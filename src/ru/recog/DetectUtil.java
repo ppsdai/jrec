@@ -1,0 +1,225 @@
+package ru.recog;
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.io.PrintStream;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
+
+
+public class DetectUtil {
+	
+	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+
+	
+	public static String picURL1 = "/Users/pps/dev/huy2.jpg";
+	public static String CASCADE_LPRHAAR16 = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_licence_plate_rus_16stages.xml";
+	public static String CASCADE_FRONTALFACE = "/Users/pps/dev/opencv-3.0.0/data/lbpcascades/lbpcascade_frontalface.xml";
+	public static String CASCADE_LPRHAAR = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_russian_plate_number.xml";
+	public static void detectNumber() {
+		System.out.println("\nRunning Detect Demo");
+
+	    // Create a face detector from the cascade file in the resources
+	    // directory.
+	    CascadeClassifier faceDetector = new CascadeClassifier(CASCADE_LPRHAAR16);
+	    
+	    System.out.println(faceDetector);
+
+	    System.out.println("FD FT size: "+faceDetector.getOriginalWindowSize().toString());
+	    Mat image = Imgcodecs.imread(picURL1);
+
+	    // Detect faces in the image.
+	    // MatOfRect is a special container class for Rect.
+	    MatOfRect faceDetections = new MatOfRect();
+	    faceDetector.detectMultiScale(image, faceDetections);
+
+	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
+
+	    // Draw a bounding box around each face.
+	    for (Rect rect : faceDetections.toArray()) {
+	    	System.out.println(rect.x+" "+rect.y);
+	        Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+	    }
+	    
+	    String filename = "/Users/pps/dev/number2.png";
+	    System.out.println(String.format("Writing %s", filename));
+	    Imgcodecs.imwrite(filename, image);
+
+	}
+	
+	public static void detectNumber(String imageFileName) {
+		System.out.println("Detecting in "+imageFileName);
+
+	    // Create a face detector from the cascade file in the resources
+	    // directory.
+	    CascadeClassifier faceDetector = new CascadeClassifier(CASCADE_LPRHAAR16);
+	    
+	    System.out.println(faceDetector);
+
+	    System.out.println("FD FT size: "+faceDetector.getOriginalWindowSize().toString());
+	    Mat image = Imgcodecs.imread(imageFileName);
+
+	    // Detect faces in the image.
+	    // MatOfRect is a special container class for Rect.
+	    MatOfRect faceDetections = new MatOfRect();
+	    faceDetector.detectMultiScale(image, faceDetections);
+
+	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
+
+	    // Draw a bounding box around each face.
+	    for (Rect rect : faceDetections.toArray()) {
+	    	System.out.println(rect.x+" "+rect.y);
+	        Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+	    }
+	    
+//	    String filename = "/Users/pps/dev/number2.png";
+	    System.out.println(String.format("Writing %s", imageFileName));
+	    Imgcodecs.imwrite(imageFileName, image);
+
+	}
+	
+    public static void displayImage(Image img2) {   
+	    //BufferedImage img=ImageIO.read(new File("/HelloOpenCV/lena.png"));
+	    ImageIcon icon=new ImageIcon(img2);
+	    JFrame frame=new JFrame();
+	    frame.setLayout(new FlowLayout());        
+	    frame.setSize(img2.getWidth(null)+50, img2.getHeight(null)+50);     
+	    JLabel lbl=new JLabel();
+	    lbl.setIcon(icon);
+	    frame.add(lbl);
+    	
+//    	SimpleViewer frame = new SimpleViewer("YOYO");
+	    frame.setVisible(true);
+	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    
+	    
+    }
+    
+    
+    public static BufferedImage Mat2BufferedImage(Mat m) {
+	// source: http://answers.opencv.org/question/10344/opencv-java-load-image-to-gui/
+	// Fastest code
+	// The output can be assigned either to a BufferedImage or to an Image
+	
+	    int type = BufferedImage.TYPE_BYTE_GRAY;
+	    if ( m.channels() > 1 ) {
+	        type = BufferedImage.TYPE_3BYTE_BGR;
+	    }
+	    int bufferSize = m.channels()*m.cols()*m.rows();
+	    byte [] b = new byte[bufferSize];
+	    m.get(0,0,b); // get all the pixels
+	    BufferedImage image = new BufferedImage(m.cols(),m.rows(), type);
+	    final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+	    System.arraycopy(b, 0, targetPixels, 0, b.length);  
+	    return image;
+
+    }
+    
+    public static void printVCInfo(VideoCapture vc, PrintStream ps) {
+    	ps.println (vc.get(Videoio.CAP_PROP_POS_MSEC)+" Current position of the video file in milliseconds or video capture timestamp");
+    	ps.println (vc.get(Videoio.CAP_PROP_POS_FRAMES)+" 0-based index of the frame to be decoded/captured next.");
+    	ps.println(vc.get(Videoio.CAP_PROP_POS_AVI_RATIO)+" Relative position of the video file: 0 - start of the film, 1 - end of the film.");
+    	ps.println (vc.get(Videoio.CAP_PROP_FRAME_WIDTH) +" Width of the frames in the video stream.");
+    	ps.println (vc.get(Videoio.CAP_PROP_FRAME_HEIGHT) +" Height of the frames in the video stream.");
+    	ps.println(vc.get(Videoio.CAP_PROP_FPS)+" Frame rate.");
+    	ps.println(vc.get(Videoio.CAP_PROP_FOURCC)+" 4-character code of codec.");
+    	ps.println(vc.get(Videoio.CAP_PROP_FRAME_COUNT)+" Number of frames in the video file.");
+    	ps.println(vc.get(Videoio.CAP_PROP_FORMAT)+" Format of the Mat objects returned by retrieve() .");
+    }
+    
+    public static void buildFramesFolder(VideoCapture vc, String prefix, PrintStream ps) 
+    		throws Exception 
+    {
+//    	File dir = new File(targetFolder);
+    	
+    	long totalframes = (long)vc.get(Videoio.CAP_PROP_FRAME_COUNT); //TODO check if this is right
+    	ps.println("TF: "+totalframes+" double: "+vc.get(Videoio.CAP_PROP_FRAME_COUNT));
+    	long framecount = 0;
+    	long totalcount = 0;
+    	Mat frame = new Mat();
+    	while (vc.read(frame)) {
+//    		ps.println("frame # "+totalcount+" framecount");
+    		framecount++; totalcount++;
+    		if (framecount >= 120) {
+    			framecount = 0;
+    			saveFrame(frame, totalcount, prefix);
+    		}
+    	}
+    	
+    }
+    
+    public static void saveFrame(Mat frame, long totalcount, String prefix) {
+    	
+//    	System.out.println("SAving "+targetFolder+"/"+prefix+totalcount);
+    	String s = new String(prefix.concat(String.valueOf(totalcount)).concat(".jpg"));
+    	System.out.println(s);
+
+    	Imgcodecs.imwrite(s, frame);
+    	
+//    	System.out.println("SAving "+targetFolder+"/"+prefix+totalcount);
+    	
+    }
+    
+    public static void findAndShowNumbers(String dirName) {
+		File cardir = new File(dirName); //"/Users/pps/dev/cars"
+		System.out.println(cardir.isDirectory());
+		String[] carlist = cardir.list();
+		for (int i = 0; i< carlist.length; i++)
+			System.out.println(carlist[i]);
+		File[] carfiles = cardir.listFiles();
+		for (int i = 0; i< carfiles.length; i++)
+			detectNumber(carfiles[i].getAbsolutePath());
+    }
+    
+	
+	public static void main(String[] args) throws Exception {
+		
+
+//		VideoCapture vc = new VideoCapture("/Users/pps/dev/vid/video-000.avi");
+
+		
+		//		System.out.println("VC: FPS"+vc.get(Videoio.CAP_PROP_FPS));
+//		printVCInfo(vc, System.out);
+		
+//		Mat image = new Mat();
+//		System.out.println("frame 0: " +vc.read(image)+" is open "+vc.isOpened());
+//		System.out.println("after retrieving: ");
+//		printVCInfo(vc, System.out);
+//		displayImage(Mat2BufferedImage(image));
+//		
+//		for (int i = 0; i<6000;i++) vc.read(image);
+//		printVCInfo(vc, System.out);
+//
+//		System.out.println("Setting to 10 seconds "+vc.get(Videoio.CAP_PROP_POS_FRAMES));
+//		Mat image2 = new Mat();
+//		System.out.println("nextvframe "+vc.read(image2));
+//		displayImage(Mat2BufferedImage(image2));
+
+		
+		
+//		buildFramesFolder(vc, "/Users/pps/dev/frames/snap", System.out);
+		
+		findAndShowNumbers("/Users/pps/dev/frames");
+		
+		
+	}
+}
