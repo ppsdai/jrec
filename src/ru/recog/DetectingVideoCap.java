@@ -48,16 +48,5 @@ public class DetectingVideoCap extends VideoCap {
         return mat2Img.getImage(mat2Img.mat);
     }
 	
- /*   CascadeClassifier faceDetector = new CascadeClassifier(cascadeURL);
-    
-    System.out.println(faceDetector);
-
-    System.out.println("FD FT size: "+faceDetector.getOriginalWindowSize().toString());
-    Mat image = Imgcodecs.imread(imageFileName);
-
-    // Detect faces in the image.
-    // MatOfRect is a special container class for Rect.
-    MatOfRect faceDetections = new MatOfRect();
-    faceDetector.detectMultiScale(image, faceDetections);*/
 
 }
