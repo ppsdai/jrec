@@ -7,8 +7,10 @@ public class Mat2Image {
     Mat mat = new Mat();
     BufferedImage img;
     byte[] dat;
+    
     public Mat2Image() {
     }
+    
     public Mat2Image(Mat mat) {
         getSpace(mat);
     }
@@ -21,8 +23,9 @@ public class Mat2Image {
             || img.getType() != BufferedImage.TYPE_3BYTE_BGR)
                 img = new BufferedImage(w, h, 
                             BufferedImage.TYPE_3BYTE_BGR);
-        }
-        BufferedImage getImage(Mat mat){
+    }
+        
+    BufferedImage getImage(Mat mat){
             getSpace(mat);
             mat.get(0, 0, dat);
             img.getRaster().setDataElements(0, 0, 

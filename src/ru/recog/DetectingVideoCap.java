@@ -1,15 +1,12 @@
 package ru.recog;
 import java.awt.image.BufferedImage;
 
-import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.videoio.VideoCapture;
 
 
 public class DetectingVideoCap extends VideoCap {
@@ -17,21 +14,21 @@ public class DetectingVideoCap extends VideoCap {
 
 	CascadeClassifier detector;// = new CascadeClassifier(DetectUtil.CASCADE_FRONTALFACE);	
 	
-	DetectingVideoCap(){
+	public DetectingVideoCap(){
         super();
     } 
     
-	DetectingVideoCap(String streamURL) {
+	public DetectingVideoCap(String streamURL) {
     	this(streamURL, DetectUtil.CASCADE_LPRHAAR16);
     }
 	
-	DetectingVideoCap(String streamURL, String cascadeURL) {
+	public DetectingVideoCap(String streamURL, String cascadeURL) {
 		super(streamURL);
 		detector = new CascadeClassifier(cascadeURL);
 	}
 	
 	//@override
-    BufferedImage getOneFrame() {
+    public BufferedImage getOneFrame() {
         cap.read(mat2Img.mat);
 	    MatOfRect detections = new MatOfRect();
 	    detector.detectMultiScale(mat2Img.mat, detections);

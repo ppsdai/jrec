@@ -2,6 +2,7 @@ package ru.recog;
 
 import java.awt.EventQueue;
 import java.awt.Graphics;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -9,17 +10,22 @@ import javax.swing.border.EmptyBorder;
 public class MyFrame extends JFrame {
     private JPanel contentPane;
     
-    VideoCap videoCap = new DetectingVideoCap("/Users/pps/vlc-output2.mpg",DetectUtil.CASCADE_LPRHAAR);
+    VideoCap videoCap; 
 
 
   /**
   * Launch the application.
   */
     public static void main(String[] args) {
+    	if (args.length == 0) {
+    		System.out.println("Video location required");
+    		System.exit(1);
+    	}
+    	final String videoURL = args[0];
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    MyFrame frame = new MyFrame();
+                    MyFrame frame = new MyFrame(videoURL);
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -32,7 +38,18 @@ public class MyFrame extends JFrame {
   * Create the frame.
   */
     public MyFrame() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	this(null);
+
+    }
+    
+    public MyFrame(String videoURL) {
+    	
+    	if (videoURL == null)
+    		videoCap = new VideoCap();
+    	else
+    		videoCap = new Skip24VideoCap(videoURL, DetectUtil.CASCADE_LPRHAAR);
+        
+    	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 650, 490);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
