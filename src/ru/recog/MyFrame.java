@@ -48,6 +48,8 @@ public class MyFrame extends JFrame {
     		videoCap = new VideoCap();
     	else
     		videoCap = new Skip24VideoCap(videoURL, DetectUtil.CASCADE_LPRHAAR);
+//			videoCap = new Skip24VideoCap(videoURL, "/Users/pps/dev/javablur/cascade.xml");	
+
         
     	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 650, 490);

@@ -1,15 +1,12 @@
 package ru.recog;
 import java.awt.FlowLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.PrintStream;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -19,6 +16,7 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
@@ -97,6 +95,41 @@ public class DetectUtil {
 
 	}
 	
+	public static void detectNumber(String imageFileName, CascadeClassifier classifier) {
+		System.out.println("Detecting in "+imageFileName+" FD FT size: "+classifier.getOriginalWindowSize().toString());
+
+	    // Create a face detector from the cascade file in the resources
+	    // directory.
+	    
+
+	    Mat image = Imgcodecs.imread(imageFileName);
+
+	    // Detect faces in the image.
+	    // MatOfRect is a special container class for Rect.
+	    Mat doubled = new Mat();
+	    Imgproc.resize(image, doubled, new Size(), 2.0, 2.0, Imgproc.INTER_LINEAR);
+//	    Mat doubled = Imgproc.resize(image, doubled, dsize, fx, fy, interpolation);
+	    MatOfRect faceDetections = new MatOfRect();
+//	    classifier.detectMultiScale(image, faceDetections);
+	    classifier.detectMultiScale(doubled, faceDetections,1.05,0,0, new Size(3,4), new Size(48,60));
+
+	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
+
+	    // Draw a bounding box around each face.
+	    for (Rect rect : faceDetections.toArray()) {
+	    	System.out.println(rect.x+" "+rect.y);
+	        Imgproc.rectangle(doubled, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+	    }
+	    
+//	    String filename = "/Users/pps/dev/number2.png";
+	    if (faceDetections.toArray().length > 0 ) {
+	    	String newName = imageFileName.replaceAll(".bmp", "_.bmp");
+		    System.out.println(String.format("Writing %s", imageFileName));
+		    Imgcodecs.imwrite(newName, doubled);
+	    }
+
+	}
+	
     public static void displayImage(Image img2) {   
 	    //BufferedImage img=ImageIO.read(new File("/HelloOpenCV/lena.png"));
 	    ImageIcon icon=new ImageIcon(img2);
@@ -167,6 +200,34 @@ public class DetectUtil {
     	
     }
     
+    public static void buildFrames(BasicVideoCapture bvc) {
+    	BasicVideoCapture.printVCInfo(bvc, System.out);
+    	Mat frame0 = new Mat();
+    	int equalCount = 0;
+    	Scalar zero = Scalar.all(0);
+    	for (int i = 0; ; i++) {
+    		Mat m = new Mat();
+    		if (!bvc.read(m)) break;;
+    		if (i==0) frame0 = m.clone();
+    		
+    			Mat d = new Mat();
+    			Core.absdiff(frame0, m, d);
+    			d = d.mul(d);
+    			Scalar s = Core.sumElems(d);
+//    			System.out.println("scalar: "+s.toString());
+    			if (zero.equals(s)) {
+    				equalCount++;
+    			} else {
+    				System.out.println("Total: "+i+" equal frames: "+equalCount);
+    				frame0 = m.clone();
+    				equalCount = 0;
+    			}
+    		
+//    		saveFrame(m, i, "/Users/pps/dev/exp/");
+    	}
+    	
+    }
+    
     public static void saveFrame(Mat frame, long totalcount, String prefix) {
     	
 //    	System.out.println("SAving "+targetFolder+"/"+prefix+totalcount);
@@ -188,6 +249,17 @@ public class DetectUtil {
 		File[] carfiles = cardir.listFiles();
 		for (int i = 0; i< carfiles.length; i++)
 			detectNumber(carfiles[i].getAbsolutePath());
+    }
+    
+    public static void findAndShowNumbers(String dirName, CascadeClassifier classifier) {
+		File cardir = new File(dirName); //"/Users/pps/dev/cars"
+		System.out.println(dirName+" "+cardir.isDirectory());
+		String[] carlist = cardir.list();
+		for (int i = 0; i< carlist.length; i++)
+			System.out.println(carlist[i]);
+		File[] carfiles = cardir.listFiles();
+		for (int i = 0; i< carfiles.length; i++)
+			detectNumber(carfiles[i].getAbsolutePath(), classifier);
     }
     
 	
@@ -218,7 +290,12 @@ public class DetectUtil {
 		
 //		buildFramesFolder(vc, "/Users/pps/dev/frames/snap", System.out);
 		
-		findAndShowNumbers("/Users/pps/dev/frames");
+//		BasicVideoCapture bvc = new BasicVideoCapture("/Users/pps/dev/vid/video-000.avi");
+//		buildFrames(bvc);
+		
+		
+		CascadeClassifier  cl = new CascadeClassifier("/Users/pps/dev/cascade1as5.xml");
+		findAndShowNumbers("/Users/pps/dev/Examples/",cl);
 		
 		
 	}

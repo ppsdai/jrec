@@ -5,6 +5,7 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
@@ -31,7 +32,11 @@ public class DetectingVideoCap extends VideoCap {
     public BufferedImage getOneFrame() {
         cap.read(mat2Img.mat);
 	    MatOfRect detections = new MatOfRect();
-	    detector.detectMultiScale(mat2Img.mat, detections);
+	    long t1 = System.currentTimeMillis();
+//	    detector.detectMultiScale(mat2Img.mat, detections);
+	    detector.detectMultiScale(mat2Img.mat, detections, 1.3, 3, 0, new Size(64,16), new Size(160,40));
+	    long t2 = System.currentTimeMillis();
+	    System.out.println((t2-t1)+" ms");
 
 	    System.out.println(String.format("Detected %s numbers", detections.toArray().length));
 
