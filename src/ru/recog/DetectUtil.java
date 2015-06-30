@@ -293,9 +293,16 @@ public class DetectUtil {
 //		BasicVideoCapture bvc = new BasicVideoCapture("/Users/pps/dev/vid/video-000.avi");
 //		buildFrames(bvc);
 		
+		if (args.length<2) {
+			System.err.println("DetectUtil picFolder cascadeFile");
+			System.exit(1);
+		}
 		
-		CascadeClassifier  cl = new CascadeClassifier("/Users/pps/dev/cascade1as5.xml");
-		findAndShowNumbers("/Users/pps/dev/Examples/",cl);
+//		CascadeClassifier  cl = new CascadeClassifier("/Users/pps/dev/cascade1as5.xml");
+//		findAndShowNumbers("/Users/pps/dev/Examples/",cl);
+		
+		CascadeClassifier  cl = new CascadeClassifier(args[1]);
+		findAndShowNumbers(args[0],cl);
 		
 		
 	}

@@ -1,5 +1,8 @@
-<project name="MyFrame" basedir="." default="script">
+<project name="MyFrame" basedir="." default="scripts">
 	<condition property="prop.filename" value="ocvwin.properties" else="ocvnix.properties">
+		<os family="windows" />
+	</condition>
+	<condition property="prop.script.suffix" value="%*" else="$@">
 		<os family="windows" />
 	</condition>
 	<loadproperties srcFile="${prop.filename}" />
@@ -18,6 +21,7 @@
 	<property name="build.dir" value="build" />
 	<property name="classes.dir" value="${build.dir}/classes"/>
 	<property name="jar.dir"     value="${build.dir}/jar"/>
+	<property name="script.dir"     value="${basedir}/scripts"/>
 	
 	<path id="scriptclasspath">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -29,17 +33,30 @@
 	<target name="clean">
 		<delete dir="${build.dir}"/>
 	</target>
+	<target name="cleanScripts">
+		<delete dir="${script.dir}"/>
+	</target>
+	<target name="cleanAll" depends="clean, cleanScripts"/>
 
 	<target name="compile">
 		<mkdir dir="${classes.dir}"/>
 		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
 	</target>
 	
-	<target name="script">
-		<mkdir dir="scripts"/>
-		<echo file="convert${script.extension}"
-		      message="java -cp ${toString:scriptclasspath} ru.recog.Png2Bmp"/>
+	<target name="scriptConvert">
+		<mkdir dir="${script.dir}"/>
+		<echo file="${script.dir}${file.separator}convert${script.extension}"
+		      message="java -cp ${toString:scriptclasspath} -Djava.library.path=${ocvLibDir} ru.recog.Png2Bmp ${prop.script.suffix}"/>
 	</target>
+	<target name="scriptDetect">
+		<mkdir dir="${script.dir}"/>
+		<echo file="${script.dir}${file.separator}detect${script.extension}"
+		      message="java -cp ${toString:scriptclasspath} -Djava.library.path=${ocvLibDir} ru.recog.DetectUtil ${prop.script.suffix}"/>
+	</target>
+	
+	<target name="scripts" depends="scriptConvert, scriptDetect"/>
+	
+	<target name="all" depends="compile,scripts"/>
 	
 <!--
 	<target name="jar" depends="compile">
@@ -62,8 +79,5 @@
 	</target>
 	
 	-->
-
-	<target name="rebuild" depends="clean"/>
-
 
 </project>
