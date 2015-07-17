@@ -1,0 +1,112 @@
+package ru.recog;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
+
+import org.opencv.core.Mat;
+
+public class LabelFrame extends JFrame implements ActionListener {
+	
+	List<Mat> imageList = new ArrayList<Mat>();
+	JPanel labelPanel;
+	boolean useBorders = false;
+	
+	
+	
+	public LabelFrame() {
+		this("LabelFrame", false);
+	}
+	
+	public LabelFrame(String name) {
+		this(name, false);
+	}
+	
+	public LabelFrame(String name, boolean useBorders) {
+		super(name);
+		this.useBorders = useBorders;
+		labelPanel = new JPanel();
+		labelPanel.setLayout(new BoxLayout(labelPanel,BoxLayout.Y_AXIS));
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(labelPanel, BorderLayout.CENTER);
+		JButton saveButton = new JButton("save");
+		saveButton.addActionListener(this);
+		getContentPane().add(saveButton, BorderLayout.SOUTH);
+		
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+
+	}
+	
+	
+//	public void addImage(Image image, String label) {
+//		JLabel jlabel = new JLabel(label);
+//		jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
+//		
+//		if (useBorders) 
+//			jlabel.setBorder(new LineBorder(Color.green, 1));
+//		labelPanel.add(jlabel);
+//		
+//		imageList.add(image);
+//	}
+	
+	public void addImage(Mat m, String label) {
+		JLabel jlabel = new JLabel(label);
+		jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
+		
+		if (useBorders) 
+			jlabel.setBorder(new LineBorder(Color.green, 1));
+		labelPanel.add(jlabel);
+		
+		imageList.add(m);
+	}
+	
+	public void addImage(Mat m, String label, int scale) {
+		JLabel jlabel = new JLabel(label);
+		if (scale!=1)
+			jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scale))));
+		else
+			jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
+
+		
+		if (useBorders) 
+			jlabel.setBorder(new LineBorder(Color.green, 1));
+		labelPanel.add(jlabel);
+		
+		imageList.add(m);
+	}
+	
+	public void addImage(Mat m, String label, int scale, int hints) {
+		JLabel jlabel = new JLabel(label);
+		
+		BufferedImage image = DetectUtil.Mat2BufferedImage(m);
+		Image scaled = image.getScaledInstance(m.cols()*scale, m.rows()*scale, hints);
+		jlabel.setIcon(new ImageIcon(scaled));
+		
+		if (useBorders) 
+			jlabel.setBorder(new LineBorder(Color.green, 1));
+		labelPanel.add(jlabel);
+		
+		imageList.add(m);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if ("save".equals(e.getActionCommand()))
+			System.out.println("Saving shit");
+	}
+
+}
