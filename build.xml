@@ -1,4 +1,4 @@
-<project name="MyFrame" basedir="." default="scripts">
+<project name="JLNPR" basedir="." default="all">
 	<condition property="prop.filename" value="ocvwin.properties" else="ocvnix.properties">
 		<os family="windows" />
 	</condition>

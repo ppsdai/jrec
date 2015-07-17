@@ -106,27 +106,29 @@ public class DetectUtil {
 
 	    // Detect faces in the image.
 	    // MatOfRect is a special container class for Rect.
-	    Mat doubled = new Mat();
-	    Imgproc.resize(image, doubled, new Size(), 2.0, 2.0, Imgproc.INTER_LINEAR);
+//	    Mat doubled = new Mat();
+//	    Imgproc.resize(image, doubled, new Size(), 2.0, 2.0, Imgproc.INTER_LINEAR);
 //	    Mat doubled = Imgproc.resize(image, doubled, dsize, fx, fy, interpolation);
 	    MatOfRect faceDetections = new MatOfRect();
-//	    classifier.detectMultiScale(image, faceDetections);
-	    classifier.detectMultiScale(doubled, faceDetections,1.05,0,0, new Size(3,4), new Size(48,60));
+	    classifier.detectMultiScale(image, faceDetections);
+//	    classifier.detectMultiScale(image, faceDetections,1.05,0,0, new Size(3,4), new Size(48,60));
 
 	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
 
 	    // Draw a bounding box around each face.
 	    for (Rect rect : faceDetections.toArray()) {
 	    	System.out.println(rect.x+" "+rect.y);
-	        Imgproc.rectangle(doubled, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+	        Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+		    Imgcodecs.imwrite(imageFileName, image);
+
 	    }
 	    
 //	    String filename = "/Users/pps/dev/number2.png";
-	    if (faceDetections.toArray().length > 0 ) {
-	    	String newName = imageFileName.replaceAll(".bmp", "_.bmp");
-		    System.out.println(String.format("Writing %s", imageFileName));
-		    Imgcodecs.imwrite(newName, doubled);
-	    }
+//	    if (faceDetections.toArray().length > 0 ) {
+//	    	String newName = imageFileName.replaceAll(".bmp", "_.bmp");
+//		    System.out.println(String.format("Writing %s", imageFileName));
+//		    Imgcodecs.imwrite(newName, doubled);
+//	    }
 
 	}
 	
