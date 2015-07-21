@@ -1,9 +1,9 @@
 package ru.recog;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -159,6 +159,16 @@ public class ImageUtils {
 		
 		return sm;
 				
+	}
+	
+	public static List<Point> mat2PointList(Mat m) {
+		//TODO assuming 1 channel mat binary image
+		List<Point> points = new ArrayList<Point>();
+		for (int row = 0; row < m.rows(); row++)
+			for (int col = 0; col < m.cols(); col++)
+				if (m.get(row, col)[0]>0)
+					points.add(new Point((float) col, (float)row ));
+		return points;
 	}
 	
 	//TODO for testing scale

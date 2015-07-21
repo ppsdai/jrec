@@ -1,4 +1,4 @@
-package ru.recog;
+package ru.recog.nn;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -8,19 +8,56 @@ import java.util.*;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.ml.ANN_MLP;
 
 import ru.recog.feature.*;
 import ru.recog.imgproc.*;
 
 public class NNTrainingBuilder {
 	
+//	public static int DIGITS = 15;
+	
+	public static final List<Character> FULL_CHARACTERS_SET
+		= Arrays.asList('0','1','2','3','4','5','6','7','8','9', 
+				'A', 'B', 'C', 'E', 'H', 'K', 'M', 'P', 'T', 'X', 'Y');
+	
+	
+	public static final FilenameFilter FILTER_BMP = new FilenameFilter() {
+		public boolean accept(File dir, String name) {
+			return name.endsWith(".bmp");
+		}
+	};
+
+	
+	private List<Character> characterSet; // = new ArrayList<String>();
+	private MultipleFeatureExtractor mfx;
+	
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+	
+	public NNTrainingBuilder(List<Character> characterSet) {
+		this.characterSet = characterSet;
+		if (!FULL_CHARACTERS_SET.containsAll(characterSet)) 
+			throw new IllegalArgumentException("Some characters from "+characterSet
+					+ " are not in the full list of chars.");
+		
+		mfx = new MultipleFeatureExtractor();
+		mfx.addExtractor(new AreaFeatureExtractor());
+//		mfx.addExtractor(new EllipseFeatureExtractor());
+		mfx.addExtractor(new XProjectionFeatureExtractor());
+		mfx.addExtractor(new YProjectionFeatureExtractor());
+		mfx.addExtractor(new SymmetryFeatureExtractor());
+//		mfx.addExtractor(new BinaryPixelFeatureExtractor(10, 20));
+		
+	}
 	
 
 	public static void main(String[] args) throws Exception {
+		
 
-		buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/1020", "1020pix.txt", "/Users/pps/dev/NNTrain/1020");
+//		processFolders(args[0],args[1]);
+		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(
+				Arrays.asList('0','1','2','3','4','5','6','7','8','9' 
+						 ));
+		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/full1020", "digits.txt", "/Users/pps/dev/NNTrain/full1020");
 		
 	}
 	
@@ -86,19 +123,13 @@ public class NNTrainingBuilder {
 	}
 	
 	
-	public static void buildTrainingAndTestingSet(String filenamePath, String suffix, String source) throws IOException {
-		MultipleFeatureExtractor mfx = new MultipleFeatureExtractor();
-//		mfx.addExtractor(new AreaFeatureExtractor());
-////		mfx.addExtractor(new EllipseFeatureExtractor());
-//		mfx.addExtractor(new XProjectionFeatureExtractor());
-//		mfx.addExtractor(new YProjectionFeatureExtractor());
-//		mfx.addExtractor(new SymmetryFeatureExtractor());
-		mfx.addExtractor(new BinaryPixelFeatureExtractor(10, 20));
+	public void buildTrainingAndTestingSet(String trainFilesDestination, String suffix, String source) throws IOException {
 		
 		System.out.println(mfx.getDimension());
 
 		
 		List<String> csvTestList = new ArrayList<String>();
+		List<String> csvTestFileList = new ArrayList<String>();
 		List<String> csvTrainList = new ArrayList<String>();
 
 		File sourceDir = new File(source);
@@ -129,22 +160,19 @@ public class NNTrainingBuilder {
 		};
 		
 		
-		for (int digit = 0; digit<10; digit++) {
-			File digitDir = new File(sourceDir, String.valueOf(digit));
-//			System.out.println("Digit "+digit);
-//			System.out.println("Total "+digitDir.list(ff).length);
-//			System.out.println("Testing "+digitDir.list(testingFilenameFileter).length
-//					+" training: "+digitDir.list(trainingFilter).length);
-
+		for (int characterIndex = 0; characterIndex<characterSet.size(); characterIndex++) {
+			File digitDir = new File(sourceDir, 
+					String.valueOf(FULL_CHARACTERS_SET.indexOf(characterSet.get(characterIndex))));
 			
 			for (String file : digitDir.list(testingFilenameFileter)) {
 				System.out.println(file);
-				csvTestList.add(createCSVTrainSampleFromImage(fullPath(digitDir,file), digit, mfx));
+				csvTestList.add(createCSVTrainSampleFromImage(fullPath(digitDir,file), characterIndex));
+				csvTestFileList.add(file);
 			}
 			
 			for (String file : digitDir.list(trainingFilenameFilter)) {
 				System.out.println(file);
-				csvTrainList.add(createCSVTrainSampleFromImage(fullPath(digitDir,file), digit, mfx));
+				csvTrainList.add(createCSVTrainSampleFromImage(fullPath(digitDir,file), characterIndex));
 			}
 		}
 		
@@ -153,17 +181,21 @@ public class NNTrainingBuilder {
 		System.out.println("Training: "+csvTrainList.size()+" Testing: "+csvTestList.size());
 		String trainFilename = "train".concat(suffix);
 		String testFilename = "test".concat(suffix);
+		String testFilesFilename = "testFiles".concat(suffix);
+
 		String infoFilename = "info".concat(suffix);
 		
-		stringsToFile(filenamePath, trainFilename, csvTrainList);
-		stringsToFile(filenamePath, testFilename, csvTestList);
+		stringsToFile(trainFilesDestination, trainFilename, csvTrainList);
+		stringsToFile(trainFilesDestination, testFilename, csvTestList);
+		stringsToFile(trainFilesDestination, testFilesFilename, csvTestFileList);
 		
 		List<String> description = new ArrayList<String>();
-		description.add("Total Features: "+mfx.getDimension());
+		description.add("Characters: "+characterSet);
+		description.add("Total Features: "+mfx.getDimension()+" Outputs: "+characterSet.size());
 		for (FeatureExtractor fex : mfx.getFeatureExtractors())
 			description.add(fex.toString());
 		
-		stringsToFile(filenamePath, infoFilename, description);
+		stringsToFile(trainFilesDestination, infoFilename, description);
 		
 	}
 	
@@ -179,8 +211,13 @@ public class NNTrainingBuilder {
 				.concat(name);
 	}
 	
+	private static String charFolder(Character c) {
+		return String.valueOf(FULL_CHARACTERS_SET.indexOf(c));
+
+	}
 	
-	public static String createCSVTrainSampleFromImage(String filename, int digitalResponse, MultipleFeatureExtractor mfx) {
+	
+	public String createCSVTrainSampleFromImage(String filename, int characterIndex) {
 		StringBuilder sb = new StringBuilder();
 		
 		Mat img = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
@@ -188,9 +225,9 @@ public class NNTrainingBuilder {
 		for (double feature : mfx.extract(img)) 
 			sb.append(feature).append(",");
 		
-		String[] responses = new String[10];
+		String[] responses = new String[characterSet.size()];
 		Arrays.fill(responses, "0");
-		responses[digitalResponse]="1";
+		responses[characterIndex]="1";
 		for (String r : responses)
 			sb.append(r).append(",");
 		sb.deleteCharAt(sb.length()-1);

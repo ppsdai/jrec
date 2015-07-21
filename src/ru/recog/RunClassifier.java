@@ -1,19 +1,18 @@
 package ru.recog;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.opencv.core.Core;
+import org.opencv.core.*;
 import org.opencv.core.Core.MinMaxLocResult;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+
+import ru.recog.feature.EllipseFeatureExtractor;
+import ru.recog.feature.FeatureExtractor;
+import ru.recog.nn.NNTrainingBuilder;
 
 public class RunClassifier {
 	
@@ -36,51 +35,106 @@ public class RunClassifier {
 //		findAndShowNumbers(args[0],cl);
 		
 		
-		Mat m = Imgcodecs.imread("/Users/pps/dev/number3.png",Imgcodecs.IMREAD_GRAYSCALE);
-		Mat otsu = new Mat();
-		double threshold = 0;
-		Mat sobelx = sobel8U(m, 1, 0), sobely = sobel8U(m,0,1);
-		Mat sobel2x = sobel8U(m, 2, 0), sobel2y = sobel8U(m,0,2);
+//		Mat m = Imgcodecs.imread("/Users/pps/dev/NNTrain/full1020/5/0.bmp",Imgcodecs.IMREAD_GRAYSCALE);
+/*		Mat m = Imgcodecs.imread("/Users/pps/dev/fives.bmp",Imgcodecs.IMREAD_GRAYSCALE);
 
+		System.out.println("M: "+m.type()+" depth: "+m.depth()+" size: "+m.size());
+
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+		Imgproc.findContours(m, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+		System.out.println(contours);
 		
 		
 		
-//		Imgproc.Sobel(m, sobely, CvType.CV_16S, 0, 1);
-//		Imgproc.Sobel(m, sobely, CvType.CV_16S, 0, 1);
-////		System.out.println(sobel.depth());
-//		double min = 0, max = 0;
+		for (MatOfPoint points : contours) {
+//			System.out.println(points.toList());
+			
+			MatOfPoint2f points2f = new MatOfPoint2f(points.toArray());
+//			points2f.fromArray(points.toArray());
+			RotatedRect rr = Imgproc.fitEllipse(points2f);
+			System.out.println(rr);
+		}
+		
+		Mat m1 = new Mat(m, new Range(0,33));
+		Mat m2 = new Mat(m, new Range(34,66));
+		Mat m3 = new Mat(m, new Range(67,99));
+		
+		MatOfPoint2f ar1 = new MatOfPoint2f();
+		ar1.fromList(ImageUtils.mat2PointList(m1));
+		
+		MatOfPoint2f ar2 = new MatOfPoint2f();
+		ar2.fromList(ImageUtils.mat2PointList(m2));
+		
+		MatOfPoint2f ar3 = new MatOfPoint2f();
+		ar3.fromList(ImageUtils.mat2PointList(m3));
+		
+		RotatedRect rr1 = Imgproc.fitEllipse(ar1);
+		System.out.println(rr1);
+		
+		RotatedRect rr2 = Imgproc.fitEllipse(ar2);
+		System.out.println(rr2);
+		
+		RotatedRect rr3 = Imgproc.fitEllipse(ar3);
+		System.out.println(rr3);*/
+		
+		
+		
+		File dir = new File("/Users/pps/dev/NNTrain/full1020");
+		for (int i = 0; i < NNTrainingBuilder.FULL_CHARACTERS_SET.size(); i++) {
+			File charDir = new File(dir, String.valueOf(i));
+			File imgFile = null;
+			for (int n = 0; !(imgFile = new File(charDir, String.valueOf(n).concat(".bmp"))).exists() ;n++);
+			Mat img = Imgcodecs.imread(imgFile.getAbsolutePath(),Imgcodecs.IMREAD_GRAYSCALE);
+			System.out.println(imgFile.getAbsolutePath());
+			MatOfPoint2f m2f = new MatOfPoint2f();
+			m2f.fromList(ImageUtils.mat2PointList(img));;
+			System.out.println(Imgproc.fitEllipse(m2f));
+		}
+		
+		//		Mat otsu = new Mat();
+//		double threshold = 0;
+//		Mat sobelx = sobel8U(m, 1, 0), sobely = sobel8U(m,0,1);
+//		Mat sobel2x = sobel8U(m, 2, 0), sobel2y = sobel8U(m,0,2);
+//
 //		
-//		MinMaxLocResult r = Core.minMaxLoc(sobel);
-		
-//		System.out.println(r.maxVal+" "+r.minVal);
-
-//		Mat convSobel = new Mat();
-//		Core.convertScaleAbs(sobel, convSobel, 255/(Math.max(r.maxVal,r.minVal)), 0);
-		Mat sobelxy = new Mat();
-		Core.add(sobelx, sobely, sobelxy);
-		
-		Mat sobel2xy = new Mat();
-		Core.add(sobel2x, sobel2y, sobel2xy);
-		
-		Imgproc.threshold(sobelxy, otsu, threshold, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
-		float[] ar = histx(otsu);
-		System.out.println(ar.length);
-
-		System.out.println(Arrays.asList(ar).toString());
-		for (int i = 0; i< ar.length;i++)
-			System.out.println(ar[i]);
-		
-		
+//		
+//		
+////		Imgproc.Sobel(m, sobely, CvType.CV_16S, 0, 1);
+////		Imgproc.Sobel(m, sobely, CvType.CV_16S, 0, 1);
+//////		System.out.println(sobel.depth());
+////		double min = 0, max = 0;
+////		
+////		MinMaxLocResult r = Core.minMaxLoc(sobel);
+//		
+////		System.out.println(r.maxVal+" "+r.minVal);
+//
+////		Mat convSobel = new Mat();
+////		Core.convertScaleAbs(sobel, convSobel, 255/(Math.max(r.maxVal,r.minVal)), 0);
+//		Mat sobelxy = new Mat();
+//		Core.add(sobelx, sobely, sobelxy);
+//		
+//		Mat sobel2xy = new Mat();
+//		Core.add(sobel2x, sobel2y, sobel2xy);
+//		
+//		Imgproc.threshold(sobelxy, otsu, threshold, 255, Imgproc.THRESH_BINARY+Imgproc.THRESH_OTSU);
+//		float[] ar = histx(otsu);
+//		System.out.println(ar.length);
+//
+//		System.out.println(Arrays.asList(ar).toString());
+//		for (int i = 0; i< ar.length;i++)
+//			System.out.println(ar[i]);
+//		
+//		
 		LabelFrame frame = new LabelFrame("OTSU");
-		
-		frame.addImage(m,"original");
-		frame.addImage(sobelx, "sobel x");
-		frame.addImage(sobely, "sobel y");
-		frame.addImage(sobelxy, "sobel x+y");
-		frame.addImage(sobel2x, "sobel 2 x");
-		frame.addImage(sobel2y, "sobel 2 y");
-		frame.addImage(sobel2xy, "sobel 2 x+y");
-		frame.addImage(otsu, "otsu");
+//		
+//		frame.addImage(m,"original");
+//		frame.addImage(sobelx, "sobel x");
+//		frame.addImage(sobely, "sobel y");
+//		frame.addImage(sobelxy, "sobel x+y");
+//		frame.addImage(sobel2x, "sobel 2 x");
+//		frame.addImage(sobel2y, "sobel 2 y");
+//		frame.addImage(sobel2xy, "sobel 2 x+y");
+//		frame.addImage(otsu, "otsu");
 		
 		
 		frame.pack();

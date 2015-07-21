@@ -9,12 +9,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 
 import org.opencv.core.Mat;
@@ -40,11 +35,16 @@ public class LabelFrame extends JFrame implements ActionListener {
 		this.useBorders = useBorders;
 		labelPanel = new JPanel();
 		labelPanel.setLayout(new BoxLayout(labelPanel,BoxLayout.Y_AXIS));
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(labelPanel, BorderLayout.CENTER);
-		JButton saveButton = new JButton("save");
-		saveButton.addActionListener(this);
-		getContentPane().add(saveButton, BorderLayout.SOUTH);
+		JScrollPane jscp = new JScrollPane(labelPanel);
+		jscp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		jscp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		add(jscp, BorderLayout.CENTER);
+		
+//		getContentPane().setLayout(new BorderLayout());
+//		getContentPane().add(labelPanel, BorderLayout.CENTER);
+//		JButton saveButton = new JButton("save");
+//		saveButton.addActionListener(this);
+//		getContentPane().add(saveButton, BorderLayout.SOUTH);
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
