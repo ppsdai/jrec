@@ -18,24 +18,13 @@ public class EllipseFeatureExtractor extends FeatureExtractor {
 	}
 	
 	public List<Double> extract(Mat m) {
-		//apparently fitEllipse requires 32f mat
-//		m.clone().convertTo(pointsf, CvType.CV_32FC2);
 		MatOfPoint2f points = new MatOfPoint2f();
 		points.fromList(ImageUtils.mat2PointList(m));
 		RotatedRect rect = Imgproc.fitEllipse(points);	
-		double minor, major;
-/*		if (rect.size.height > rect.size.width) {
-			minor = rect.size.width;
-			major = rect.size.height;
-		} else {
-			minor = rect.size.height;
-			major = rect.size.width;
-		}*/
-		return Arrays.asList(rect.center.x, rect.center.y, rect.size.width, rect.size.height, Math.min(rect.angle, 180 - rect.angle) );
-//		return Arrays.asList(minor, major, Math.min(rect.angle, 180 - rect.angle) );
-/*		double diagonal = Math.sqrt(m.rows()*m.rows()+m.cols()*m.cols());
-		return Arrays.asList(minor/diagonal, major/diagonal, rect.angle/ 360); //FIXME find out how angle is returned
-*/		
+
+		//TODO make sure that rectangle sizes are not switched, otherwise we will get values > 1
+		return Arrays.asList(rect.center.x/m.cols(), rect.center.y/m.rows(), rect.size.width/m.cols(), 
+				rect.size.height/m.rows(), Math.min(rect.angle, 180 - rect.angle)/90 );
 	}
 
 }
