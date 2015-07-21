@@ -1,7 +1,6 @@
 package ru.recog.feature;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Mat;
@@ -9,6 +8,13 @@ import org.opencv.core.Mat;
 public class MultipleFeatureExtractor extends FeatureExtractor {
 	
 	List<FeatureExtractor> featureList = new ArrayList<FeatureExtractor>();
+
+	
+	public MultipleFeatureExtractor() {}
+	
+	public MultipleFeatureExtractor(List<FeatureExtractor> list) {
+		featureList = list;
+	}
 
 	@Override
 	public List<Double> extract(Mat m) {
@@ -35,6 +41,21 @@ public class MultipleFeatureExtractor extends FeatureExtractor {
 	
 	public void setDimension(int dimension) {
 		throw new IllegalArgumentException("Cannot set dimension on MultipleFeatureExtractor");
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("MultipleFeatures(");
+		sb.append(getDimension()).append(")[");
+		for (FeatureExtractor fe : featureList) 
+			sb.append(fe.toString()).append(", ");
+		
+		sb.deleteCharAt(sb.length()-1);
+		sb.deleteCharAt(sb.length()-1);
+
+		sb.append("]");
+
+		return sb.toString();
 	}
 
 }

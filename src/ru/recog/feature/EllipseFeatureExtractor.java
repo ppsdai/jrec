@@ -26,5 +26,10 @@ public class EllipseFeatureExtractor extends FeatureExtractor {
 		return Arrays.asList(rect.center.x/m.cols(), rect.center.y/m.rows(), rect.size.width/m.cols(), 
 				rect.size.height/m.rows(), Math.min(rect.angle, 180 - rect.angle)/90 );
 	}
+	
+	@Override
+	public String toString() {
+		return "Ellipse(5)";
+	}
 
 }

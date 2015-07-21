@@ -35,4 +35,8 @@ public class SymmetryFeatureExtractor extends FeatureExtractor {
 		return pair;
 	}
 
+	@Override
+	public String toString() {
+		return "Symmetry(2)";
+	}
 }

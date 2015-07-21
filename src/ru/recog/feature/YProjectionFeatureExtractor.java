@@ -22,5 +22,10 @@ public class YProjectionFeatureExtractor extends FeatureExtractor {
 			projections.add( (double) Core.countNonZero(m.row(row)) / m.cols());
 		return projections;
 	}
+	
+	@Override
+	public String toString() {
+		return "YProjection(".concat(String.valueOf(getDimension())).concat(")");
+	}
 
 }

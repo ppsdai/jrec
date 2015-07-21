@@ -28,5 +28,10 @@ public class BinaryPixelFeatureExtractor extends FeatureExtractor {
 				pixels.add(m.get(row, col)[0]>0? 1.0 : 0.0 );
 		return pixels;
 	}
+	
+	@Override
+	public String toString() {
+		return "BinaryPixel(".concat(String.valueOf(getDimension())).concat(")");
+	}
 
 }

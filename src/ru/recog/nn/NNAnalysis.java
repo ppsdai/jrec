@@ -30,7 +30,16 @@ public class NNAnalysis {
 //		readErrorFile("/Users/pps/dev/NNTrain/full1020/Test60OverFit.txt");
 		
 		
-		printAverageFeatures("/Users/pps/dev/NNTrain/full1020");
+//		printAverageFeatures("/Users/pps/dev/NNTrain/full1020");
+		List<FeatureExtractor> fexlist = new ArrayList<FeatureExtractor>();
+		fexlist.add(new AreaFeatureExtractor());
+		fexlist.add(new EllipseFeatureExtractor());
+		fexlist.add(new XProjectionFeatureExtractor());
+		fexlist.add(new YProjectionFeatureExtractor());
+		fexlist.add(new SymmetryFeatureExtractor());
+		MultipleFeatureExtractor mfx = new MultipleFeatureExtractor(fexlist);
+		
+		System.out.println(mfx);
 		
 		
 

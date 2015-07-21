@@ -22,5 +22,11 @@ public class XProjectionFeatureExtractor extends FeatureExtractor {
 			projections.add( (double) Core.countNonZero(m.col(col)) / m.rows());
 		return projections;
 	}
+	
+	@Override
+	public String toString() {
+		return "XProjection(".concat(String.valueOf(getDimension())).concat(")");
+
+	}
 
 }

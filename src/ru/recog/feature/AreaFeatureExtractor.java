@@ -19,5 +19,10 @@ public class AreaFeatureExtractor extends FeatureExtractor {
 	public List<Double> extract(Mat m) {
 		return Collections.singletonList( ImageUtils.binaryAreaNorm(m));
 	}
+	
+	@Override
+	public String toString() {
+		return "Area(1)";
+	}
 
 }
