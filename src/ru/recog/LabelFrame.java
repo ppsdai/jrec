@@ -1,14 +1,15 @@
 package ru.recog;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
@@ -74,13 +75,24 @@ public class LabelFrame extends JFrame implements ActionListener {
 		imageList.add(m);
 	}
 	
-	public void addImage(Mat m, String label, int scale) {
+	public void addImage(Mat m, String label, int scale)  {
 		JLabel jlabel = new JLabel(label);
-		if (scale!=1)
-			jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scale))));
-		else
-			jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
 
+		if (m.rows()==0 || m.cols()==0) {
+//			throw new IllegalArgumentException("Matrix with size "+m.size()+" cannot be processed.");
+			System.err.println("Matrix with size "+m.size()+" cannot be processed.");
+			try {
+				jlabel.setIcon(new ImageIcon(ImageIO.read(new File("/Users/pps/warning.png"))));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			if (scale!=1)
+				jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scale))));
+			else
+				jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
+		}
 		
 		if (useBorders) 
 			jlabel.setBorder(new LineBorder(Color.green, 1));

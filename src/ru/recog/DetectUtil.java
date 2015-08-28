@@ -23,6 +23,8 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
+import ru.recog.video.BasicVideoCapture;
+
 
 public class DetectUtil {
 	
@@ -33,6 +35,8 @@ public class DetectUtil {
 	public static String CASCADE_LPRHAAR16 = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_licence_plate_rus_16stages.xml";
 	public static String CASCADE_FRONTALFACE = "/Users/pps/dev/opencv-3.0.0/data/lbpcascades/lbpcascade_frontalface.xml";
 	public static String CASCADE_LPRHAAR = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_russian_plate_number.xml";
+	public static String CASCADE_LEXA = "/Users/pps/dev/DETECT_INSIDE/haarcascade_0_5/cascade.xml";
+
 	public static void detectNumber() {
 		System.out.println("\nRunning Detect Demo");
 
@@ -130,6 +134,44 @@ public class DetectUtil {
 //		    Imgcodecs.imwrite(newName, doubled);
 //	    }
 
+	}
+	
+	public static void detectNumberAndSave(String imageFileName, String dest, CascadeClassifier classifier) {
+		System.out.println("Detecting in "+imageFileName+" FD FT size: "+classifier.getOriginalWindowSize().toString());
+
+	    // Create a face detector from the cascade file in the resources
+	    // directory.
+	    
+
+	    Mat image = Imgcodecs.imread(imageFileName);
+
+	    // Detect faces in the image.
+	    // MatOfRect is a special container class for Rect.
+//	    Mat doubled = new Mat();
+//	    Imgproc.resize(image, doubled, new Size(), 2.0, 2.0, Imgproc.INTER_LINEAR);
+//	    Mat doubled = Imgproc.resize(image, doubled, dsize, fx, fy, interpolation);
+	    MatOfRect faceDetections = new MatOfRect();
+//	    classifier.detectMultiScale(image, faceDetections);
+	    classifier.detectMultiScale(image, faceDetections,1.05,3,0, new Size(30,10), new Size(120,40));
+
+	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
+
+	    // Draw a bounding box around each face.
+	    int i = 1;
+    	File f = new File(imageFileName);
+    	String fs = f.getName();
+    	String ext = fs.substring(fs.lastIndexOf('.'));
+    	String name = fs.substring(0, fs.lastIndexOf('.'));
+	    for (Rect rect : faceDetections.toArray()) {
+	    	System.out.println(rect.x+" "+rect.y);
+//	        Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+	    	Mat newM = image.submat(rect);
+	    	String newFN = name.concat(String.valueOf(i)).concat(ext);
+		    Imgcodecs.imwrite(new File(dest, newFN).getAbsolutePath(), newM);
+		    i++;
+
+	    }
+	    
 	}
 	
     public static void displayImage(Image img2) {   
@@ -264,47 +306,36 @@ public class DetectUtil {
 			detectNumber(carfiles[i].getAbsolutePath(), classifier);
     }
     
+    public static void findAndShowNumbers(String dirName, String destName, CascadeClassifier classifier) {
+		File cardir = new File(dirName); //"/Users/pps/dev/cars"
+		System.out.println(dirName+" "+cardir.isDirectory());
+		String[] carlist = cardir.list();
+		for (int i = 0; i< carlist.length; i++)
+			System.out.println(carlist[i]);
+		File[] carfiles = cardir.listFiles();
+		for (int i = 0; i< carfiles.length; i++)
+			detectNumberAndSave(carfiles[i].getAbsolutePath(), destName, classifier);
+    }
+    
 	
 	public static void main(String[] args) throws Exception {
-		
-
-//		VideoCapture vc = new VideoCapture("/Users/pps/dev/vid/video-000.avi");
-
-		
-		//		System.out.println("VC: FPS"+vc.get(Videoio.CAP_PROP_FPS));
-//		printVCInfo(vc, System.out);
-		
-//		Mat image = new Mat();
-//		System.out.println("frame 0: " +vc.read(image)+" is open "+vc.isOpened());
-//		System.out.println("after retrieving: ");
-//		printVCInfo(vc, System.out);
-//		displayImage(Mat2BufferedImage(image));
-//		
-//		for (int i = 0; i<6000;i++) vc.read(image);
-//		printVCInfo(vc, System.out);
-//
-//		System.out.println("Setting to 10 seconds "+vc.get(Videoio.CAP_PROP_POS_FRAMES));
-//		Mat image2 = new Mat();
-//		System.out.println("nextvframe "+vc.read(image2));
-//		displayImage(Mat2BufferedImage(image2));
-
 		
 		
 //		buildFramesFolder(vc, "/Users/pps/dev/frames/snap", System.out);
 		
-//		BasicVideoCapture bvc = new BasicVideoCapture("/Users/pps/dev/vid/video-000.avi");
-//		buildFrames(bvc);
-		
-		if (args.length<2) {
+/*		if (args.length<2) {
 			System.err.println("DetectUtil picFolder cascadeFile");
 			System.exit(1);
 		}
 		
-//		CascadeClassifier  cl = new CascadeClassifier("/Users/pps/dev/cascade1as5.xml");
-//		findAndShowNumbers("/Users/pps/dev/Examples/",cl);
 		
 		CascadeClassifier  cl = new CascadeClassifier(args[1]);
-		findAndShowNumbers(args[0],cl);
+		findAndShowNumbers(args[0],cl);*/
+		
+		CascadeClassifier cl = new CascadeClassifier(CASCADE_LPRHAAR);
+		findAndShowNumbers(args[0],"/Users/pps/dev/detected", cl);
+
+		
 		
 		
 	}

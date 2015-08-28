@@ -39,13 +39,19 @@ public class NNTrainingBuilder {
 			throw new IllegalArgumentException("Some characters from "+characterSet
 					+ " are not in the full list of chars.");
 		
+//		mfx = new MultipleFeatureExtractor();
+//		mfx.addExtractor(new AreaFeatureExtractor());
+////		mfx.addExtractor(new EllipseFeatureExtractor());
+//		mfx.addExtractor(new XProjectionFeatureExtractor());
+//		mfx.addExtractor(new YProjectionFeatureExtractor());
+//		mfx.addExtractor(new SymmetryFeatureExtractor());
+////		mfx.addExtractor(new BinaryPixelFeatureExtractor(10, 20));
+		
 		mfx = new MultipleFeatureExtractor();
 		mfx.addExtractor(new AreaFeatureExtractor());
-//		mfx.addExtractor(new EllipseFeatureExtractor());
-		mfx.addExtractor(new XProjectionFeatureExtractor());
-		mfx.addExtractor(new YProjectionFeatureExtractor());
+		mfx.addExtractor(new GravityGridFeatureExtractor(10, 20));
 		mfx.addExtractor(new SymmetryFeatureExtractor());
-//		mfx.addExtractor(new BinaryPixelFeatureExtractor(10, 20));
+		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
 		
 	}
 	
@@ -53,11 +59,13 @@ public class NNTrainingBuilder {
 	public static void main(String[] args) throws Exception {
 		
 
+//		processCharFolders("/Users/pps/symbols", "/Users/pps/dev/NNTrain/goodshit");
+		
 //		processFolders(args[0],args[1]);
-		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(
-				Arrays.asList('0','1','2','3','4','5','6','7','8','9' 
-						 ));
-		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/full1020", "digits.txt", "/Users/pps/dev/NNTrain/full1020");
+		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(FULL_CHARACTERS_SET
+		//		Arrays.asList('0','1','2','3','4','5','6','7','8','9' )
+						 );
+		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/goodshit", "EDGE.txt", "/Users/pps/dev/NNTrain/goodshit");
 		
 	}
 	
@@ -85,12 +93,65 @@ public class NNTrainingBuilder {
 		System.out.println("c "+c);
 
 	}
+	
+	public static void processCharFolders(String sourceFolder, String destFolder) {
+		
+		CompoundImageProcessor cip = new CompoundImageProcessor();
+		cip.addImageProcessor(new Binarization(40, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU));
+		cip.addImageProcessor(new ErodingDilator(Imgproc.MORPH_CROSS, new Size(3,3), 2));
+		cip.addImageProcessor(new Cropper());
+		
+		System.out.println("Using CIP: "+cip.toString());
+		
+		File sourceDir = new File(sourceFolder);
+		File destDir = new File(destFolder);
+		if (!destDir.exists()) destDir.mkdir();
+		System.out.println("Processing all chars from "+sourceDir.getAbsolutePath());
+		System.out.println("Moving to "+destDir.getAbsolutePath());
+		for (int i = 0; i<FULL_CHARACTERS_SET.size(); i++) {
+			String charSource = new File(sourceDir, String.valueOf(i)).getAbsolutePath();
+			String charDest = new File(destFolder, String.valueOf(i)).getAbsolutePath();
+			processFolders(charSource, charDest,cip);
+		}
+		
+	}
+	
+	
+	
+	static void processFolders(String sourceFolder, String destFolder, CompoundImageProcessor cip) {
+		File sourceDir = new File(sourceFolder);
+		File destDir = new File(destFolder);
+		if (!destDir.exists()) destDir.mkdirs();
+		System.out.println("from "+sourceDir.getAbsolutePath());
+		System.out.println("to "+destDir.getAbsolutePath());
+		
+		
+		Mat m = new Mat();
+		FilenameFilter bmp = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".bmp");
+			}
+		};
+		List<File> files = Arrays.asList(sourceDir.listFiles(bmp));
+		for (File f : files) {
+			System.out.println("reading from"+f.getAbsolutePath());
 
+			m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			Mat pm = cip.processImage(m);
+
+			String filename = destDir.getAbsolutePath().concat(File.separator).concat(f.getName());
+			System.out.println("writing to "+filename);
+			Imgcodecs.imwrite(filename, pm);
+
+			
+		}
+	}
+	
 	
 	static void processFolders(String sourceFolder, String destFolder) {
 		File sourceDir = new File(sourceFolder);
 		File destDir = new File(destFolder);
-		if (!destDir.exists()) destDir.mkdir();
+		if (!destDir.exists()) destDir.mkdirs();
 		System.out.println("from "+sourceDir.getAbsolutePath());
 		System.out.println("to "+destDir.getAbsolutePath());
 		

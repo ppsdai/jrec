@@ -1,4 +1,4 @@
-package ru.recog;
+package ru.recog.video;
 
 import org.opencv.core.Mat;
 

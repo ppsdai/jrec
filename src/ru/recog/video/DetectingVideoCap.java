@@ -1,4 +1,4 @@
-package ru.recog;
+package ru.recog.video;
 import java.awt.image.BufferedImage;
 
 import org.opencv.core.MatOfRect;
@@ -8,6 +8,8 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+
+import ru.recog.DetectUtil;
 
 
 public class DetectingVideoCap extends VideoCap {

@@ -5,10 +5,12 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
+import ru.recog.Contours;
 import ru.recog.LabelFrame;
 import ru.recog.feature.*;
 
@@ -20,6 +22,8 @@ public class NNAnalysis {
 	private static final String OUTPUT_STRING = "Output:";
 	private static final String DESIRED_STRING = "Desired output:";
 	private static final String ERROR_STRING = "Error:";
+	private static final String INPUT_STRING = "Input:";
+
 	
 	private static final double EPSILON = 0.02;
 
@@ -27,19 +31,19 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-//		readErrorFile("/Users/pps/dev/NNTrain/full1020/Test60OverFit.txt");
+		readErrorFile("/Users/pps/dev/NNTrain/goodshit/TestResults240815.txt");
 		
 		
-//		printAverageFeatures("/Users/pps/dev/NNTrain/full1020");
-		List<FeatureExtractor> fexlist = new ArrayList<FeatureExtractor>();
-		fexlist.add(new AreaFeatureExtractor());
-		fexlist.add(new EllipseFeatureExtractor());
-		fexlist.add(new XProjectionFeatureExtractor());
-		fexlist.add(new YProjectionFeatureExtractor());
-		fexlist.add(new SymmetryFeatureExtractor());
-		MultipleFeatureExtractor mfx = new MultipleFeatureExtractor(fexlist);
-		
-		System.out.println(mfx);
+//		printAverageFeatures("/Users/pps/dev/NNTrain/goodshit");
+//		List<FeatureExtractor> fexlist = new ArrayList<FeatureExtractor>();
+//		fexlist.add(new AreaFeatureExtractor());
+////		fexlist.add(new EllipseFeatureExtractor());
+//		fexlist.add(new XProjectionFeatureExtractor());
+//		fexlist.add(new YProjectionFeatureExtractor());
+//		fexlist.add(new SymmetryFeatureExtractor());
+//		MultipleFeatureExtractor mfx = new MultipleFeatureExtractor(fexlist);
+//		
+//		System.out.println(mfx);
 		
 		
 
@@ -47,11 +51,14 @@ public class NNAnalysis {
 	
 	public static void printAverageFeatures(String pathToFullSetofData) {
 		List<FeatureExtractor> fexlist = new ArrayList<FeatureExtractor>();
-		fexlist.add(new AreaFeatureExtractor());
-		fexlist.add(new EllipseFeatureExtractor());
-		fexlist.add(new XProjectionFeatureExtractor());
-		fexlist.add(new YProjectionFeatureExtractor());
-		fexlist.add(new SymmetryFeatureExtractor());
+//		fexlist.add(new AreaFeatureExtractor());
+//		fexlist.add(new EllipseFeatureExtractor());
+//		fexlist.add(new XProjectionFeatureExtractor());
+//		fexlist.add(new YProjectionFeatureExtractor());
+//		fexlist.add(new SymmetryFeatureExtractor());
+//		fexlist.add(new GravityCenterFeatureExtractor());
+		fexlist.add(new EdgeIntersectionFeatureExtractor(3, 3));
+
 		
 		for (FeatureExtractor fex : fexlist) {
 			
@@ -130,7 +137,7 @@ public class NNAnalysis {
 		
 		List<String> errorList = new ArrayList<String>();
 		List<String> testFileList = getTestFilesListFromFile(
-				new File (new File(errorFile).getParent(), "testFilesfull1020.txt" ).getAbsolutePath() );
+				new File (new File(errorFile).getParent(), "testFilesEDGE.txt" ).getAbsolutePath() );
 		LineNumberReader lnr = new LineNumberReader(new FileReader(errorFile));
 		for (String line; (line = lnr.readLine()) != null;)
 			errorList.add(line);
@@ -141,7 +148,16 @@ public class NNAnalysis {
 		
 		System.out.println("Read lines: "+errorList.size());
 		
+		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
+				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
+						new GravityGridFeatureExtractor(10, 20),
+						new SymmetryFeatureExtractor(),
+						new EdgeIntersectionFeatureExtractor(3, 3)));
+		
+		
+		
 		int errorCount = 0;
+		int smallErrorCount = 0; //in case when we have erros, but there is still >0.95 probability present
 		
 		System.out.println("Total entries in report: "+errorList.size()+" total test files: "
 				+testFileList.size());
@@ -150,12 +166,16 @@ public class NNAnalysis {
 //		Map<String,String> 
 		for (int index = 0; index < errorList.size(); index++) {
 			String line = errorList.get(index);
+			String inputString = line.substring(line.indexOf(INPUT_STRING)+INPUT_STRING.length(), 
+					line.indexOf(OUTPUT_STRING)).trim();
 			String outputString = line.substring(line.indexOf(OUTPUT_STRING)+OUTPUT_STRING.length(), 
 											line.indexOf(DESIRED_STRING)).trim();
 			String desiredString = line.substring(line.indexOf(DESIRED_STRING)+DESIRED_STRING.length(), 
 												line.indexOf(ERROR_STRING)).trim();
 			String errorString = line.substring(line.indexOf(ERROR_STRING)+ERROR_STRING.length()).trim();
 			
+			
+			List<Double> input = parseToDouble(inputString);
 			List<Double> output = parseToDouble(outputString);
 			List<Double> desired = parseToDouble(desiredString);
 			List<Double> error = parseToDouble(errorString);
@@ -164,6 +184,7 @@ public class NNAnalysis {
 				
 				
 				errorCount++;
+				for (double d : output) if (d > 0.94) { smallErrorCount++; break; }
 				String errLabel = getChar(desiredString)+": "+output+" "+testFileList.get(index);
 //				System.out.println(getChar(desiredString)+": "+output+" "+testFileList.get(index));
 				System.out.println(errLabel);
@@ -178,18 +199,52 @@ public class NNAnalysis {
 				
 				String sss = getChar(desIndex)+" - "+output.get(desIndex);
 				
-				lf.addImage(Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE), sss+" !!! "+checkErrors2(error, 0.05), 5);
+//				List<Double> nnout = nn.getNNOutput(Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE));
+				
+				// post processing work
+				
+				Mat m = Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+				
+				List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+
+				
+				Imgproc.findContours(m.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+				
+				
+				//***
+				
+				
+				lf.addImage(Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE), sss+" !!! "+checkErrors2(error, 0.05)+" contours: "+contours.size()
+						/*+" nn: "+checkErrors2(nnout,0.05)*/, 5);
+				
+				Collections.sort(contours, Contours.RECT_COMPARATOR);
+				if (contours.size()>1 || (contours.size()==1 
+						&& Contours.getContourRect(contours.get(0)).height<m.rows()
+						&& Contours.getContourRect(contours.get(0)).width<m.cols()))
+				for (MatOfPoint mop : contours) {
+					Rect r = Contours.getContourRect(mop);
+					
+					if (r.height>=m.rows()/2 && r.width>=m.cols()/3) {
+						Mat cm = m.clone().submat(r.y,r.y+r.height+1,r.x, r.x+r.width+1);
+						List<Double> nnout = nn.getNNOutput(cm);
+						lf.addImage(cm, checkErrors2(nnout, 0.05),3);
+					}
+				}
+				
 				
 			}
 
 		}
 		
 		System.out.println("Total errors: "+errorCount);
+		System.out.println("Small errors: "+smallErrorCount);
 		int size = errorList.size();
 		System.out.println("Total: "+size);
 
 		double percentage = (double)(size-errorCount)/size;
 		System.out.println("Correct percentage: "+percentage);
+		
+		System.out.println("Small error percentage: "+(double)(size-errorCount+smallErrorCount)/size);
 		lf.pack();
 		lf.setVisible(true);
 
@@ -202,6 +257,16 @@ public class NNAnalysis {
 	public static char getChar(String output) {
 		return NNTrainingBuilder.FULL_CHARACTERS_SET.get(readIndexFromOutput(output));
 	}
+	
+	public static String convertNNOutputToString(double[] nnoutput) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < nnoutput.length; i++) 
+			if (nnoutput[i] > EPSILON) sb.append(getChar(i))
+				.append("(").append(String.format("%.3f", nnoutput[i])).append(") ");
+		
+		return sb.toString();
+	}
+	
 	
 	public static List<String> getTestFilesListFromFile(String testFile) throws Exception {
 		List<String> listOfFiles = new ArrayList<String>();

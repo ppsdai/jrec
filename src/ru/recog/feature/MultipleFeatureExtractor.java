@@ -1,7 +1,6 @@
 package ru.recog.feature;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.opencv.core.Mat;
 
@@ -14,6 +13,11 @@ public class MultipleFeatureExtractor extends FeatureExtractor {
 	
 	public MultipleFeatureExtractor(List<FeatureExtractor> list) {
 		featureList = list;
+	}
+	
+	public MultipleFeatureExtractor(FeatureExtractor... extractors) {
+		this(Arrays.asList(extractors));
+//		featureList = list;
 	}
 
 	@Override

@@ -1,17 +1,18 @@
 package ru.recog;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.imgproc.CompoundImageProcessor;
-import ru.recog.imgproc.ImageProcessor;
+import ru.recog.imgproc.*;
 
 public class ImageUtils {
-
+	
+	
+	
 	public static Mat crop(Mat m) {
 	//		Mat cropped = new Mat(m.size(), CvType.CV_8UC1);
 			int top =-1, left =-1, right = -1, bottom = -1; 
@@ -37,14 +38,14 @@ public class ImageUtils {
 					if (m.get(row, col)[0] > 0)
 						bottom = row;
 			
-			System.out.println("top "+top+" bottom "+bottom+" left "+left+" right "+right);
+//			System.out.println("top "+top+" bottom "+bottom+" left "+left+" right "+right);
 			Mat cropped;
 			if (top < 0 || bottom < 0 || left < 0 || right < 0) {
 				System.err.println("top "+top+" bottom "+bottom+" left "+left+" right "+right);
 				System.err.println("Could not crop, binarization ate it all, returning original one");
 				cropped = m.clone();
 			} else 
-				cropped = m.submat(top, bottom, left, right);
+				cropped = m.submat(top, bottom+1, left, right+1);
 			return cropped;
 	}
 	
@@ -138,17 +139,135 @@ public class ImageUtils {
 		Imgproc.threshold(linear, lb, 1, 255, Imgproc.THRESH_BINARY);
 		return lb;
 	}
+	
+	public static Mat localbin(Mat m, double threshK) {
+		//TODO remove copying from Mat and back to it
+		
+		
+		int SizeX = m.cols();
+		int SizeY = m.rows();
+		int[][] CMatrix = new int[SizeX][SizeY];
+
+		for (int x = 0; x < SizeX; x++)
+			for (int y = 0; y < SizeY; y++)
+//			  CMatrix[x][y] = src.at<uchar>(y, x);
+				CMatrix[x][y] = (int)m.get(y, x)[0];
+
+
+		int CenterLine = 1;
+		int d = 5; // 5; // 8;
+		
+		
+		 double k =  - 0.0;  // - 0.2
+		 double k2 = 0.1;
+		 int R = 40;
+		 int y_smooth;
+
+		//d = round( 0.75 * ISqr_av);
+//		cout << " Size d = " << d;
+
+		// variables for calculating mean white and mean black
+
+		double W_1_av, WI_av, WISqr_av;
+		double B_1_av, BI_av, BISqr_av;
+		
+		int[][] CMatrix_Out = new int[SizeX][SizeY];
+
+		for (int x = 0; x < SizeX; x++)
+			for (int y = 0; y < SizeY; y++)
+				CMatrix_Out[x][y] = 0;
+
+		for (int x = d; x < (SizeX - d); x++)
+			for (int y = d; y < (SizeY - d); y++)
+			{
+				double _1_av = 0; double I_av = 0; double ISqr_av = 0;
+				for (int i = (-d); i <= d; i++)
+					for (int j = (-d); j <= d; j++)
+					{
+						y_smooth = CenterLine + (y - CenterLine) / 1; // 1.5;
+						_1_av = _1_av + 1;
+						I_av = I_av + CMatrix[x + i][y_smooth + j]; // try to count around centerline  CMatrix[x + i][y + j]
+						ISqr_av = ISqr_av + CMatrix[x + i][y_smooth + j] * CMatrix[x + i][y_smooth + j]; //CMatrix[x + i][y + j] * CMatrix[x + i][y + j]
+					}
+				I_av = I_av / _1_av;
+				ISqr_av = (ISqr_av / _1_av) - I_av * I_av;
+				ISqr_av = Math.sqrt(ISqr_av);
+				double local_threshhold = I_av + k * ISqr_av;
+
+				//local_threshhold = I_av *( 1 + k2 * ( ISqr_av/R  - 1));
+				// calculate mean values for W and B, and take threshhold inbetween
+				// supposing that they both have the same gaussian distribution
+				
+				B_1_av = 0; BI_av = 0; BISqr_av = 0;
+				W_1_av = 0; WI_av = 0; WISqr_av = 0;
+
+				for (int i = (-d); i <= d; i++)
+					for (int j = (-d); j <= d; j++)
+					{
+						y_smooth = CenterLine + (y - CenterLine) / 1; // 1.5;
+						if (CMatrix[x + i][y_smooth + j] > local_threshhold)
+						{
+							W_1_av = W_1_av + 1;
+							WI_av = WI_av + CMatrix[x + i][y_smooth + j]; // try to count around centerline  CMatrix[x + i][y + j]
+							WISqr_av = WISqr_av + CMatrix[x + i][y_smooth + j] * CMatrix[x + i][y_smooth + j]; //CMatrix[x + i][y + j] * CMatrix[x + i][y + j]
+						}
+						else
+						{
+							B_1_av = B_1_av + 1;
+							BI_av = BI_av + CMatrix[x + i][y_smooth + j]; // try to count around centerline  CMatrix[x + i][y + j]
+							BISqr_av = BISqr_av + CMatrix[x + i][y_smooth + j] * CMatrix[x + i][y_smooth + j]; //CMatrix[x + i][y + j] * CMatrix[x + i][y + j]
+						}
+
+					}
+				BI_av = BI_av / B_1_av;
+				WI_av = WI_av / W_1_av;
+
+				BISqr_av = (BISqr_av / B_1_av) - BI_av * BI_av;
+				BISqr_av = Math.sqrt(BISqr_av);
+				
+				WISqr_av = (WISqr_av / W_1_av) - WI_av * WI_av;
+				WISqr_av = Math.sqrt(WISqr_av);
+
+				//local_threshhold = (BI_av + WI_av)/2;
+				
+				local_threshhold = BI_av + (WI_av - BI_av) * BISqr_av / (BISqr_av + WISqr_av) * threshK; // 1
+				// zaplatka na malue variaziju intensivnosti
+				//if (ISqr_av < 15) local_threshhold = 128;
+
+			//		cout << " WI " << WI_av;
+			//	    cout << " BI " << BI_av;
+				// here the threshhold
+				if (CMatrix[x][y] > local_threshhold) CMatrix_Out[x][y] = 0;
+				else CMatrix_Out[x][y] = 255;
+
+		}
+
+		//for (x = 0; x < SizeX; x++)
+		//	for (y = 0; y < SizeY; y++)
+		//		src_out.at<uchar>(y, x) = (uchar)CMatrix_Out[x][y];
+
+
+		Mat out = new Mat(m.size(), m.type());
+		for (int x = 0; x < SizeX; x++)
+			for (int y = 0; y < SizeY; y++)
+//				src.at<uchar>(y, x) = (uchar)(CMatrix_Out[x][y]);
+				out.put(y, x, CMatrix_Out[x][y]);
+		
+		return out;
+		
+	}
  	
 	public static double binaryAreaNorm(Mat m) {
 		return (double) Core.countNonZero(m)/ (m.cols()*m.rows());
 	}
 	
 	public static Mat scaleUp(Mat m, int scaleFactor) {
-		System.out.println("scaling m "+m.cols()+"x"+m.rows());
+//		System.out.println("scaling m "+m.cols()+"x"+m.rows());
 		Mat sm = new Mat(m.rows()*scaleFactor, m.cols()*scaleFactor, m.type());
 		for (int row = 0; row < m.rows(); row++)
 			for (int col = 0; col < m.cols(); col++) {
-				double val = m.get(row, col)[0];
+//				double val = m.get(row, col)[0];
+				double[] val = m.get(row, col);
 				for (int srow = 0; srow < scaleFactor; srow++)
 					for (int scol = 0; scol < scaleFactor; scol++) {
 //						System.out.println("row "+row+" col "+col+" srow "+srow+" scol"
@@ -169,6 +288,40 @@ public class ImageUtils {
 				if (m.get(row, col)[0]>0)
 					points.add(new Point((float) col, (float)row ));
 		return points;
+	}
+	
+	public static void main(String[] args) {
+		
+/*		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		LabelFrame lf = new LabelFrame("", true);
+		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame401.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		lf.addImage(m, "orig", 3);
+		for (double k = 0.2; k < 1.6; k+=0.2) {
+			Mat b = localbin(m, k);
+			lf.addImage(b, String.valueOf(k), 3);
+		}
+		
+		lf.pack();
+		lf.setVisible(true);
+		
+		Mat tri = Mat.zeros(new Size(100,100), CvType.CV_8UC1);
+		Imgproc.rectangle(tri, new Point(20,20), new Point(80,80), new Scalar(255,255,255));
+		LabelFrame exp = new LabelFrame();
+		exp.addImage(tri, "");
+		exp.pack();
+		exp.setVisible(true);
+		
+		List<MatOfPoint> l = new ArrayList<MatOfPoint>();
+		Imgproc.findContours(tri, l, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+		for (MatOfPoint mop : l)
+			System.out.println(mop);
+			
+		*/
+
+		
+		
+		
 	}
 	
 	//TODO for testing scale

@@ -1,8 +1,10 @@
-package ru.recog;
+package ru.recog.video;
 import java.awt.image.BufferedImage;
 
 import org.opencv.core.Core;
 import org.opencv.videoio.VideoCapture;
+
+import ru.recog.Mat2Image;
 
 public class VideoCap {
     
@@ -13,7 +15,7 @@ public class VideoCap {
     VideoCapture cap;
     Mat2Image mat2Img = new Mat2Image();
 
-    VideoCap(){
+    public VideoCap(){
         cap = new VideoCapture();
         cap.open(0);
     } 
@@ -27,7 +29,7 @@ public class VideoCap {
     	}
     }
  
-    BufferedImage getOneFrame() {
+    public BufferedImage getOneFrame() {
         cap.read(mat2Img.mat);
 //        System.out.println(cap.get(Videoio.CAP_PROP_POS_FRAMES));
         return mat2Img.getImage(mat2Img.mat);

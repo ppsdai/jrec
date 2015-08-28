@@ -1,4 +1,4 @@
-package ru.recog;
+package ru.recog.video;
 import java.awt.image.BufferedImage;
 
 import org.opencv.core.MatOfRect;
@@ -7,6 +7,8 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+
+import ru.recog.DetectUtil;
 
 
 public class MultipleDetectorsVideoCap extends VideoCap {
@@ -30,7 +32,7 @@ public class MultipleDetectorsVideoCap extends VideoCap {
 	}
 	
 	//@override
-    BufferedImage getOneFrame() {
+    public BufferedImage getOneFrame() {
         cap.read(mat2Img.mat);
 	    MatOfRect detections = new MatOfRect();
 	    MatOfRect detections2 = new MatOfRect();

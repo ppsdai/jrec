@@ -7,6 +7,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import ru.recog.video.Skip24VideoCap;
+import ru.recog.video.VideoCap;
+
 public class MyFrame extends JFrame {
     private JPanel contentPane;
     

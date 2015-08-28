@@ -43,6 +43,7 @@ public class CompoundImageProcessor implements ImageProcessor {
 			pm = ip.processImage(pm);
 			stageImages.add(pm.clone());
 		}
+		
 		return pm;
 	}
 

@@ -12,6 +12,8 @@ import org.opencv.video.BackgroundSubtractor;
 import org.opencv.video.Video;
 import org.opencv.videoio.Videoio;
 
+import ru.recog.video.BasicVideoCapture;
+
 public class FrameBuilder {
 	
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
