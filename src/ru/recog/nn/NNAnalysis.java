@@ -267,6 +267,20 @@ public class NNAnalysis {
 		return sb.toString();
 	}
 	
+	public static String nnOutputToSymbol(double[] nnoutput) {
+		StringBuffer sb = new StringBuffer("[");
+		boolean found = false;
+		for (int i = 0; i < nnoutput.length; i ++) {
+			if (nnoutput[i]> 0.9) {
+				found = true;
+				sb.append(getChar(i));
+			}
+		}
+		if (!found) sb.append("*");
+		sb.append("]");
+		return sb.toString();
+	}
+	
 	
 	public static List<String> getTestFilesListFromFile(String testFile) throws Exception {
 		List<String> listOfFiles = new ArrayList<String>();
