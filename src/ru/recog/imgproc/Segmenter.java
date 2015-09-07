@@ -51,7 +51,7 @@ public class Segmenter {
 		
 		
 		
-		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
+		NNWrapper nn = new NNWrapper("c:\\dev\\Net496021.nnet", 
 				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
 						new GravityGridFeatureExtractor(10, 20),
 						new SymmetryFeatureExtractor(),
@@ -64,7 +64,7 @@ public class Segmenter {
 		cip.addImageProcessor(new Cropper());
 		
 		
-		File dir = new File("/Users/pps/dev/Examples");
+		File dir = new File("c:\\dev\\PlatesSegmentation"); //Good");
 		LabelFrame lf = new LabelFrame("GOOD", true);
 //
 //		

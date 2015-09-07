@@ -10,7 +10,7 @@ import ru.recog.imgproc.*;
 import ru.recog.nn.NNAnalysis;
 import ru.recog.nn.NNWrapper;
 
-public class Contours {
+public class NewContours {
 	
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
@@ -79,7 +79,7 @@ public class Contours {
 //		cmp.addImageProcessor(new Resizer(new Size(10,20)));
 //		cmp.addImageProcessor(new Binarization(1, 255, Imgproc.THRESH_BINARY));
 //		Resizer resizer = new Resizer(new Size(10,20));
-		NNWrapper nnw = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/GoodNet375021.nnet");
+//		NNWrapper nnw = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/GoodNet375021.nnet");
 		
 //		System.out.println(mfx);
 		
@@ -90,14 +90,17 @@ public class Contours {
 
 		
 		
-		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame87601.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-		Mat m1 = Imgcodecs.imread("/Users/pps/dev/detected/frame87601.png", Imgcodecs.CV_LOAD_IMAGE_COLOR);
-//		Mat m = Imgcodecs.imread("c:\\dev\\PlatesSegmentation\\32.bmp", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//		Mat m1 = Imgcodecs.imread("c:\\dev\\PlatesSegmentation\\32.bmp", Imgcodecs.CV_LOAD_IMAGE_COLOR);
+//		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame87601.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//		Mat m1 = Imgcodecs.imread("/Users/pps/dev/detected/frame87601.png", Imgcodecs.CV_LOAD_IMAGE_COLOR);
+		Mat m = Imgcodecs.imread("c:\\dev\\PlatesSegmentation\\32.bmp", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		Mat m1 = Imgcodecs.imread("c:\\dev\\PlatesSegmentation\\32.bmp", Imgcodecs.CV_LOAD_IMAGE_COLOR);
 
+		SegmentationResult result = new SegmentationResult(); 
+		result = NewSegmenter.segment(m, result);
+		
 		lf.addImage(m, "orig", 3);
 		
-		for (double k = 0.2; k < 1.6; k+=0.2) {
+		for (double k = 0.2; k < 1.0; k+=0.2) {
 			Mat b = ImageUtils.localbin(m, k);
 //			Mat bb = new Mat(m.size(), CvType.CV_8UC1);
 			Mat bb = m1.clone();
@@ -135,6 +138,10 @@ public class Contours {
 		
 			rf.addImage(bb, String.valueOf(k), 3);
 
+			// add centerline and show
+			Imgproc.cvtColor(b, b, Imgproc.COLOR_GRAY2RGB);
+			Imgproc.line(b, new Point( 0, result.getCenterLine()), new Point(b.cols()-1, result.getCenterLine()),
+					        new Scalar(0,255,0));
 			
 			lf.addImage(b, String.valueOf(k), 3);
 //			break;

@@ -13,7 +13,12 @@ public class SegmentationResult {
 	
 	private Mat originalMat;
 	private int upperBound, lowerBound;
+	private int leftPoint, rightPoint;      // estimates of the number boundaries
 	private List<Integer> cutPoints;
+<<<<<<< HEAD
+	private int lengthEstimate = 0;
+	private int CenterLine = 0;
+=======
 	private List<Rect> rectangles = null;
 	
 	
@@ -84,6 +89,7 @@ public class SegmentationResult {
 		return rectangles;
 	}
 	
+>>>>>>> 06a7b7156ee3b946d88ded95fe4de94604da5219
 	
 	public Mat getOriginalMat() {
 		return originalMat;
@@ -108,12 +114,35 @@ public class SegmentationResult {
 	public void setLowerBound(int lowerBound) {
 		this.lowerBound = lowerBound;
 	}
+	public int getleftPoint() {
+		return leftPoint;
+	}
+	public void setleftPoint(int leftPoint) {
+		this.leftPoint = leftPoint;
+	}
+	public int getrightPoint() {
+		return rightPoint;
+	}
+	public void setrightPoint(int rightPoint) {
+		this.rightPoint = rightPoint;
+	}
 	public List<Integer> getCutPoints() {
 		return cutPoints;
 	}
 	public void setCutPoints(List<Integer> cutPoints) {
 		this.cutPoints = cutPoints;
 	}
-	
+	public int getlengthEstimate() {
+		return lengthEstimate;
+	}
+	public void setlengthEstimate(int lengthEstimate) {
+		this.lengthEstimate = lengthEstimate;
+	}
 
+	public int getCenterLine() {
+		return CenterLine;
+	}
+	public void setCenterLine(int CenterLine) {
+		this.CenterLine = CenterLine;
+	}
 }
