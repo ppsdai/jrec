@@ -51,7 +51,6 @@ public class SaveDialog extends JDialog implements PropertyChangeListener, Actio
         
         pane.addPropertyChangeListener(this);
         box.addActionListener(this);
-//        add(new JScrollPane(pane));
         
 		setContentPane(new JScrollPane(pane));
 		
@@ -84,14 +83,12 @@ public class SaveDialog extends JDialog implements PropertyChangeListener, Actio
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-//		System.out.println(e);
 		if ("comboBoxEdited".equals(e.getActionCommand()))
 			pane.setValue(JOptionPane.OK_OPTION);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println(evt);
 		if (evt.getSource().equals(pane) && "value".equals(evt.getPropertyName())) {
 			if (JOptionPane.UNINITIALIZED_VALUE == evt.getNewValue())
 				return;
@@ -114,7 +111,12 @@ public class SaveDialog extends JDialog implements PropertyChangeListener, Actio
 	private void doOK() {
 		String s = (String)box.getSelectedItem();
 		if ( ru.recog.Utils.checkNumber(s) == null) {
-			box.insertItemAt(s.toUpperCase(), 0);
+			boolean found = false;
+			for (int i = 0; i < box.getItemCount(); i++)
+				if (s.toUpperCase().equalsIgnoreCase(box.getItemAt(i)))
+					found = true;
+			if (!found)
+				box.insertItemAt(s.toUpperCase(), 0);
 			number = s.toUpperCase();
 			setVisible(false);
 		} else System.out.println("Error processing "+s+" - "+ru.recog.Utils.checkNumber(s));
