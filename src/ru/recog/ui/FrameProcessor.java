@@ -38,10 +38,10 @@ public class FrameProcessor {
 		
 		setupFolders(dest);
 		
-		
 		files = new ArrayList<String>(Arrays.asList(dir.list(Utils.FILTER_BMP_PNG)));
 		int total = files.size();
-		files.removeAll(processedFiles);
+		if (processedFiles!=null)
+			files.removeAll(processedFiles);
 		
 		Collections.sort(files, new Comparator<String>() {
 			public int compare(String o1, String o2) {
