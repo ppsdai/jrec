@@ -68,7 +68,15 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 	}
 	
 	public void addPlatePanel(String filename) {
-		addPlatePanel(new PlatePanel(filename));
+		try {
+			PlatePanel pp = new PlatePanel(filename);
+			addPlatePanel(pp);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			segmentationFault(filename);
+			showExceptionDialog(e);
+			System.out.println("for file: "+filename);
+			e.printStackTrace();
+		}
 	}
 	
 	public void addPlatePanel(PlatePanel pp) {
@@ -95,6 +103,16 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 			loader.saveSegFault(panel);
 			removePlatePanel(panel);
 
+		} catch (IOException e) {
+			e.printStackTrace();
+			showExceptionDialog(e);
+		}
+	}
+	
+	public void segmentationFault(String filename) {
+		System.out.println("segfault");
+		try {
+			loader.saveSegFault(filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 			showExceptionDialog(e);

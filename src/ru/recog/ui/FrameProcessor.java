@@ -154,6 +154,14 @@ public class FrameProcessor {
 
 	}
 	
+	void saveSegFault(String filename) throws IOException {
+		//add to log file
+		addToLog(filename.concat(";").concat(SFAULT));
+		//save to seg fault folder
+		copy(filename, segDir);
+
+	}
+	
 	void saveRecFault(PlatePanel panel) throws IOException {
 		//add to log file
 		addToLog(panel.getFilename().concat(";").concat(RFAULT));

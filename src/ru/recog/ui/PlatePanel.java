@@ -118,7 +118,7 @@ public class PlatePanel extends JPanel implements ActionListener {
 		Mat orig = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		
-		try {
+//		try {
 			segResult = Segmenter.segment(orig);
 			
 			for (int p : segResult.getCutPoints())
@@ -129,11 +129,11 @@ public class PlatePanel extends JPanel implements ActionListener {
 				Imgproc.line(m, new Point(r.x, r.y+r.height), new Point(r.x+r.width, r.y+r.height), new Scalar(255,0,0));
 			}
 			
-		} catch (ArrayIndexOutOfBoundsException e) {
+//		} catch (ArrayIndexOutOfBoundsException e) {
 			// TODO Auto-generated catch block
-			System.out.println("for file: "+filename);
-			e.printStackTrace();
-		}
+//			System.out.println("for file: "+filename);
+//			e.printStackTrace();
+//		}
 	}
 
 	
