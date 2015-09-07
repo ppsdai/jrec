@@ -31,7 +31,7 @@ public class Utils {
 	= Arrays.asList('0','1','2','3','4','5','6','7','8','9'); 
 	
 	public static final List<Character> LETTERS_SET
-	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'P', 'T', 'X', 'Y');
+	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'O', 'P', 'T', 'X', 'Y');
 	
 	
 	public static String checkNumber(String number) {
