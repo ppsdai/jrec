@@ -113,27 +113,29 @@ public class Segmenter {
 	}
 	
 	
+	
 	public static List<Mat> getSegments(Mat m) {
-		return getSegments(segment(m));
+		
+		return segment(m).getSegments();
 	}
 	
-	public static List<Mat> getSegments(SegmentationResult result) {
-		List<Mat> pieces = new ArrayList<Mat>();
-		
-		Mat  res = result.getOriginalMat().rowRange(result.getRowRange());
-
-		List<Integer> cutPoints = result.getCutPoints();
-		int x0 = 0; int x1 = 0;
-		
-		for (int i = 0; i <= cutPoints.size(); i++) {
-			if (i == cutPoints.size()) x1 = res.cols()-1;
-			else x1 = cutPoints.get(i);
-			pieces.add(res.colRange(x0, x1+1));
-			
-			x0 = x1;
-		}
-		return pieces;
-	}
+//	public static List<Mat> getSegments(SegmentationResult result) {
+//		List<Mat> pieces = new ArrayList<Mat>();
+//		
+//		Mat  res = result.getOriginalMat().rowRange(result.getRowRange());
+//
+//		List<Integer> cutPoints = result.getCutPoints();
+//		int x0 = 0; int x1 = 0;
+//		
+//		for (int i = 0; i <= cutPoints.size(); i++) {
+//			if (i == cutPoints.size()) x1 = res.cols()-1;
+//			else x1 = cutPoints.get(i);
+//			pieces.add(res.colRange(x0, x1+1));
+//			
+//			x0 = x1;
+//		}
+//		return pieces;
+//	}
 
 	public static SegmentationResult segment(Mat m) throws ArrayIndexOutOfBoundsException {
 			int[] blackLength = new int[m.rows()];
