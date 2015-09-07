@@ -23,6 +23,7 @@ public class FrameProcessor {
 	
 	int position = 0;
 	List<String> files;
+	List<String> processedFiles;
 	
 	
 	public static final String RFAULT = "RFAULT";
@@ -37,7 +38,10 @@ public class FrameProcessor {
 		
 		setupFolders(dest);
 		
-		files = Arrays.asList(dir.list(Utils.FILTER_BMP_PNG));
+		
+		files = new ArrayList<String>(Arrays.asList(dir.list(Utils.FILTER_BMP_PNG)));
+		int total = files.size();
+		files.removeAll(processedFiles);
 		
 		Collections.sort(files, new Comparator<String>() {
 			public int compare(String o1, String o2) {
@@ -47,7 +51,7 @@ public class FrameProcessor {
 			}
 			
 		});
-		System.out.println("Loaded files: "+files.size());
+		System.out.println("Total: "+total+" loaded files: "+files.size());
 		
 	}
 	
@@ -63,6 +67,17 @@ public class FrameProcessor {
 			recDir.mkdir();
 			segDir.mkdir();
 			nnDir.mkdir();
+		} else {
+			processedFiles = new ArrayList<String>();
+			try {
+				LineNumberReader lnr = new LineNumberReader(new FileReader(new File(dest, LOGNAME)));
+				for (String line; (line = lnr.readLine()) != null;) {
+					String fn = line.substring(0, line.indexOf(";"));
+					processedFiles.add(fn.substring(fn.lastIndexOf(File.separator)+1, fn.length()));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 			
 		for (char c : Utils.FULL_CHARACTERS_SET) {
@@ -73,7 +88,7 @@ public class FrameProcessor {
 //		Arrays.fill(charCounters, 0);
 
 		try {
-			logwriter = new PrintWriter(new FileWriter(new File(dest, LOGNAME)), true);
+			logwriter = new PrintWriter(new FileWriter(new File(dest, LOGNAME), true), true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
