@@ -149,9 +149,10 @@ public class PlatePanel extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		System.out.println(e.getActionCommand());		
+//		System.out.println(e.getActionCommand());		
 		if ("bin".equals(e.getActionCommand()))
-			parent.removePlatePanel(this);
+			System.out.println("NOT IMPLEMENTED");
+//			parent.removePlatePanel(this);
 		if ("seg".equals(e.getActionCommand()))
 			parent.segmentationFault(this);
 		if ("rec".equals(e.getActionCommand()))
