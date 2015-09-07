@@ -12,7 +12,6 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import ru.recog.feature.EllipseFeatureExtractor;
 import ru.recog.feature.FeatureExtractor;
-import ru.recog.nn.NNTrainingBuilder;
 
 public class RunClassifier {
 	
@@ -80,7 +79,7 @@ public class RunClassifier {
 		
 		
 		File dir = new File("/Users/pps/dev/NNTrain/full1020");
-		for (int i = 0; i < NNTrainingBuilder.FULL_CHARACTERS_SET.size(); i++) {
+		for (int i = 0; i < Utils.FULL_CHARACTERS_SET.size(); i++) {
 			File charDir = new File(dir, String.valueOf(i));
 			File imgFile = null;
 			for (int n = 0; !(imgFile = new File(charDir, String.valueOf(n).concat(".bmp"))).exists() ;n++);

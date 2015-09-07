@@ -215,6 +215,11 @@ public class Segmenter {
 				if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) localMaximums.add(x);
 				if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
 			}
+			
+//			if (localMaximums.size() == 0 || localMinimums.size() == 0) {
+//				System.out.println("Failed to find a maximum/minimum");
+//				return null;
+//			}
 	
 //			System.out.println("max: "+localMaximums);
 //			System.out.println(localMaximums.size());

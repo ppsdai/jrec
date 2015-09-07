@@ -10,8 +10,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.Contours;
-import ru.recog.LabelFrame;
+import ru.recog.*;
 import ru.recog.feature.*;
 
 public class NNAnalysis {
@@ -64,7 +63,7 @@ public class NNAnalysis {
 			
 			System.out.println(fex.getClass()+" dimensions: "+fex.getDimension());
 
-			for (int i = 0; i < NNTrainingBuilder.FULL_CHARACTERS_SET.size(); i++) {
+			for (int i = 0; i < Utils.FULL_CHARACTERS_SET.size(); i++) {
 				List<List<Double>> lll = extractAverages(fex, pathToFullSetofData.concat(File.separator).concat(String.valueOf(i)));
 		//		for (List<Double> list : lll)
 		//			System.out.println(list);
@@ -79,7 +78,7 @@ public class NNAnalysis {
 	public static List<List<Double>> extractAverages(FeatureExtractor fex, String sourceFolder) {
 		int dimension = fex.getDimension();
 		List<Double> minimum = new ArrayList<Double>(), maximum =  new ArrayList<Double>(), average =  new ArrayList<Double>();
-		File[] files = new File(sourceFolder).listFiles(NNTrainingBuilder.FILTER_BMP);
+		File[] files = new File(sourceFolder).listFiles(Utils.FILTER_BMP);
 		for (File file : files) {
 			Mat m = Imgcodecs.imread(file.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			List<Double> results = fex.extract(m);
@@ -251,11 +250,11 @@ public class NNAnalysis {
 	}
 	
 	public static char getChar(int index) {
-		return NNTrainingBuilder.FULL_CHARACTERS_SET.get(index);
+		return Utils.FULL_CHARACTERS_SET.get(index);
 	}
 	
 	public static char getChar(String output) {
-		return NNTrainingBuilder.FULL_CHARACTERS_SET.get(readIndexFromOutput(output));
+		return Utils.FULL_CHARACTERS_SET.get(readIndexFromOutput(output));
 	}
 	
 	public static String convertNNOutputToString(double[] nnoutput) {
@@ -304,7 +303,7 @@ public class NNAnalysis {
 		for (int i = 0; i < errors.size(); i++)
 //		for (double d : errors)
 			if (errors.get(i) > epsilon) {
-				sb.append(NNTrainingBuilder.FULL_CHARACTERS_SET.get(i)).append(" ").append(errors.get(i)).append("; ");
+				sb.append(Utils.FULL_CHARACTERS_SET.get(i)).append(" ").append(errors.get(i)).append("; ");
 			}
 		if (sb.length() > 0) return sb.toString();
 		else return null;

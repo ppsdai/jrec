@@ -9,24 +9,13 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import ru.recog.Utils;
 import ru.recog.feature.*;
 import ru.recog.imgproc.*;
 
 public class NNTrainingBuilder {
 	
 //	public static int DIGITS = 15;
-	
-	public static final List<Character> FULL_CHARACTERS_SET
-		= Arrays.asList('0','1','2','3','4','5','6','7','8','9', 
-				'A', 'B', 'C', 'E', 'H', 'K', 'M', 'P', 'T', 'X', 'Y');
-	
-	
-	public static final FilenameFilter FILTER_BMP = new FilenameFilter() {
-		public boolean accept(File dir, String name) {
-			return name.endsWith(".bmp");
-		}
-	};
-
 	
 	private List<Character> characterSet; // = new ArrayList<String>();
 	private MultipleFeatureExtractor mfx;
@@ -35,7 +24,7 @@ public class NNTrainingBuilder {
 	
 	public NNTrainingBuilder(List<Character> characterSet) {
 		this.characterSet = characterSet;
-		if (!FULL_CHARACTERS_SET.containsAll(characterSet)) 
+		if (!Utils.FULL_CHARACTERS_SET.containsAll(characterSet)) 
 			throw new IllegalArgumentException("Some characters from "+characterSet
 					+ " are not in the full list of chars.");
 		
@@ -62,8 +51,7 @@ public class NNTrainingBuilder {
 //		processCharFolders("/Users/pps/symbols", "/Users/pps/dev/NNTrain/goodshit");
 		
 //		processFolders(args[0],args[1]);
-		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(FULL_CHARACTERS_SET
-		//		Arrays.asList('0','1','2','3','4','5','6','7','8','9' )
+		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET
 						 );
 		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/goodshit", "EDGE.txt", "/Users/pps/dev/NNTrain/goodshit");
 		
@@ -108,7 +96,7 @@ public class NNTrainingBuilder {
 		if (!destDir.exists()) destDir.mkdir();
 		System.out.println("Processing all chars from "+sourceDir.getAbsolutePath());
 		System.out.println("Moving to "+destDir.getAbsolutePath());
-		for (int i = 0; i<FULL_CHARACTERS_SET.size(); i++) {
+		for (int i = 0; i<Utils.FULL_CHARACTERS_SET.size(); i++) {
 			String charSource = new File(sourceDir, String.valueOf(i)).getAbsolutePath();
 			String charDest = new File(destFolder, String.valueOf(i)).getAbsolutePath();
 			processFolders(charSource, charDest,cip);
@@ -223,17 +211,17 @@ public class NNTrainingBuilder {
 		
 		for (int characterIndex = 0; characterIndex<characterSet.size(); characterIndex++) {
 			File digitDir = new File(sourceDir, 
-					String.valueOf(FULL_CHARACTERS_SET.indexOf(characterSet.get(characterIndex))));
+					String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(characterSet.get(characterIndex))));
 			
 			for (String file : digitDir.list(testingFilenameFileter)) {
 				System.out.println(file);
-				csvTestList.add(createCSVTrainSampleFromImage(fullPath(digitDir,file), characterIndex));
+				csvTestList.add(createCSVTrainSampleFromImage(Utils.fullPath(digitDir,file), characterIndex));
 				csvTestFileList.add(file);
 			}
 			
 			for (String file : digitDir.list(trainingFilenameFilter)) {
 				System.out.println(file);
-				csvTrainList.add(createCSVTrainSampleFromImage(fullPath(digitDir,file), characterIndex));
+				csvTrainList.add(createCSVTrainSampleFromImage(Utils.fullPath(digitDir,file), characterIndex));
 			}
 		}
 		
@@ -267,13 +255,8 @@ public class NNTrainingBuilder {
 		pw.close();
 	}
 	
-	public static String fullPath(File parent, String name) {
-		return parent.getAbsolutePath().concat(File.separator)
-				.concat(name);
-	}
-	
 	private static String charFolder(Character c) {
-		return String.valueOf(FULL_CHARACTERS_SET.indexOf(c));
+		return String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(c));
 
 	}
 	

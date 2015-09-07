@@ -1,6 +1,9 @@
 package ru.recog;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.opencv.core.*;
@@ -9,6 +12,45 @@ public class Utils {
 	
 	
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+	
+	public static final FilenameFilter FILTER_BMP = new FilenameFilter() {
+		public boolean accept(File dir, String name) {
+			return name.endsWith(".bmp");
+		}
+	};
+	public static final FilenameFilter FILTER_BMP_PNG = new FilenameFilter() {
+		public boolean accept(File dir, String name) {
+			return name.endsWith(".bmp") || name.endsWith(".png");
+		}
+	};
+	public static final List<Character> FULL_CHARACTERS_SET
+	= Arrays.asList('0','1','2','3','4','5','6','7','8','9', 
+			'A', 'B', 'C', 'E', 'H', 'K', 'M', 'P', 'T', 'X', 'Y');
+	
+	public static final List<Character> NUMBERS_SET
+	= Arrays.asList('0','1','2','3','4','5','6','7','8','9'); 
+	
+	public static final List<Character> LETTERS_SET
+	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'P', 'T', 'X', 'Y');
+	
+	
+	public static String checkNumber(String number) {
+		if (number == null) return "number is null";
+		if (number.length()!=6) return "number length is "+number.length();
+		
+		String upper = number.toUpperCase();
+		
+		if (LETTERS_SET.containsAll(Arrays.asList(upper.charAt(0), upper.charAt(4), upper.charAt(5)))
+				&& NUMBERS_SET.containsAll(Arrays.asList(upper.charAt(1), upper.charAt(2), upper.charAt(3))))
+			return null;
+		else return "wrong number";
+		
+	}
+	
+	public static String fullPath(File parent, String name) {
+		return parent.getAbsolutePath().concat(File.separator)
+				.concat(name);
+	}
 
 	
 	public static Mat produceSumMat(Mat m) {
@@ -88,5 +130,6 @@ public class Utils {
 		System.out.println(Arrays.deepToString(arr));
 
 	}
+
 
 }
