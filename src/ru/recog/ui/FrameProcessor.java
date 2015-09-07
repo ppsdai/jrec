@@ -17,7 +17,7 @@ public class FrameProcessor {
 	File destination;
 	File recDir, segDir, nnDir;
 	
-	int[] charCounters = new int[Utils.FULL_CHARACTERS_SET.size()];
+//	int[] charCounters = new int[Utils.FULL_CHARACTERS_SET.size()];
 	
 	PrintWriter logwriter; 
 	
@@ -70,7 +70,7 @@ public class FrameProcessor {
 				if (makeDirs) cf.mkdir();
 		}
 		
-		Arrays.fill(charCounters, 0);
+//		Arrays.fill(charCounters, 0);
 
 		try {
 			logwriter = new PrintWriter(new FileWriter(new File(dest, LOGNAME)), true);
@@ -103,7 +103,7 @@ public class FrameProcessor {
 			sb.append(r.x).append(";").append(r.y).append(";")
 			.append(r.width).append(";").append(r.height).append(";");
 			
-			saveChar(segments.get(i), number.charAt(charNum));
+			saveChar(segments.get(i), panel.getFilename(), number.charAt(charNum));
 
 		}
 		
@@ -114,12 +114,23 @@ public class FrameProcessor {
 
 	}
 	
-	private void saveChar(Mat m, char c) {
-		int index = Utils.FULL_CHARACTERS_SET.indexOf(c);
-		String filename = String.valueOf(charCounters[index]).concat(".bmp");
+	private void saveChar(Mat m, String origFilename, char c) {
+//		int index = Utils.FULL_CHARACTERS_SET.indexOf(c);
+//		String filename = String.valueOf(charCounters[index]).concat(".bmp");
+		
+		String fname = origFilename.substring(origFilename.lastIndexOf(File.separator)+1,
+				origFilename.lastIndexOf("."));
+		int counter = 1;
+		String filename;
+		do {
+			filename = fname.concat("_").concat(String.valueOf(counter)).concat(".bmp");
+			counter++;
+		} while (new File(Utils.fullPath(new File(nnDir, String.valueOf(c)), 
+				filename)).exists());
+		
 		
 		Imgcodecs.imwrite(Utils.fullPath(new File(nnDir, String.valueOf(c)), filename), m);
-		charCounters[index]++;
+//		charCounters[index]++;
 		
 	}
 	
