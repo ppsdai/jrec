@@ -88,10 +88,13 @@ public class Contours {
 		LabelFrame cf = new LabelFrame("chars", true);
 		LabelFrame bf = new LabelFrame("binchars", true);
 
-
+		
 		
 		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame87601.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		Mat m1 = Imgcodecs.imread("/Users/pps/dev/detected/frame87601.png", Imgcodecs.CV_LOAD_IMAGE_COLOR);
+//		Mat m = Imgcodecs.imread("c:\\dev\\PlatesSegmentation\\32.bmp", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//		Mat m1 = Imgcodecs.imread("c:\\dev\\PlatesSegmentation\\32.bmp", Imgcodecs.CV_LOAD_IMAGE_COLOR);
+
 		lf.addImage(m, "orig", 3);
 		
 		for (double k = 0.2; k < 1.6; k+=0.2) {
@@ -127,8 +130,9 @@ public class Contours {
 //				List<Double> nnoutput = nnw.getNNOutput(rm);
 //				Mat cm = b.clone().submat(r);
 				cf.addImage(cm, r.toString(), 8);
-				bf.addImage(rm, NNAnalysis.convertNNOutputToString(nnw.getNNOutputArray(rm)), 3);
+				//bf.addImage(rm, NNAnalysis.convertNNOutputToString(nnw.getNNOutputArray(rm)), 3);
 			}
+		
 			rf.addImage(bb, String.valueOf(k), 3);
 
 			
