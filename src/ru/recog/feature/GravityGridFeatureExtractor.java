@@ -126,6 +126,13 @@ public class GravityGridFeatureExtractor extends FeatureExtractor {
 			return (double) Core.countNonZero(img.row(row)) / img.cols();
 	}
 	
+	@Override
+	public String toString() {
+		return "GravityGrid[".concat(String.valueOf(gridW)).concat("x")
+				.concat(String.valueOf(gridH)).concat("]");
+	}
+	
+	
 	public static void main(String[] args) {
 		System.out.println(Math.floor(-0.1));
 		System.out.println(Math.ceil(-0.1));
