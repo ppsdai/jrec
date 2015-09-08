@@ -30,7 +30,7 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-		readErrorFile("/Users/pps/dev/NNTrain/newshit/ErrorsAppAd.txt");
+		readErrorFile("/Users/pps/dev/NNTrain/newshit/ErrorsAppAd.txt", "testFilesNS.txt");
 		
 		
 //		printAverageFeatures("/Users/pps/dev/NNTrain/goodshit");
@@ -132,11 +132,11 @@ public class NNAnalysis {
 	}
 	
 	
-	public static void readErrorFile(String errorFile) throws Exception {
+	public static void readErrorFile(String errorFile, String testFilesList) throws Exception {
 		
 		List<String> errorList = new ArrayList<String>();
 		List<String> testFileList = getTestFilesListFromFile(
-				new File (new File(errorFile).getParent(), "testFilesNS.txt" ).getAbsolutePath() );
+				new File (new File(errorFile).getParent(), testFilesList ).getAbsolutePath() );
 		LineNumberReader lnr = new LineNumberReader(new FileReader(errorFile));
 		for (String line; (line = lnr.readLine()) != null;)
 			errorList.add(line);
