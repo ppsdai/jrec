@@ -154,6 +154,8 @@ public class DetectUtil {
 
 	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
 
+	    File destF = new File(dest);
+	    if (!destF.exists()) destF.mkdirs();
 	    // Draw a bounding box around each face.
 	    int i = 1;
     	File f = new File(imageFileName);
@@ -302,17 +304,14 @@ public class DetectUtil {
 		
 //		buildFramesFolder(vc, "/Users/pps/dev/frames/snap", System.out);
 		
-/*		if (args.length<2) {
-			System.err.println("DetectUtil picFolder cascadeFile");
+		if (args.length<2) {
+			System.err.println("DetectUtil picFolder cascadeFile [cascadeFile]");
 			System.exit(1);
 		}
 		
-		
-		CascadeClassifier  cl = new CascadeClassifier(args[1]);
-		findAndShowNumbers(args[0],cl);*/
-		
-		CascadeClassifier cl = new CascadeClassifier(CASCADE_LPRHAAR);
-		findAndShowNumbers(args[0],"/Users/pps/dev/detected", cl);
+		CascadeClassifier cl = new CascadeClassifier(
+				args.length<3? CASCADE_LPRHAAR : args[args.length-1]);
+		findAndShowNumbers(args[0],args[1], cl);
 
 		
 		
