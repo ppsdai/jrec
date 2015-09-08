@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.swing.*;
 
+import ru.recog.ImageUtils;
+
 public class SaveDialog extends JDialog implements PropertyChangeListener, ActionListener{
 	
 	
@@ -58,25 +60,33 @@ public class SaveDialog extends JDialog implements PropertyChangeListener, Actio
 		
 	}
 	
+//	private Image concatImages(List<PlatePanel> panels) {
+//		int maxwidth = 0;
+//		int height = 0;
+//		for (PlatePanel pp : panels) {
+//			BufferedImage i = (BufferedImage)pp.getImage();
+//			if (i.getWidth()>maxwidth) maxwidth = i.getWidth();
+//			height = height+i.getHeight();
+//		}
+//		BufferedImage sumImage = new BufferedImage(maxwidth, height, BufferedImage.TYPE_INT_RGB);
+//		Graphics2D g2 = sumImage.createGraphics();
+//		height = 0;
+//		for (PlatePanel pp : panels) {
+//			BufferedImage i = (BufferedImage)pp.getImage();
+//			g2.drawImage(i, 0, height, Color.DARK_GRAY, null);
+//			height = height+i.getHeight();
+//		}
+//		g2.dispose();
+//		
+//		return sumImage;
+//	}
+	
 	private Image concatImages(List<PlatePanel> panels) {
-		int maxwidth = 0;
-		int height = 0;
-		for (PlatePanel pp : panels) {
-			BufferedImage i = (BufferedImage)pp.getImage();
-			if (i.getWidth()>maxwidth) maxwidth = i.getWidth();
-			height = height+i.getHeight();
-		}
-		BufferedImage sumImage = new BufferedImage(maxwidth, height, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2 = sumImage.createGraphics();
-		height = 0;
-		for (PlatePanel pp : panels) {
-			BufferedImage i = (BufferedImage)pp.getImage();
-			g2.drawImage(i, 0, height, Color.DARK_GRAY, null);
-			height = height+i.getHeight();
-		}
-		g2.dispose();
-		
-		return sumImage;
+		BufferedImage[] bi = new BufferedImage[panels.size()];
+		for (int i = 0; i < panels.size(); i++)
+			bi[i] = (BufferedImage)panels.get(i).getImage();
+		return ImageUtils.concatImages(bi);
+
 	}
 	
 	public String getNumber() {

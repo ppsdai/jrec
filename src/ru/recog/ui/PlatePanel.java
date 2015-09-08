@@ -109,8 +109,10 @@ public class PlatePanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if ("orig".equals(e.getActionCommand())) {
+			Image i = ImageUtils.concatImages(ImageUtils.mat2Image(ImageUtils.scaleUp(segResult.getOriginalMat(),2)),
+					ImageUtils.mat2Image(segResult.getOriginalMat()));
 			JOptionPane.showMessageDialog(parent, "", "Original size",JOptionPane.OK_OPTION ,
-					new ImageIcon(ImageUtils.mat2Image(segResult.getOriginalMat())));
+					new ImageIcon(i));
 		}
 //			parent.removePlatePanel(this);
 		if ("seg".equals(e.getActionCommand()))

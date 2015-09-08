@@ -1,17 +1,43 @@
 package ru.recog;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.util.*;
+import java.util.List;
 
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.*;
+import ru.recog.ui.PlatePanel;
 
 public class ImageUtils {
+	
+	
+	public static Image concatImages(BufferedImage...images) {
+		int maxwidth = 0;
+		int height = 0;
+		for (BufferedImage i : images) {
+//			BufferedImage i = (BufferedImage)pp.getImage();
+			if (i.getWidth()>maxwidth) maxwidth = i.getWidth();
+			height = height+i.getHeight();
+		}
+		BufferedImage sumImage = new BufferedImage(maxwidth, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = sumImage.createGraphics();
+		height = 0;
+		for (BufferedImage i : images) {
+//			BufferedImage i = (BufferedImage)pp.getImage();
+			g2.drawImage(i, 0, height, Color.DARK_GRAY, null);
+			height = height+i.getHeight();
+		}
+		g2.dispose();
+		
+		return sumImage;
+	}
 	
 	
 	

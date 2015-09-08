@@ -4,19 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
 
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-
-import ru.recog.imgproc.SegmentationResult;
-import ru.recog.imgproc.Segmenter;
+import org.opencv.core.Core;
 
 public class PlateSelectionFrame extends JFrame implements ActionListener {
 	
