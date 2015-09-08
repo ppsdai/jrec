@@ -52,7 +52,9 @@ public class SaveDialog extends JDialog implements PropertyChangeListener, Actio
         pane.addPropertyChangeListener(this);
         box.addActionListener(this);
         
-		setContentPane(new JScrollPane(pane));
+		setContentPane(new JScrollPane(pane, 
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 		
 	}
 	
