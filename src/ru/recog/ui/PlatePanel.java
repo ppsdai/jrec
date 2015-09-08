@@ -2,8 +2,6 @@ package ru.recog.ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -76,23 +74,17 @@ public class PlatePanel extends JPanel implements ActionListener {
 		
 		Mat orig = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-		
-//		try {
-			segResult = Segmenter.segment(orig);
-			
-			for (int p : segResult.getCutPoints())
-				Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), new Scalar(0,255,0));
-			
-			for (Rect r : segResult.getRevisedRectangles()) {
-				Imgproc.line(m, new Point(r.x, r.y), new Point(r.x+r.width,r.y), new Scalar(255,0,0));
-				Imgproc.line(m, new Point(r.x, r.y+r.height), new Point(r.x+r.width, r.y+r.height), new Scalar(255,0,0));
-			}
-			
-//		} catch (ArrayIndexOutOfBoundsException e) {
-			// TODO Auto-generated catch block
-//			System.out.println("for file: "+filename);
-//			e.printStackTrace();
-//		}
+
+		segResult = Segmenter.segment(orig);
+
+		for (int p : segResult.getCutPoints())
+			Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), new Scalar(0,255,0));
+
+		for (Rect r : segResult.getRevisedRectangles()) {
+			Imgproc.line(m, new Point(r.x, r.y), new Point(r.x+r.width,r.y), new Scalar(255,0,0));
+			Imgproc.line(m, new Point(r.x, r.y+r.height), new Point(r.x+r.width, r.y+r.height), new Scalar(255,0,0));
+		}
+
 	}
 
 	
@@ -155,12 +147,10 @@ public class PlatePanel extends JPanel implements ActionListener {
 			}
 		}
 		
-//		System.out.println("Segment # "+s);
 		if (s!=-1) {
 			saveCheckbox.setSelected(true);
 			firstSegmentIndex = s;
 			int drawX = s==0? 0 : segResult.getCutPoints().get(s-1)*scaleFactor;
-//			Graphics g = ii.getImage().getGraphics();
 			Image img = ImageUtils.mat2Image(ImageUtils.scaleUp(m,scaleFactor));
 			Graphics g = img.getGraphics();
 			g.setColor(Color.RED);
@@ -177,63 +167,6 @@ public class PlatePanel extends JPanel implements ActionListener {
 			});
 		}
 
-
-	}
-	
-	
-	
-	public static void main(String args[]) {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
-		final JFrame frame = new JFrame("big frame");
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		
-		JScrollPane scrollPane = new JScrollPane(panel);
-		
-		frame.setPreferredSize(new Dimension(800, 600));
-		frame.add(scrollPane, BorderLayout.CENTER);
-		
-		File dir = new File("/Users/pps/dev/PlatesTestPictures");
-//
-//		
-		for (String filestr : dir.list()) {
-		
-			String filename = new File(dir, filestr).getAbsolutePath();
-//			Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//			Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-//			
-//			try {
-//				SegmentationResult result = Segmenter.segment(m);
-//				
-////				List<Mat> pieces = result.getRevisedSegments(); //FIXME
-//				
-//				for (int p : result.getCutPoints())
-//					Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
-//				
-//				for (Rect r : result.getRevisedRectangles()) {
-//					Imgproc.line(m1, new Point(r.x, r.y), new Point(r.x+r.width,r.y), new Scalar(255,0,0));
-//					Imgproc.line(m1, new Point(r.x, r.y+r.height), new Point(r.x+r.width, r.y+r.height), new Scalar(255,0,0));
-//				}
-//				
-//				PlatePanel pp = new PlatePanel(m1, result);
-//				panel.add(pp);
-//			} catch (ArrayIndexOutOfBoundsException e) {
-//				// TODO Auto-generated catch block
-//				System.out.println("for file: "+filename);
-//				e.printStackTrace();
-//			}
-
-
-		}
-		
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				frame.pack();
-				frame.setVisible(true);
-			}
-		});
-		
 
 	}
 
