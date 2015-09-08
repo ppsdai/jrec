@@ -30,7 +30,7 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-		readErrorFile("/Users/pps/dev/NNTrain/goodshit/TestResults240815.txt");
+		readErrorFile("/Users/pps/dev/NNTrain/newshit/ErrorsAppAd.txt");
 		
 		
 //		printAverageFeatures("/Users/pps/dev/NNTrain/goodshit");
@@ -136,7 +136,7 @@ public class NNAnalysis {
 		
 		List<String> errorList = new ArrayList<String>();
 		List<String> testFileList = getTestFilesListFromFile(
-				new File (new File(errorFile).getParent(), "testFilesEDGE.txt" ).getAbsolutePath() );
+				new File (new File(errorFile).getParent(), "testFilesNS.txt" ).getAbsolutePath() );
 		LineNumberReader lnr = new LineNumberReader(new FileReader(errorFile));
 		for (String line; (line = lnr.readLine()) != null;)
 			errorList.add(line);
@@ -185,10 +185,9 @@ public class NNAnalysis {
 				errorCount++;
 				for (double d : output) if (d > 0.94) { smallErrorCount++; break; }
 				String errLabel = getChar(desiredString)+": "+output+" "+testFileList.get(index);
-//				System.out.println(getChar(desiredString)+": "+output+" "+testFileList.get(index));
 				System.out.println(errLabel);
 				String imgFileName = new File(
-						new File(errorFile).getParent() , String.valueOf(readIndexFromOutput(desiredString))
+						new File(errorFile).getParent() , String.valueOf(getChar(desiredString))
 						).getAbsolutePath().concat(File.separator).concat(testFileList.get(index));
 //				File f = new File(new File("/Users/pps/dev/NNTrain/full1020"), 
 //						String.valueOf(readIndexFromOutput(desiredString)), testFileList.get(index));
@@ -204,31 +203,31 @@ public class NNAnalysis {
 				
 				Mat m = Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 				
-				List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+//				List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
 				
-				Imgproc.findContours(m.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+//				Imgproc.findContours(m.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 				
 				
 				//***
 				
 				
-				lf.addImage(Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE), sss+" !!! "+checkErrors2(error, 0.05)+" contours: "+contours.size()
-						/*+" nn: "+checkErrors2(nnout,0.05)*/, 5);
+				lf.addImage(Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE), sss+" !!! "+checkErrors2(error, 0.05)/*+" contours: "+contours.size()
+						+" nn: "+checkErrors2(nnout,0.05)*/, 5);
 				
-				Collections.sort(contours, Contours.RECT_COMPARATOR);
-				if (contours.size()>1 || (contours.size()==1 
-						&& Contours.getContourRect(contours.get(0)).height<m.rows()
-						&& Contours.getContourRect(contours.get(0)).width<m.cols()))
-				for (MatOfPoint mop : contours) {
-					Rect r = Contours.getContourRect(mop);
-					
-					if (r.height>=m.rows()/2 && r.width>=m.cols()/3) {
-						Mat cm = m.clone().submat(r.y,r.y+r.height+1,r.x, r.x+r.width+1);
-						List<Double> nnout = nn.getNNOutput(cm);
-						lf.addImage(cm, checkErrors2(nnout, 0.05),3);
-					}
-				}
+//				Collections.sort(contours, Contours.RECT_COMPARATOR);
+//				if (contours.size()>1 || (contours.size()==1 
+//						&& Contours.getContourRect(contours.get(0)).height<m.rows()
+//						&& Contours.getContourRect(contours.get(0)).width<m.cols()))
+//				for (MatOfPoint mop : contours) {
+//					Rect r = Contours.getContourRect(mop);
+//					
+//					if (r.height>=m.rows()/2 && r.width>=m.cols()/3) {
+//						Mat cm = m.clone().submat(r.y,r.y+r.height+1,r.x, r.x+r.width+1);
+//						List<Double> nnout = nn.getNNOutput(cm);
+//						lf.addImage(cm, checkErrors2(nnout, 0.05),3);
+//					}
+//				}
 				
 				
 			}

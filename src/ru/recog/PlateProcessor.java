@@ -32,8 +32,8 @@ public class PlateProcessor {
 		for (Mat piece : pieces) {
 			Mat proc = cip.processImage(piece);
 			
-			Mat scaled = ImageUtils.scaleUp(proc, 3);
-			sb.append(NNAnalysis.nnOutputToSymbol(nn.getNNOutputArray(scaled)));
+//			Mat scaled = ImageUtils.scaleUp(proc, 3);
+			sb.append(NNAnalysis.nnOutputToSymbol(nn.getNNOutputArray(proc)));
 //			lf.addImage(scaled, NNAnalysis.convertNNOutputToString(nn.getNNOutputArray(scaled)),1);
 		}
 		
@@ -45,9 +45,11 @@ public class PlateProcessor {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		
-		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
+//		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
+		NNWrapper nn = new NNWrapper(args[0],
+//				"/Users/pps/dev/NNTrain/newshit/AppAdNNet295021.nnet",
 				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
-						new GravityGridFeatureExtractor(10, 20),
+						new GravityGridFeatureExtractor(4, 7),
 						new SymmetryFeatureExtractor(),
 						new EdgeIntersectionFeatureExtractor(3, 3)));
 		

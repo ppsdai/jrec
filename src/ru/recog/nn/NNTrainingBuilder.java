@@ -38,7 +38,8 @@ public class NNTrainingBuilder {
 		
 		mfx = new MultipleFeatureExtractor();
 		mfx.addExtractor(new AreaFeatureExtractor());
-		mfx.addExtractor(new GravityGridFeatureExtractor(10, 20));
+//		mfx.addExtractor(new GravityGridFeatureExtractor(10, 20));
+		mfx.addExtractor(new GravityGridFeatureExtractor(4, 7));
 		mfx.addExtractor(new SymmetryFeatureExtractor());
 		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
 		
@@ -48,12 +49,12 @@ public class NNTrainingBuilder {
 	public static void main(String[] args) throws Exception {
 		
 
-//		processCharFolders("/Users/pps/symbols", "/Users/pps/dev/NNTrain/goodshit");
+//		processCharFolders("/Users/pps/segmented/NN", "/Users/pps/dev/NNTrain/newshit");
 		
 //		processFolders(args[0],args[1]);
-		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET
-						 );
-		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/goodshit", "EDGE.txt", "/Users/pps/dev/NNTrain/goodshit");
+		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
+		
+		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/newshit", "NS.txt", "/Users/pps/dev/NNTrain/newshit");
 		
 	}
 	
@@ -86,7 +87,7 @@ public class NNTrainingBuilder {
 		
 		CompoundImageProcessor cip = new CompoundImageProcessor();
 		cip.addImageProcessor(new Binarization(40, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU));
-		cip.addImageProcessor(new ErodingDilator(Imgproc.MORPH_CROSS, new Size(3,3), 2));
+//		cip.addImageProcessor(new ErodingDilator(Imgproc.MORPH_CROSS, new Size(3,3), 2));
 		cip.addImageProcessor(new Cropper());
 		
 		System.out.println("Using CIP: "+cip.toString());
@@ -96,9 +97,14 @@ public class NNTrainingBuilder {
 		if (!destDir.exists()) destDir.mkdir();
 		System.out.println("Processing all chars from "+sourceDir.getAbsolutePath());
 		System.out.println("Moving to "+destDir.getAbsolutePath());
-		for (int i = 0; i<Utils.FULL_CHARACTERS_SET.size(); i++) {
-			String charSource = new File(sourceDir, String.valueOf(i)).getAbsolutePath();
-			String charDest = new File(destFolder, String.valueOf(i)).getAbsolutePath();
+//		for (int i = 0; i<Utils.FULL_CHARACTERS_SET.size(); i++) {
+//			String charSource = new File(sourceDir, String.valueOf(i)).getAbsolutePath();
+//			String charDest = new File(destFolder, String.valueOf(i)).getAbsolutePath();
+//			processFolders(charSource, charDest,cip);
+//		}
+		for (char c : Utils.FULL_CHARACTERS_SET) {
+			String charSource = new File(sourceDir, String.valueOf(c)).getAbsolutePath();
+			String charDest = new File(destFolder, String.valueOf(c)).getAbsolutePath();
 			processFolders(charSource, charDest,cip);
 		}
 		
@@ -187,42 +193,65 @@ public class NNTrainingBuilder {
 				return name.endsWith(".bmp");
 			}
 		};
-		final FilenameFilter testingFilenameFileter = new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				if (!ff.accept(dir, name)) return false;
-				int index = name.indexOf("(");
-				if (index == -1) index = name.indexOf(".");
-				int number;
-				try {
-					 number = Integer.valueOf(name.substring(0, index).trim());
-				} catch (NumberFormatException nfe) {
-					nfe.printStackTrace(System.out);
-					return false;
-				}
-				return (number >= 0 && number<=100);
-			}
-		};
-		FilenameFilter trainingFilenameFilter = new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return ff.accept(dir, name) && !testingFilenameFileter.accept(dir,name);
-			}
-		};
+		
+//		final FilenameFilter testingFilenameFileter = new FilenameFilter() {
+//			public boolean accept(File dir, String name) {
+//				if (!ff.accept(dir, name)) return false;
+//				int index = name.indexOf("(");
+//				if (index == -1) index = name.indexOf(".");
+//				int number;
+//				try {
+//					 number = Integer.valueOf(name.substring(0, index).trim());
+//				} catch (NumberFormatException nfe) {
+//					nfe.printStackTrace(System.out);
+//					return false;
+//				}
+//				return (number >= 0 && number<=100);
+//			}
+//		};
+//		FilenameFilter trainingFilenameFilter = new FilenameFilter() {
+//			public boolean accept(File dir, String name) {
+//				return ff.accept(dir, name) && !testingFilenameFileter.accept(dir,name);
+//			}
+//		};
 		
 		
 		for (int characterIndex = 0; characterIndex<characterSet.size(); characterIndex++) {
-			File digitDir = new File(sourceDir, 
-					String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(characterSet.get(characterIndex))));
 			
-			for (String file : digitDir.list(testingFilenameFileter)) {
+			
+			File digitDir = new File(sourceDir, 
+//					String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(characterSet.get(characterIndex))));
+					String.valueOf(characterSet.get(characterIndex)));
+
+
+			
+			//		for (char c : characterSet) {
+//			File digitDir = new File(sourceDir, String.valueOf(c))
+			
+			//find all the files in char directory
+			List<String> allFiles = new ArrayList<String>(Arrays.asList(digitDir.list())); // list of all images
+			List<String> testFiles = new ArrayList<String>();
+			//take 10% to be test files
+			int TN = Math.round(allFiles.size()/10);
+			Random random = new Random();
+			for (int i = 0; i < TN; i++) {
+				// find TN random indexes, remove them from allFiles and add to list of test images
+				int randIndex = random.nextInt(allFiles.size());
+				testFiles.add(allFiles.remove(randIndex)); 
+			}
+			
+			
+			for (String file : testFiles) {
 				System.out.println(file);
 				csvTestList.add(createCSVTrainSampleFromImage(Utils.fullPath(digitDir,file), characterIndex));
 				csvTestFileList.add(file);
 			}
 			
-			for (String file : digitDir.list(trainingFilenameFilter)) {
+			for (String file : allFiles) {
 				System.out.println(file);
 				csvTrainList.add(createCSVTrainSampleFromImage(Utils.fullPath(digitDir,file), characterIndex));
 			}
+			System.out.println("DO TRAIN FILES CONTAIN TEST FILES?:"+allFiles.containsAll(testFiles));
 		}
 		
 		
