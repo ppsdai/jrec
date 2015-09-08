@@ -66,7 +66,7 @@ public class LabelFrame extends JFrame implements ActionListener {
 	
 	public void addImage(Mat m, String label) {
 		JLabel jlabel = new JLabel(label);
-		jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
+		jlabel.setIcon(new ImageIcon(ImageUtils.mat2Image(m)));
 		
 		if (useBorders) 
 			jlabel.setBorder(new LineBorder(Color.green, 1));
@@ -89,9 +89,9 @@ public class LabelFrame extends JFrame implements ActionListener {
 			}
 		} else {
 			if (scale!=1)
-				jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scale))));
+				jlabel.setIcon(new ImageIcon(ImageUtils.mat2Image(ImageUtils.scaleUp(m,scale))));
 			else
-				jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
+				jlabel.setIcon(new ImageIcon(ImageUtils.mat2Image(m)));
 		}
 		
 		if (useBorders) 
@@ -104,7 +104,7 @@ public class LabelFrame extends JFrame implements ActionListener {
 	public void addImage(Mat m, String label, int scale, int hints) {
 		JLabel jlabel = new JLabel(label);
 		
-		BufferedImage image = DetectUtil.Mat2BufferedImage(m);
+		BufferedImage image = ImageUtils.mat2Image(m);
 		Image scaled = image.getScaledInstance(m.cols()*scale, m.rows()*scale, hints);
 		jlabel.setIcon(new ImageIcon(scaled));
 		

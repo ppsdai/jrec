@@ -13,7 +13,6 @@ import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.DetectUtil;
 import ru.recog.ImageUtils;
 import ru.recog.imgproc.SegmentationResult;
 import ru.recog.imgproc.Segmenter;
@@ -27,52 +26,12 @@ public class PlatePanel extends JPanel implements ActionListener {
 	
 	private int firstSegmentIndex = 0;
 	
-	private JButton segFault, recFault, showBin;
+	private JButton segFault, recFault, showOrig;
 	public JCheckBox saveCheckbox;
 	
 	private PlateSelectionFrame parent;
 	
 	private ImageIcon ii;
-	
-//	public PlatePanel(Mat mat, SegmentationResult sr) {
-//		super();
-//		
-//		this.m = mat;
-//		this.segResult = sr;
-//		
-//		setBorder(new LineBorder(Color.darkGray, 1, true));
-//		setLayout(new BorderLayout());
-//		
-//		saveCheckbox = new JCheckBox();
-//		segFault = new JButton("seg");
-//		recFault = new JButton("rec");
-//		showBin = new JButton("bin");
-//		JPanel left = new JPanel();
-//		JPanel right = new JPanel();
-//		
-//		
-//		ii = new ImageIcon(DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scaleFactor)));
-//		JLabel l = new JLabel(ii);
-//		
-//		l.addMouseListener(new MouseAdapter() {
-//			public void mouseClicked(MouseEvent e) { processMouseClick(e); }
-//		});
-//		
-//		left.add(l);
-//		left.add(saveCheckbox);
-//		
-//		
-//		right.add(segFault);
-//		right.add(recFault);
-//		right.add(showBin);
-//		
-//		add(left, BorderLayout.LINE_START);
-//		add(right, BorderLayout.LINE_END);
-//		
-//		addActionListener(this);
-//		
-//	}
-	
 	
 	public PlatePanel(String filename) {
 		super();
@@ -85,12 +44,12 @@ public class PlatePanel extends JPanel implements ActionListener {
 		saveCheckbox = new JCheckBox();
 		segFault = new JButton("seg");
 		recFault = new JButton("rec");
-		showBin = new JButton("bin");
+		showOrig = new JButton("orig");
 		JPanel left = new JPanel();
 		JPanel right = new JPanel();
 		
 		
-		ii = new ImageIcon(DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scaleFactor)));
+		ii = new ImageIcon(ImageUtils.mat2Image(ImageUtils.scaleUp(m,scaleFactor)));
 		JLabel l = new JLabel(ii);
 		
 		l.addMouseListener(new MouseAdapter() {
@@ -103,7 +62,7 @@ public class PlatePanel extends JPanel implements ActionListener {
 		
 		right.add(segFault);
 		right.add(recFault);
-		right.add(showBin);
+		right.add(showOrig);
 		
 		add(left, BorderLayout.LINE_START);
 		add(right, BorderLayout.LINE_END);
@@ -149,9 +108,10 @@ public class PlatePanel extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-//		System.out.println(e.getActionCommand());		
-		if ("bin".equals(e.getActionCommand()))
-			System.out.println("NOT IMPLEMENTED");
+		if ("orig".equals(e.getActionCommand())) {
+			JOptionPane.showMessageDialog(parent, "", "Original size",JOptionPane.OK_OPTION ,
+					new ImageIcon(ImageUtils.mat2Image(segResult.getOriginalMat())));
+		}
 //			parent.removePlatePanel(this);
 		if ("seg".equals(e.getActionCommand()))
 			parent.segmentationFault(this);
@@ -163,13 +123,13 @@ public class PlatePanel extends JPanel implements ActionListener {
 	public void addActionListener(ActionListener al) {
 		segFault.addActionListener(al);
 		recFault.addActionListener(al);
-		showBin.addActionListener(al);
+		showOrig.addActionListener(al);
 	}
 	
 	public void removeActionListener(ActionListener al) {
 		segFault.removeActionListener(al);
 		recFault.removeActionListener(al);
-		showBin.removeActionListener(al);
+		showOrig.removeActionListener(al);
 	}
 	
 	Image getImage() {
@@ -199,7 +159,7 @@ public class PlatePanel extends JPanel implements ActionListener {
 			firstSegmentIndex = s;
 			int drawX = s==0? 0 : segResult.getCutPoints().get(s-1)*scaleFactor;
 //			Graphics g = ii.getImage().getGraphics();
-			Image img = DetectUtil.Mat2BufferedImage(ImageUtils.scaleUp(m,scaleFactor));
+			Image img = ImageUtils.mat2Image(ImageUtils.scaleUp(m,scaleFactor));
 			Graphics g = img.getGraphics();
 			g.setColor(Color.RED);
 			g.drawLine(drawX, 1, drawX, m.rows()*scaleFactor-2);
