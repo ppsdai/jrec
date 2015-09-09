@@ -46,6 +46,11 @@ public class GradientGridFeatureExtractor extends FeatureExtractor {
 		return features;
 	}
 	
+	@Override
+	public String toString() {
+		return "GradientGrid["+width+"x"+height+"]("+getDimension()+")";
+	}
+	
 	private double[][] fillGrid(Mat m) {
 		double[][] grid = new double[width][height];
 		
