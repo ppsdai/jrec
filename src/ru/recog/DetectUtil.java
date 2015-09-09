@@ -38,8 +38,6 @@ public class DetectUtil {
 	public static void detectNumber() {
 		System.out.println("\nRunning Detect Demo");
 
-	    // Create a face detector from the cascade file in the resources
-	    // directory.
 	    CascadeClassifier faceDetector = new CascadeClassifier(CASCADE_LPRHAAR16);
 	    
 	    System.out.println(faceDetector);
@@ -47,14 +45,11 @@ public class DetectUtil {
 	    System.out.println("FD FT size: "+faceDetector.getOriginalWindowSize().toString());
 	    Mat image = Imgcodecs.imread(picURL1);
 
-	    // Detect faces in the image.
-	    // MatOfRect is a special container class for Rect.
 	    MatOfRect faceDetections = new MatOfRect();
 	    faceDetector.detectMultiScale(image, faceDetections);
 
 	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
 
-	    // Draw a bounding box around each face.
 	    for (Rect rect : faceDetections.toArray()) {
 	    	System.out.println(rect.x+" "+rect.y);
 	        Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
@@ -156,7 +151,7 @@ public class DetectUtil {
 
 	    File destF = new File(dest);
 	    if (!destF.exists()) destF.mkdirs();
-	    // Draw a bounding box around each face.
+	
 	    int i = 1;
     	File f = new File(imageFileName);
     	String fs = f.getName();
