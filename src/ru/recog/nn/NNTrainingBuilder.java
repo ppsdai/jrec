@@ -36,12 +36,14 @@ public class NNTrainingBuilder {
 //		mfx.addExtractor(new SymmetryFeatureExtractor());
 ////		mfx.addExtractor(new BinaryPixelFeatureExtractor(10, 20));
 		
+//		mfx = new MultipleFeatureExtractor();
+//		mfx.addExtractor(new AreaFeatureExtractor());
+//		mfx.addExtractor(new GravityGridFeatureExtractor(4, 7));
+//		mfx.addExtractor(new SymmetryFeatureExtractor());
+//		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
+		
 		mfx = new MultipleFeatureExtractor();
-		mfx.addExtractor(new AreaFeatureExtractor());
-//		mfx.addExtractor(new GravityGridFeatureExtractor(10, 20));
-		mfx.addExtractor(new GravityGridFeatureExtractor(4, 7));
-		mfx.addExtractor(new SymmetryFeatureExtractor());
-		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
+		mfx.addExtractor(new OverlapGradientGridFeatureExtractor());
 		
 	}
 	
@@ -54,7 +56,7 @@ public class NNTrainingBuilder {
 //		processFolders(args[0],args[1]);
 		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
 		
-		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/newshit", "NS.txt", "/Users/pps/dev/NNTrain/newshit");
+		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/grayscale", "GS.txt", "/Users/pps/segmented/NN");
 		
 	}
 	

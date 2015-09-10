@@ -30,7 +30,8 @@ public class PlateProcessor {
 		StringBuilder sb = new StringBuilder();
 		
 		for (Mat piece : pieces) {
-			Mat proc = cip.processImage(piece);
+//			Mat proc = cip.processImage(piece);
+			Mat proc  = piece.clone();
 			
 //			Mat scaled = ImageUtils.scaleUp(proc, 3);
 			sb.append(NNAnalysis.nnOutputToSymbol(nn.getNNOutputArray(proc)));
@@ -48,11 +49,17 @@ public class PlateProcessor {
 			System.out.println("Usage: PlateProcessor nnFile plateSourceFolder");
 		}
 		
+//		NNWrapper nn = new NNWrapper(args[0],
+//				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
+//						new GravityGridFeatureExtractor(4, 7),
+//						new SymmetryFeatureExtractor(),
+//						new EdgeIntersectionFeatureExtractor(3, 3)));
+		
 		NNWrapper nn = new NNWrapper(args[0],
-				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
-						new GravityGridFeatureExtractor(4, 7),
-						new SymmetryFeatureExtractor(),
-						new EdgeIntersectionFeatureExtractor(3, 3)));
+		new MultipleFeatureExtractor(
+				new OverlapGradientGridFeatureExtractor()));
+		
+		
 		
 		CompoundImageProcessor cip = new CompoundImageProcessor();
 		cip.addImageProcessor(new Binarization(40, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU));
@@ -90,6 +97,9 @@ public class PlateProcessor {
 				
 				lf.addImage(m1, pl.getLPString(pieces), 5);
 			} catch (ArrayIndexOutOfBoundsException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NullPointerException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

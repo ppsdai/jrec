@@ -30,7 +30,7 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-		readErrorFile("/Users/pps/dev/NNTrain/newshit/ErrorsAppAd.txt", "testFilesNS.txt");
+		readErrorFile("/Users/pps/segmented/NN/errorGS.txt", "testFilesGS.txt");
 		
 		
 //		printAverageFeatures("/Users/pps/dev/NNTrain/goodshit");
