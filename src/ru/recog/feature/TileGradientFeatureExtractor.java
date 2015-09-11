@@ -10,7 +10,7 @@ public class TileGradientFeatureExtractor extends GradientGridFeatureExtractor {
 	public TileGradientFeatureExtractor() {
 		width = 8;
 		height = 14;
-		setDimension(4*7);
+		setDimension(4*7*4);
 	}
 
 	@Override
