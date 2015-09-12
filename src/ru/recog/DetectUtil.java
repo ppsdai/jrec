@@ -3,7 +3,6 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.io.File;
 import java.io.PrintStream;
-import java.net.URL;
 import java.net.URLClassLoader;
 
 import javax.swing.*;
@@ -28,9 +27,6 @@ public class DetectUtil {
 	public static String CASCADE_LPRHAAR = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_russian_plate_number.xml";
 	public static String CASCADE_LEXA = "/Users/pps/dev/DETECT_INSIDE/haarcascade_0_5/cascade.xml";
 	
-	public static URL CASCADE_LPR = System.class.getResource("/russianLP.xml"); //TODO is this right?
-//	public static String CASCADE_LPR_PATH = new File(CASCADE_LPR).getAbsolutePath();
-
 	public static void detectNumber(String imageFileName) {
 		System.out.println("Detecting in "+imageFileName);
 
@@ -274,7 +270,7 @@ public class DetectUtil {
 		}
 		
 		CascadeClassifier cl = new CascadeClassifier(
-				args.length<3? CASCADE_LPR.getFile() : args[args.length-1]);
+				args.length<3? Utils.CASCADE_LPR.getFile() : args[args.length-1]);
 		findAndShowNumbers(args[0],args[1], cl);
 		
 		

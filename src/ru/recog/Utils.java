@@ -2,6 +2,7 @@ package ru.recog;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -130,6 +131,9 @@ public class Utils {
 		System.out.println(Arrays.deepToString(arr));
 
 	}
+
+	public static URL CASCADE_LPR = System.class.getResource("/russianLP.xml"); //TODO is this right?
+	//	public static String CASCADE_LPR_PATH = new File(CASCADE_LPR).getAbsolutePath();
 
 
 }
