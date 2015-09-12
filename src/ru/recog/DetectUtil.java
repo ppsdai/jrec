@@ -3,18 +3,12 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.*;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
@@ -29,38 +23,14 @@ public class DetectUtil {
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
 	
-	public static String picURL1 = "/Users/pps/dev/huy2.jpg";
 	public static String CASCADE_LPRHAAR16 = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_licence_plate_rus_16stages.xml";
 	public static String CASCADE_FRONTALFACE = "/Users/pps/dev/opencv-3.0.0/data/lbpcascades/lbpcascade_frontalface.xml";
 	public static String CASCADE_LPRHAAR = "/Users/pps/dev/opencv-3.0.0/data/haarcascades/haarcascade_russian_plate_number.xml";
 	public static String CASCADE_LEXA = "/Users/pps/dev/DETECT_INSIDE/haarcascade_0_5/cascade.xml";
-
-	public static void detectNumber() {
-		System.out.println("\nRunning Detect Demo");
-
-	    CascadeClassifier faceDetector = new CascadeClassifier(CASCADE_LPRHAAR16);
-	    
-	    System.out.println(faceDetector);
-
-	    System.out.println("FD FT size: "+faceDetector.getOriginalWindowSize().toString());
-	    Mat image = Imgcodecs.imread(picURL1);
-
-	    MatOfRect faceDetections = new MatOfRect();
-	    faceDetector.detectMultiScale(image, faceDetections);
-
-	    System.out.println(String.format("Detected %s numbers", faceDetections.toArray().length));
-
-	    for (Rect rect : faceDetections.toArray()) {
-	    	System.out.println(rect.x+" "+rect.y);
-	        Imgproc.rectangle(image, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
-	    }
-	    
-	    String filename = "/Users/pps/dev/number2.png";
-	    System.out.println(String.format("Writing %s", filename));
-	    Imgcodecs.imwrite(filename, image);
-
-	}
 	
+	public static URL CASCADE_LPR = System.class.getResource("/russianLP.xml"); //TODO is this right?
+//	public static String CASCADE_LPR_PATH = new File(CASCADE_LPR).getAbsolutePath();
+
 	public static void detectNumber(String imageFileName) {
 		System.out.println("Detecting in "+imageFileName);
 
@@ -296,7 +266,6 @@ public class DetectUtil {
 	
 	public static void main(String[] args) throws Exception {
 		
-		
 //		buildFramesFolder(vc, "/Users/pps/dev/frames/snap", System.out);
 		
 		if (args.length<2) {
@@ -305,9 +274,8 @@ public class DetectUtil {
 		}
 		
 		CascadeClassifier cl = new CascadeClassifier(
-				args.length<3? CASCADE_LPRHAAR : args[args.length-1]);
+				args.length<3? CASCADE_LPR.getFile() : args[args.length-1]);
 		findAndShowNumbers(args[0],args[1], cl);
-
 		
 		
 		
