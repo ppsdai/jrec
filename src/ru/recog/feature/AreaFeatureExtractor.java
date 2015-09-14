@@ -3,11 +3,14 @@ package ru.recog.feature;
 import java.util.Collections;
 import java.util.List;
 
-import org.opencv.core.Core;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opencv.core.Mat;
 
 import ru.recog.ImageUtils;
 
+
+@XmlRootElement(name = "AreaFEX")
 public class AreaFeatureExtractor extends FeatureExtractor {
 
 	

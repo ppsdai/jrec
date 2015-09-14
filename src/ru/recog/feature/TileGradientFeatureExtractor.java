@@ -3,8 +3,12 @@ package ru.recog.feature;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opencv.core.Mat;
 
+
+@XmlRootElement (name = "TileGradient")
 public class TileGradientFeatureExtractor extends GradientGridFeatureExtractor {
 	
 	public TileGradientFeatureExtractor() {

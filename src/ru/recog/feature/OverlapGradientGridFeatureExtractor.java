@@ -3,10 +3,14 @@ package ru.recog.feature;
 import java.io.PrintStream;
 import java.util.*;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.opencv.core.*;
 
 import ru.recog.LabelFrame;
 
+
+@XmlRootElement (name = "OverlapGradient")
 public class OverlapGradientGridFeatureExtractor extends GradientGridFeatureExtractor {
 	
 	public OverlapGradientGridFeatureExtractor() {

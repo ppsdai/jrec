@@ -2,8 +2,11 @@ package ru.recog.feature;
 
 import java.util.*;
 
+import javax.xml.bind.annotation.*;
+
 import org.opencv.core.Mat;
 
+@XmlRootElement (name = "MultipleFEX")
 public class MultipleFeatureExtractor extends FeatureExtractor {
 	
 	List<FeatureExtractor> featureList = new ArrayList<FeatureExtractor>();
@@ -28,6 +31,7 @@ public class MultipleFeatureExtractor extends FeatureExtractor {
 		return vals;
 	}
 	
+	@XmlElementRef
 	public List<FeatureExtractor> getFeatureExtractors() {
 		return featureList;
 	}
@@ -43,9 +47,11 @@ public class MultipleFeatureExtractor extends FeatureExtractor {
 		return dim;
 	}
 	
-	public void setDimension(int dimension) {
-		throw new IllegalArgumentException("Cannot set dimension on MultipleFeatureExtractor");
-	}
+//	@XmlTransient
+//	public void setDimension(int dimension) {
+////		throw new IllegalArgumentException("Cannot set dimension on MultipleFeatureExtractor");
+//		setDimension(getDimension());
+//	}
 	
 	@Override
 	public String toString() {

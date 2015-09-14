@@ -1,10 +1,14 @@
 package ru.recog.feature;
 
+import javax.xml.bind.annotation.XmlElement;
+
 import org.opencv.core.Mat;
 
 public abstract class GradientGridFeatureExtractor extends FeatureExtractor {
 	
+	@XmlElement
 	protected int width;
+	@XmlElement
 	protected int height;
 	protected double[][] grid;
 
