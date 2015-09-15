@@ -68,7 +68,12 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 		} catch (ArrayIndexOutOfBoundsException e) {
 			segmentationFault(filename);
 			showExceptionDialog(e);
-			System.out.println("for file: "+filename);
+			System.out.println("AIOBE for file: "+filename);
+			e.printStackTrace();
+		} catch (NullPointerException e) {
+			segmentationFault(filename);
+			showExceptionDialog(e);
+			System.out.println("NPE for file: "+filename);
 			e.printStackTrace();
 		}
 	}

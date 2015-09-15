@@ -43,9 +43,20 @@ public class FrameProcessor {
 		
 		Collections.sort(files, new Comparator<String>() {
 			public int compare(String o1, String o2) {
-				int i1 = Integer.valueOf(o1.substring(5, o1.indexOf(".")) );
-				int i2 = Integer.valueOf(o2.substring(5, o2.indexOf(".")) );
-				return Integer.compare(i1, i2);
+				//int i1 = Integer.valueOf(o1.substring(5, o1.indexOf(".")) );
+				//int i2 = Integer.valueOf(o2.substring(5, o2.indexOf(".")) );
+				//return Integer.compare(i1, i2);
+				int i1 = Integer.valueOf(o1.substring(o1.lastIndexOf("N")+1, o1.lastIndexOf("t")) );
+				int i2 = Integer.valueOf(o2.substring(o2.lastIndexOf("N")+1, o2.lastIndexOf("t")) );
+		        if (Integer.compare(i1, i2) != 0)
+		          return Integer.compare(i1, i2);
+		        else
+		        {
+					i1 = Integer.valueOf(o1.substring(o1.lastIndexOf("t")+1, o1.lastIndexOf(".")) );
+					i2 = Integer.valueOf(o2.substring(o2.lastIndexOf("t")+1, o2.lastIndexOf(".")) );
+					return Integer.compare(i1, i2);
+		        }
+		        
 			}
 			
 		});
