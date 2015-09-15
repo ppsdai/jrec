@@ -34,19 +34,57 @@ public class Utils {
 	public static final List<Character> LETTERS_SET
 	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'O', 'P', 'T', 'X', 'Y');
 	
+	public static final List<Character> LETTERS_SET_PLUS_0
+	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'O', 'P', 'T', 'X', 'Y');
+	
 	
 	public static String checkNumber(String number) {
+//		if (number == null) return "number is null";
+//		if (number.length()!=6) return "number length is "+number.length();
+//		
+//		String upper = number.toUpperCase();
+//		
+//		if (LETTERS_SET.containsAll(Arrays.asList(upper.charAt(0), upper.charAt(4), upper.charAt(5)))
+//				&& NUMBERS_SET.containsAll(Arrays.asList(upper.charAt(1), upper.charAt(2), upper.charAt(3))))
+//			return null;
+//		else return "wrong number";
+		return check(number, LETTERS_SET, NUMBERS_SET);
+		
+	}
+	
+	public static String checkNumberWith0(String number) {
+		return check(number, LETTERS_SET_PLUS_0, NUMBERS_SET);
+//		if (number == null) return "number is null";
+//		if (number.length()!=6) return "number length is "+number.length();
+//		
+//		String upper = number.toUpperCase();
+//		
+//		if (LETTERS_SET.containsAll(Arrays.asList(upper.charAt(0), upper.charAt(4), upper.charAt(5)))
+//				&& NUMBERS_SET.containsAll(Arrays.asList(upper.charAt(1), upper.charAt(2), upper.charAt(3))))
+//			return null;
+//		else return "wrong number";
+	}
+	
+	public static boolean isNumber(String number) {
+		return checkNumber(number) == null;
+	}
+	
+	public static boolean isNumberWith0(String number) {
+		return checkNumberWith0(number) == null;
+	}
+	
+	private static String check(String number, List<Character> letterSet, List<Character> digitSet) {
 		if (number == null) return "number is null";
 		if (number.length()!=6) return "number length is "+number.length();
 		
 		String upper = number.toUpperCase();
 		
-		if (LETTERS_SET.containsAll(Arrays.asList(upper.charAt(0), upper.charAt(4), upper.charAt(5)))
-				&& NUMBERS_SET.containsAll(Arrays.asList(upper.charAt(1), upper.charAt(2), upper.charAt(3))))
+		if (letterSet.containsAll(Arrays.asList(upper.charAt(0), upper.charAt(4), upper.charAt(5)))
+				&& digitSet.containsAll(Arrays.asList(upper.charAt(1), upper.charAt(2), upper.charAt(3))))
 			return null;
 		else return "wrong number";
 		
-	}
+	} 
 	
 	public static String fullPath(File parent, String name) {
 		return parent.getAbsolutePath().concat(File.separator)
