@@ -35,6 +35,9 @@ public class AggregatePlates {
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 	
 	
+	private static final double MIN_DISTANCE = 200; //cause great shaman told us so
+	
+	
     private SortedMap<Integer, MatOfRect> sm = new TreeMap<Integer, MatOfRect>();
     //FIXME  data structure has only implicit correspondance between Rect <---> Mat (Image)
     // need to reconfigure so that this correspondance is clear
@@ -92,95 +95,46 @@ public class AggregatePlates {
 	}
 	
 	public void process() {
-		
 		// loop by time on the sorted list
 		for (Integer t: sm.keySet() ) {
-			//MatOfRect mor = sm.get(t);
 			List<Rect> lor = sm.get(t).toList();
 			
-			// loop on an opened list make a list of closest finds
-			List<Integer> nearestInOpenList = new ArrayList<Integer>();
-			for (Rect rect : lor) {
-				// find minDistance and move to object
-				//TODO
-				float minDistance = 10000;
-				float distance;
-				int minDCount = -1;
-				for ( int nplt = 0; nplt < openPlateList.size() ; nplt++ ) {
-					Rect rect1 = openPlateList.get(nplt).getLastAddedRect();
-//					distance = (float) Math.sqrt((rect1.x - rect.x)*(rect1.x - rect.x) + (rect1.y - rect.y)*(rect1.y - rect.y));
-					distance = rectDistance(rect, rect1);
-					if ( distance < minDistance) {
-						minDistance = distance;
-						minDCount = nplt;
-					}
+			for (Rect r : lor) {
+				Plate p = findClosestPlate(r, openPlateList);
+				Mat smallImage = smMat.get(t).get(lor.indexOf(r));
+				if (p!=null) 
+					p.add(t, r, smallImage);
+				else 
+					openPlateList.add(new Plate(t, r, smallImage));
+			}
+			
+			for (Iterator<Plate> it = openPlateList.iterator(); it.hasNext();) {
+				Plate p = it.next();
+				if (p.getLastAddedTime() != t) {
+					finalPlateList.add(p);
+					it.remove();
 				}
-				nearestInOpenList.add(minDCount); // for every rect add a number in a list
-				
 			}
-			
-/*			 check if there are same finds and if there are change them
-			for (PlateNumber plNum: openPlateList)
-			for (PlateNumber plNum2: openPlateList)
-			{
-				if ( plNum != plNum2)
-			    check if distance is the same
-			}
-			*/
-			
-			// add to a list of opened numbers
-			for ( int x = 0; x < nearestInOpenList.size() ; x++ ) {
-				Rect rect = lor.get(x);
-				Mat smallImage = smMat.get(t).get(x); // implicitly should be the same
-				// go to a next iteration if -1, i.e. there is no element
-				if (nearestInOpenList.get(x) < 0) {
-					openPlateList.add(new Plate(t, rect, smallImage) );  //uses a constructor
-					continue;
-				}
-				
-				Rect rect1 = openPlateList.get(nearestInOpenList.get(x)).getLastAddedRect();
-				// if it is close enough add, otherwise open a new plate in a openList
-				float distance = rectDistance(rect1, rect);
-//						(float) Math.sqrt((rect1.x - rect.x)*(rect1.x - rect.x) + (rect1.y - rect.y)*(rect1.y - rect.y));
-		
-				if ( distance  < 200 )
-					openPlateList.get(nearestInOpenList.get(x)).add(t, rect, smallImage);
-				else //add to a list a new Plate
-					openPlateList.add(new Plate(t, rect, smallImage) );  //uses a constructor
-			}
-			
-			// if there was no update, then remove from a list of opened numbers to a final list
-			int x=0;
-			while ( x < openPlateList.size()) {
-				if ( openPlateList.get(x).getLastAddedTime() != t )
-					// move to final list and delete from openList
-					finalPlateList.add(openPlateList.remove(x));
-				else
-					x++;
-			}
-			
 		}
 		
-		
-		// in the end move the rest from open list to a final list
-		for (int x=0; x < openPlateList.size(); x++)
-			finalPlateList.add(openPlateList.remove(x));
-		
-		
-		// make an output
-		int outputCounter = 0;
-		for (Plate pn : finalPlateList)
-		{
-			System.out.println("Next Number " + finalPlateList.indexOf(pn) );
-			for (int xx = 0; xx < pn.getLength(); xx++ )
-			{
-				System.out.println("Time " + pn.getTimeOfRecord(xx)  + 
-					" " + pn.getPositionRect(xx).x +" " + 
-					pn.getPositionRect(xx).y);
-			    outputCounter++;
+		flushPlates(); //FIXME we shall do this separately when we switch to streaming
+	}
+	
+	public void flushPlates() {
+		finalPlateList.addAll(openPlateList);
+		openPlateList.clear();
+	}
+	
+	private Plate findClosestPlate(Rect r, List<Plate> plateList) {
+		Plate closest = null; double distance = 10000;
+		for (Plate plate : plateList) {
+			double d = rectDistance(r, plate.getLastAddedRect());
+			if (distance > d) {
+				distance = d; 
+				closest = plate;
 			}
 		}
-		System.out.println(" Rearranged Numbers Count: " + outputCounter);
+		return distance <= MIN_DISTANCE? closest : null;
 	}
     
     
@@ -225,32 +179,12 @@ public class AggregatePlates {
 	
 	public static void main(String[] args) throws Exception {
 		
-//		AggregatePlates ap = new AggregatePlates();
-//		ap.loadFolder("/Users/pps/dev/testframes");
-//		System.out.println("Total frames: "+ap.getFrames());
-//		System.out.println(" Detected Numbers Count: " + ap.getDetections());
-//		ap.process();
-		
-//		
-//		if (args.length<2) {
-//			System.err.println("DetectUtil picFolder cascadeFile [cascadeFile]");
-//			System.exit(1);
-//		}
-//		
-//		CascadeClassifier cl = new CascadeClassifier(
-//				args.length<3? Utils.CASCADE_LPR.getFile() : args[args.length-1]);
-//		findAndShowNumbers(args[0],args[1], cl);
+		AggregatePlates ap = new AggregatePlates();
+		ap.loadFolder("/Users/pps/dev/testframes");
+		System.out.println("Total frames: "+ap.getFrames());
+		System.out.println(" Detected Numbers Count: " + ap.getDetections());
+		ap.process();
 
-	}
-	
-	
-	public static List<Plate> convertCatalogToObjects(String dirName){
-		
-		 List<Plate> finalPlateList = new ArrayList<Plate>();
-		 return finalPlateList;
-		 
-		 
-		 
 	}
 	
 	
