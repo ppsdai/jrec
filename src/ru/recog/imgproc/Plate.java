@@ -11,7 +11,8 @@ public class Plate {
 	private List<Integer> timeOfRecord = new ArrayList<Integer>();
 	private List<Rect>    positionRect = new ArrayList<Rect>();
 	private List<Mat> plateImage = new ArrayList<Mat>();
-	//Mat newM = image.submat(rect);
+
+	public static final Rect EMPTY_RECT = new Rect(0,0,0,0);
 	
 	public Plate(int t, Rect r, Mat m) {
 		add(t, r, m);
@@ -37,6 +38,10 @@ public class Plate {
 		timeOfRecord.add(t);
 		positionRect.add(r);
 		plateImage.add(m);
+	}
+	
+	public void add(int t, Mat m) {
+		add(t, EMPTY_RECT, m);
 	}
 	
 	public Rect getLastAddedRect()  {

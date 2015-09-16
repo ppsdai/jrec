@@ -138,27 +138,50 @@ public class AggregatePlates {
 	}
     
     
-    public void savePlates(String destination, List<Plate> plateList, String prefix ) {
+    public static void savePlates(String destination, List<Plate> plateList, String prefix ) {
 		// write to catalog
 	    File destF = new File(destination);
 	    if (!destF.exists()) destF.mkdirs();
 		
-	    // find a refix from dirName V051
-//	    int aInt = getLastDigits(dirName);
-//	    String pref = "V" + aInt;
-	    String pref = prefix;
-	    
-		for (Plate pn : finalPlateList)
+		for (Plate pn : plateList)
 		{
 			//System.out.println("Next Number " + finalPlateList.indexOf(pn) );
 			for (int xx = 0; xx < pn.getLength(); xx++ )
 			{
-    	        String newFN = prefix + "N"+finalPlateList.indexOf(pn)+"t"+pn.getTimeOfRecord(xx)+".png";
+    	        String newFN = prefix + "N"+plateList.indexOf(pn)+"t"+pn.getTimeOfRecord(xx)+".png";
     	        //System.out.println(destName + newFN);
     	        Mat newM = pn.getPlateImage(xx);
 	            Imgcodecs.imwrite(new File(destF, newFN).getAbsolutePath(), newM);
 			}
 		} 
+    }
+    
+    /**
+     * Reads a folder with plate images with naming scheme V##N##t##
+     * @param source  folder with images
+     * @return List<Plate> containing plates in these folders
+     */
+    
+    public static List<Plate> readFormattedFolder(String source) {
+    	Map<String, Plate> prefixes = new HashMap<String, Plate>();
+		File cardir = new File(source); 
+		
+		for (File carfile : cardir.listFiles(Utils.FILTER_BMP_PNG)) {
+			Mat m = Imgcodecs.imread(carfile.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			String filename = carfile.getName();
+			String prefix = filename.substring(0, filename.lastIndexOf("t"));
+			int time = getLastDigits(filename);
+			if (prefixes.containsKey(prefix))
+				prefixes.get(prefix).add(time, m);
+			else
+				prefixes.put(prefix, new Plate(time, Plate.EMPTY_RECT, m));
+		}
+    	
+    	return new ArrayList<Plate>(prefixes.values());
+    }
+    
+    public List<Plate> getPlates() {
+    	return finalPlateList;
     }
     
     private static int getLastDigits(String s) {
@@ -168,7 +191,6 @@ public class AggregatePlates {
 	    while (m.find()) {
 	    	timeOfFrame.add(m.group()); 
 	    }
-	    //System.out.println( timeOfFrame.get(0) );
 	    return Integer.parseInt(timeOfFrame.get( timeOfFrame.size() - 1 ));
     }
     
@@ -179,12 +201,17 @@ public class AggregatePlates {
 	
 	public static void main(String[] args) throws Exception {
 		
-		AggregatePlates ap = new AggregatePlates();
-		ap.loadFolder("/Users/pps/dev/testframes");
-		System.out.println("Total frames: "+ap.getFrames());
-		System.out.println(" Detected Numbers Count: " + ap.getDetections());
-		ap.process();
+//		AggregatePlates ap = new AggregatePlates();
+//		ap.loadFolder("/Users/pps/frames/046");
+//		System.out.println("Total frames: "+ap.getFrames());
+//		System.out.println(" Detected Numbers Count: " + ap.getDetections());
+//		ap.process();
+//		
+//		System.out.println(ap.getPlates());
+//		
+//		savePlates("/Users/pps/dev/aggr", ap.getPlates(), "V046");
 
+		System.out.println(readFormattedFolder("/Users/pps/dev/aggr"));
 	}
 	
 	
