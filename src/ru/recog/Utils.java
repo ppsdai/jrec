@@ -2,6 +2,7 @@ package ru.recog;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -151,27 +152,38 @@ public class Utils {
 	
 	public static void main(String[] args) {
 		
-		//Test addArray
-		double[] a = new double[] {1,2,3};
-		double[] b = new double[] {3,2,1};
-		System.out.println(Arrays.stream(addArrays(a,b)).boxed().collect(Collectors.toList()));
+		System.out.println(CASCADE_LPR);
 		
-		//Test subArray
-		double[] c = new double[] {1,2,3};
-		double[] d = new double[] {1,2,3};
-		System.out.println(Arrays.stream(subArrays(c,d)).boxed().collect(Collectors.toList()));
-		
-		//Test produceSumMat
-		Mat m = Mat.ones(4, 4, CvType.CV_8UC1);
-		System.out.println(m.dump());
-		System.out.println(produceSumMat(m).dump());
-		double[][] arr = produceSumArr(m);
-		System.out.println(Arrays.deepToString(arr));
+//		//Test addArray
+//		double[] a = new double[] {1,2,3};
+//		double[] b = new double[] {3,2,1};
+//		System.out.println(Arrays.stream(addArrays(a,b)).boxed().collect(Collectors.toList()));
+//		
+//		//Test subArray
+//		double[] c = new double[] {1,2,3};
+//		double[] d = new double[] {1,2,3};
+//		System.out.println(Arrays.stream(subArrays(c,d)).boxed().collect(Collectors.toList()));
+//		
+//		//Test produceSumMat
+//		Mat m = Mat.ones(4, 4, CvType.CV_8UC1);
+//		System.out.println(m.dump());
+//		System.out.println(produceSumMat(m).dump());
+//		double[][] arr = produceSumArr(m);
+//		System.out.println(Arrays.deepToString(arr));
 
+	}
+	
+	public static String URL2FString(URL url) {
+		try {
+			return new File(CASCADE_LPR.toURI()).getAbsolutePath();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 
 	public static URL CASCADE_LPR = System.class.getResource("/russianLP.xml"); //TODO is this right?
-	//	public static String CASCADE_LPR_PATH = new File(CASCADE_LPR).getAbsolutePath();
+	public static String CASCADE_LPR_PATH = URL2FString(CASCADE_LPR);
 
 
 }

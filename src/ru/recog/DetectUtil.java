@@ -270,7 +270,7 @@ public class DetectUtil {
 		}
 		
 		CascadeClassifier cl = new CascadeClassifier(
-				args.length<3? Utils.CASCADE_LPR.getFile() : args[args.length-1]);
+				args.length<3? Utils.CASCADE_LPR_PATH : args[args.length-1]);
 		findAndShowNumbers(args[0],args[1], cl);
 		
 		
