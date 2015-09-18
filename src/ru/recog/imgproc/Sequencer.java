@@ -16,13 +16,14 @@ import ru.recog.Utils;
 public class Sequencer {
 
 	//contains a map of possible sequences
-	private Map< String, int[] > mPossibleSequences = new HashMap<String, int[]>();
-	private int firstMax = 0;
-	private int secondMax = 0;	
+	private Map< String, int[] > mPossibleSequences; 
+	private int firstMax; 
+	private int secondMax; 	
 	
 	// final output method, gives a 6 symbols string, that should contain a number 
 	public String doSequence( List<String> plateSymbols) {
 		
+		mPossibleSequences = new HashMap<String, int[]>();
 		String outputStr = "";
 		
 		// detect numbers
@@ -37,18 +38,14 @@ public class Sequencer {
 			return outputStr;
 		}
 		// if there is 1 match and it was matched more than 3 times
-		if (mPossibleSequences.size() == 1){
-			for (String str: mPossibleSequences.keySet() )
-			{
-				int[] arr = mPossibleSequences.get(str);
-				if (arr[0]>=2)
-				{
-					System.out.println(" One matches >2  = " + arr[0]);
-					return str;
-				}
-				else
-					return outputStr; // as in no matches
-			}
+		if (mPossibleSequences.size() == 1) {
+			String str = mPossibleSequences.keySet().iterator().next();
+			int[] arr = mPossibleSequences.get(str);
+			if (arr[0] >= 2) {
+				System.out.println(" One matches >2  = " + arr[0]);
+				return str;
+			} else
+				return outputStr; // as in no matches
 		}
 				
 		// find first and second max, and key
@@ -127,6 +124,10 @@ public class Sequencer {
 	
 
 	private String findFristAndSecondMax(){
+		
+		firstMax = 0;
+		secondMax = 0;
+		
 		String outputStr="";
 		
 		for (String str: mPossibleSequences.keySet() ){
@@ -144,6 +145,13 @@ public class Sequencer {
 	      }
 	    }
 		return outputStr;
+	}
+	
+	public static void main(String[] args) {
+		Sequencer seq = new Sequencer();
+		List<String> huinia = Arrays.asList("4*477PM****A", "**477*C**3*", "*477*C*0*", 
+				"4*477MP*3**", "B*77MP*1*H", "X*77MP****");
+		System.out.println(seq.doSequence(huinia));
 	}
 
 }
