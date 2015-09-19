@@ -38,10 +38,10 @@ public class AggregatePlates {
 	private static final double MIN_DISTANCE = 200; //cause great shaman told us so
 	
 	
-    private SortedMap<Integer, MatOfRect> sm = new TreeMap<Integer, MatOfRect>();
+    private SortedMap<Long, MatOfRect> sm = new TreeMap<Long, MatOfRect>();
     //FIXME  data structure has only implicit correspondance between Rect <---> Mat (Image)
     // need to reconfigure so that this correspondance is clear
-    private SortedMap<Integer, List<Mat>> smMat = new TreeMap<Integer, List<Mat>>();
+    private SortedMap<Long, List<Mat>> smMat = new TreeMap<Long, List<Mat>>();
     
     private CascadeClassifier classifier;
     
@@ -61,22 +61,26 @@ public class AggregatePlates {
     }
 
 	private void addFrame(String imageFileName) {
-	    Mat image = Imgcodecs.imread(imageFileName);
+		Mat image = Imgcodecs.imread(imageFileName);
+		long timestamp = (long) getLastDigits(imageFileName);
+		addFrame(image, timestamp);
+		
+	}
+	
+	private void addFrame(Mat image, long timestamp) {
 	    MatOfRect plateDetections = new MatOfRect();
 	    classifier.detectMultiScale(image, plateDetections,1.05,3,0, new Size(30,10), new Size(120,40));
 
-	    int aInt = getLastDigits(imageFileName);
-	    
 	    frameCounter++;
 	    detectionCounter = detectionCounter + plateDetections.toList().size();
 	    
-	    sm.put(aInt, plateDetections);
+	    sm.put(timestamp, plateDetections);
 	    
 	    // adding images, looks like a FIX, need to change datastructure
 	    List<Mat> lm = new ArrayList<Mat>();
 	    for (Rect rect : plateDetections.toArray()) 
 	    	lm.add(image.submat(rect));
-	    smMat.put(aInt, lm);
+	    smMat.put(timestamp, lm);
 	}
 	
 	public long getFrames() {
@@ -96,7 +100,7 @@ public class AggregatePlates {
 	
 	public void process() {
 		// loop by time on the sorted list
-		for (Integer t: sm.keySet() ) {
+		for (long t: sm.keySet() ) {
 			List<Rect> lor = sm.get(t).toList();
 			
 			for (Rect r : lor) {
@@ -201,17 +205,17 @@ public class AggregatePlates {
 	
 	public static void main(String[] args) throws Exception {
 		
-//		AggregatePlates ap = new AggregatePlates();
-//		ap.loadFolder("/Users/pps/frames/046");
-//		System.out.println("Total frames: "+ap.getFrames());
-//		System.out.println(" Detected Numbers Count: " + ap.getDetections());
-//		ap.process();
-//		
-//		System.out.println(ap.getPlates());
-//		
-//		savePlates("/Users/pps/dev/aggr", ap.getPlates(), "V046");
+		AggregatePlates ap = new AggregatePlates();
+		ap.loadFolder("/Users/pps/frames/046");
+		System.out.println("Total frames: "+ap.getFrames());
+		System.out.println(" Detected Numbers Count: " + ap.getDetections());
+		ap.process();
+		
+		System.out.println(ap.getPlates());
+		
+		savePlates("/Users/pps/dev/aggr", ap.getPlates(), "V046");
 
-		System.out.println(readFormattedFolder("/Users/pps/dev/aggr"));
+//		System.out.println(readFormattedFolder("/Users/pps/dev/aggr"));
 	}
 	
 	

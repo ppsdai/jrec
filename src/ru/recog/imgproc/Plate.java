@@ -8,13 +8,13 @@ import org.opencv.core.Rect;
 
 public class Plate {
 
-	private List<Integer> timeOfRecord = new ArrayList<Integer>();
+	private List<Long> timeOfRecord = new ArrayList<Long>();
 	private List<Rect>    positionRect = new ArrayList<Rect>();
 	private List<Mat> plateImage = new ArrayList<Mat>();
 
 	public static final Rect EMPTY_RECT = new Rect(0,0,0,0);
 	
-	public Plate(int t, Rect r, Mat m) {
+	public Plate(long t, Rect r, Mat m) {
 		add(t, r, m);
 	}
 	
@@ -22,7 +22,7 @@ public class Plate {
 		return timeOfRecord.size();
 	}
 	
-	public Integer getTimeOfRecord(int n) {
+	public long getTimeOfRecord(int n) {
 		return timeOfRecord.get(n);
 	}
 	
@@ -34,13 +34,17 @@ public class Plate {
 		return plateImage.get(n);
 	}
 	
-	public void add(int t, Rect r, Mat m) {
+	public List<Mat> getPlateImages() {
+		return plateImage;
+	}
+	
+	public void add(long t, Rect r, Mat m) {
 		timeOfRecord.add(t);
 		positionRect.add(r);
 		plateImage.add(m);
 	}
 	
-	public void add(int t, Mat m) {
+	public void add(long t, Mat m) {
 		add(t, EMPTY_RECT, m);
 	}
 	
@@ -48,7 +52,7 @@ public class Plate {
 	    return getPositionRect( positionRect.size() - 1 );
 	}
 	
-	public int getLastAddedTime()  {
+	public long getLastAddedTime()  {
 	    return getTimeOfRecord( timeOfRecord.size() - 1 );
 	}
 	
