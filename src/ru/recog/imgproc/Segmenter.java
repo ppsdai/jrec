@@ -14,42 +14,14 @@ import ru.recog.nn.NNAnalysis;
 import ru.recog.nn.NNWrapper;
 
 public class Segmenter {
+	
+	
+	private static final int MAX_HOPS = 5; //cause great shaman told us so
+	private static final int MAX_CHAR_WIDTH = 16;
+	private static final int MIN_CHAR_WIDTH = 6;
 
 	public static void main(String[] args) throws IllegalArgumentException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
-/*		File dir = new File("/Users/pps/dev/detected");
-		File destdir = new File("/Users/pps/dev/detectedcut");
-		
-		
-		
-		for (String fs : dir.list()) {
-			String filename = new File(dir,fs).getAbsolutePath();
-			System.out.println(filename);
-			Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-			
-			SegmentationResult result = null;
-			try { result = Segmenter.segment(m); 
-			} catch (ArrayIndexOutOfBoundsException ae) {
-				ae.printStackTrace();
-			}
-			
-//			Mat  res = m1.rowRange(result.getRowRange());
-			
-//			for (int p : points)
-			if (result!=null) {
-				for (int p : result.getCutPoints())
-					Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
-				
-				String dfilename = new File(destdir, fs).getAbsolutePath();
-				
-				Imgcodecs.imwrite(dfilename, m1);
-			}
-		}
-		*/
-		
-		
 		
 		NNWrapper nn = new NNWrapper("c:\\dev\\Net496021.nnet", 
 				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
@@ -79,7 +51,7 @@ public class Segmenter {
 //			List<Integer> points = Segmenter.segment(m);
 			SegmentationResult result = Segmenter.segment(m);
 			
-			List<Mat> pieces = getSegments(m);
+			List<Mat> pieces = result.getSegments();
 			
 			
 //			Mat  res = m.rowRange(result.getRowRange());
@@ -111,31 +83,6 @@ public class Segmenter {
 		lf.pack();
 		lf.setVisible(true);
 	}
-	
-	
-	
-	public static List<Mat> getSegments(Mat m) {
-		
-		return segment(m).getSegments();
-	}
-	
-//	public static List<Mat> getSegments(SegmentationResult result) {
-//		List<Mat> pieces = new ArrayList<Mat>();
-//		
-//		Mat  res = result.getOriginalMat().rowRange(result.getRowRange());
-//
-//		List<Integer> cutPoints = result.getCutPoints();
-//		int x0 = 0; int x1 = 0;
-//		
-//		for (int i = 0; i <= cutPoints.size(); i++) {
-//			if (i == cutPoints.size()) x1 = res.cols()-1;
-//			else x1 = cutPoints.get(i);
-//			pieces.add(res.colRange(x0, x1+1));
-//			
-//			x0 = x1;
-//		}
-//		return pieces;
-//	}
 
 	public static SegmentationResult segment(Mat m) throws ArrayIndexOutOfBoundsException {
 			int[] blackLength = new int[m.rows()];
@@ -161,9 +108,6 @@ public class Segmenter {
 				}
 				blackLength[row] = maxBlackLength;
 			}
-//			System.out.println("blacklength");
-	//		for (int i : blackLength)
-	//			System.out.println(i);
 				
 			Mat sobelx = new Mat(m.size(), m. type());
 			Imgproc.Sobel(m.clone(), sobelx, CvType.CV_32F, 1, 0);
@@ -216,16 +160,6 @@ public class Segmenter {
 				if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
 			}
 			
-//			if (localMaximums.size() == 0 || localMinimums.size() == 0) {
-//				System.out.println("Failed to find a maximum/minimum");
-//				return null;
-//			}
-	
-//			System.out.println("max: "+localMaximums);
-//			System.out.println(localMaximums.size());
-//			
-//			System.out.println("mins: "+localMinimums);
-//			System.out.println(localMinimums.size());
 	
 			int[] mins = new int[localMinimums.size()];
 			int[] maxs = new int[localMaximums.size()];
@@ -261,7 +195,7 @@ public class Segmenter {
 			int x_Max = x;
 			float ValueMax = minD[x];
 			int x_Start = x;
-			for (x = 0; x < 5; x++) {
+			for (x = 0; x < MAX_HOPS && x_Start-x>=0; x++) {
 				if (ValueMax < minD[x_Start - x]) {
 					ValueMax = minD[x_Start - x];
 					x_Max = x_Start - x;
@@ -295,8 +229,8 @@ public class Segmenter {
 				if (diff1 < diff2) {
 					// add the first point on condition that it is inside the
 					// interval
-					if (((mins[x + 1] - mins[x]) < 16)
-							&& ((mins[x + 1] - mins[x]) >= 6)) // (diff1 < 3) &&
+					if (((mins[x + 1] - mins[x]) < MAX_CHAR_WIDTH)
+							&& ((mins[x + 1] - mins[x]) >= MIN_CHAR_WIDTH)) // (diff1 < 3) &&
 					{
 						divPoints.add(0, mins[x]);
 						x = x + 0; // FIXME LOL?
@@ -304,8 +238,8 @@ public class Segmenter {
 				} else {
 					// add the second point on condition that it is inside the
 					// interval
-					if (((mins[x + 1] - mins[x - 1]) < 16)
-							&& ((mins[x + 1] - mins[x - 1]) >= 6)) // (diff2 < 3) &&
+					if (((mins[x + 1] - mins[x - 1]) < MAX_CHAR_WIDTH)
+							&& ((mins[x + 1] - mins[x - 1]) >= MIN_CHAR_WIDTH)) // (diff2 < 3) &&
 					{
 						divPoints.add(0, mins[x - 1]);
 						x = x - 1;
@@ -332,8 +266,8 @@ public class Segmenter {
 				if (diff1 < diff2) {
 					// add the first point on condition that it is inside the
 					// interval
-					if (((mins[x] - mins[x - 1]) < 16)
-							&& ((mins[x] - mins[x - 1]) >= 6)) // (diff1 < 3) &&
+					if (((mins[x] - mins[x - 1]) < MAX_CHAR_WIDTH)
+							&& ((mins[x] - mins[x - 1]) >= MIN_CHAR_WIDTH)) // (diff1 < 3) &&
 					{
 						divPoints.add(mins[x]);
 						x = x + 0; // FIXME ROFLCOPTER
@@ -341,8 +275,8 @@ public class Segmenter {
 				} else {
 					// add the second point on condition that it is inside the
 					// interval
-					if (((mins[x + 1] - mins[x - 1]) < 16)
-							&& ((mins[x + 1] - mins[x - 1]) >= 6)) // (diff2 < 3) &&
+					if (((mins[x + 1] - mins[x - 1]) < MAX_CHAR_WIDTH)
+							&& ((mins[x + 1] - mins[x - 1]) >= MIN_CHAR_WIDTH)) // (diff2 < 3) &&
 					{
 						divPoints.add(mins[x + 1]);
 						x = x + 1;
