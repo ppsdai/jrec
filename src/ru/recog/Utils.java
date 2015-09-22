@@ -36,7 +36,7 @@ public class Utils {
 	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'O', 'P', 'T', 'X', 'Y');
 	
 	public static final List<Character> LETTERS_SET_PLUS_0
-	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'O', 'P', 'T', 'X', 'Y');
+	= Arrays.asList('A', 'B', 'C', 'E', 'H', 'K', 'M', 'O', 'P', 'T', 'X', 'Y', '0');
 	
 	
 	public static String checkNumber(String number) {
@@ -175,7 +175,7 @@ public class Utils {
 	
 	public static String URL2FString(URL url) {
 		try {
-			return new File(CASCADE_LPR.toURI()).getAbsolutePath();
+			return new File(url.toURI()).getAbsolutePath();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			return "";
