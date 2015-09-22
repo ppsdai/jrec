@@ -5,12 +5,12 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 
-import org.neuroph.nnet.MultiLayerPerceptron;
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
-import ru.recog.*;
+import ru.recog.LabelFrame;
+import ru.recog.Utils;
 import ru.recog.feature.*;
 
 public class NNAnalysis {
@@ -30,8 +30,9 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-		readErrorFile("/Users/pps/segmented/NN/errorGS.txt", "testFilesGS.txt");
+		readErrorFile("/Users/pps/AllSegmented/NN/50kerror72.txt", "testFilesTGS.txt");
 		
+//		checkCharFolder("/Users/pps/dev/NNTrain/NNet724021.nnet", "/Users/pps/symbols/3");
 		
 //		printAverageFeatures("/Users/pps/dev/NNTrain/goodshit");
 //		List<FeatureExtractor> fexlist = new ArrayList<FeatureExtractor>();
@@ -46,6 +47,18 @@ public class NNAnalysis {
 		
 		
 
+	}
+	
+	
+	public static void checkCharFolder(String nnPath, String sourceDir) {
+		int c = 0;
+		File sourceFile = new File(sourceDir);
+		NNWrapper nn = new NNWrapper(nnPath, new MultipleFeatureExtractor(new OverlapGradientGridFeatureExtractor()));
+		for (String fn : sourceFile.list(Utils.FILTER_BMP_PNG)) {
+			Mat m = Imgcodecs.imread(Utils.fullPath(sourceFile, fn));
+			System.out.println(nnOutputToSymbol(nn.getNNOutputArray(m)));
+			
+		}
 	}
 	
 	public static void printAverageFeatures(String pathToFullSetofData) {
@@ -147,11 +160,11 @@ public class NNAnalysis {
 		
 		System.out.println("Read lines: "+errorList.size());
 		
-		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
-				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
-						new GravityGridFeatureExtractor(10, 20),
-						new SymmetryFeatureExtractor(),
-						new EdgeIntersectionFeatureExtractor(3, 3)));
+//		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
+//				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
+//						new GravityGridFeatureExtractor(10, 20),
+//						new SymmetryFeatureExtractor(),
+//						new EdgeIntersectionFeatureExtractor(3, 3)));
 		
 		
 		

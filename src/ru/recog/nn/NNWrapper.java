@@ -12,12 +12,27 @@ import ru.recog.feature.*;
 public class NNWrapper {
 	
 	MultipleFeatureExtractor mfx;
-	
 	MultiLayerPerceptron nn;
 	
 	
+	String pathToNN;
+	
+	public String getPathToNN() {
+		return pathToNN;
+	}
+	
+	public MultipleFeatureExtractor getFeatureExtractor() {
+		return mfx;
+	}
+//
+	public void setPathToNN(String pathToNN) {
+		this.pathToNN = pathToNN;
+		nn = (MultiLayerPerceptron)NeuralNetwork.createFromFile(pathToNN);
+	}
+
+	
 	public NNWrapper(String nnPath) {
-		nn = (MultiLayerPerceptron)NeuralNetwork.createFromFile(nnPath);
+		setPathToNN(nnPath);
 		
 		System.out.println(nn.getNetworkType());
 		System.out.println(nn.getLearningRule());
@@ -75,6 +90,32 @@ public class NNWrapper {
 		nn.calculate();
 		return nn.getOutput();
 		
+	}
+	
+	public static String nnOutputToSymbol(double[] nnoutput) {
+		StringBuffer sb = new StringBuffer("");
+		int found = 0;
+		char ch = 0;
+		for (int i = 0; i < nnoutput.length; i ++) {
+			if (nnoutput[i]> 0.9) {
+				found++;
+				ch = NNAnalysis.getChar(i);
+			}
+		}
+		if (found == 1 )
+			sb.append(ch);
+		else sb.append("*");
+		
+		return sb.toString();
+	}
+	
+	public String getLPString(List<Mat> pieces) {
+		StringBuilder sb = new StringBuilder();
+		
+		for (Mat piece : pieces) 
+			sb.append(nnOutputToSymbol(getNNOutputArray(piece.clone())));
+		
+		return sb.toString();
 	}
 	
 //	public List<Double> getNNOutput(Mat m) {

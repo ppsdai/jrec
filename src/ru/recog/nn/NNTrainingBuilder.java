@@ -43,7 +43,7 @@ public class NNTrainingBuilder {
 //		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
 		
 		mfx = new MultipleFeatureExtractor();
-		mfx.addExtractor(new OverlapGradientGridFeatureExtractor());
+		mfx.addExtractor(new TileGradientFeatureExtractor());
 		
 	}
 	
@@ -56,7 +56,7 @@ public class NNTrainingBuilder {
 //		processFolders(args[0],args[1]);
 		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
 		
-		trainBuilder.buildTrainingAndTestingSet("/Users/pps/dev/NNTrain/grayscale", "GS.txt", "/Users/pps/segmented/NN");
+		trainBuilder.buildTrainingAndTestingSet("/Users/pps/segmented/NN", "TGS.txt", "/Users/pps/segmented/NN");
 		
 	}
 	
