@@ -34,8 +34,8 @@ public class ShapeBasedSegmenter {
     plImg - plate Image should be grayScale */
 	public static List<BinShape> getFinalShapes(Mat plImg){
 		
-		numbCorr = new ArrayList<Integer>();
-		List<BinShape> shapeList = new ArrayList<BinShape>();
+		
+		//List<BinShape> shapeList = new ArrayList<BinShape>();
 		
 		// binarise image
 		Mat binImg = plImg.clone(); //ImageUtils.localbin(plImg.clone(), 0.6);
@@ -44,14 +44,15 @@ public class ShapeBasedSegmenter {
 		
 		
 		
-		return shapeList;
+		return allShapeList;
 	}
 	
     /**  
     method returns all shapes on a binary image */
 	public static List<BinShape> getAllShapes(Mat binImg){
 		
-		List<BinShape> shapeList = new ArrayList<BinShape>();	
+	
+		numbCorr = new ArrayList<Integer>();
 		
 		//cycle through binImg and fill an array with numbers
 		int SizeX = binImg.cols();
@@ -266,9 +267,11 @@ public class ShapeBasedSegmenter {
 			System.out.println( " Shape N = " + (nObjects++));
 			BinShape shp = mapOfShapes.get(key);
 			System.out.println(" N oF Points = " + shp.getNPoint());
-			System.out.println(" Bouinding Rect = " + shp.getRect());
+			System.out.println(" Bouinding Rect = " + shp.getBoundingRect());
 		}
 		
+		// transform map to list
+		List<BinShape> shapeList = new ArrayList<BinShape>(mapOfShapes.values());	
 		return shapeList;
 	}
 	
@@ -324,24 +327,24 @@ public class ShapeBasedSegmenter {
 		
 		LabelFrame lf = new LabelFrame("GOOD", true);
 
-		    String filestr = "4.bmp";  //"46Bin.bmp"; //"test.bmp";
+		    String filestr = "46Bin.bmp"; // "4.bmp";  //"46Bin.bmp"; //"test.bmp";
 			String filename = new File(dir, filestr).getAbsolutePath();
 			
+			System.out.println("File: " + filestr);
+			Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			//Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+			//Mat b = ImageUtils.localbin(m.clone(), 0.6);  //0.6		  
 			
-			String str = Utils.URL2FString(System.class.getResource("/ShapeSegmenterTest1.bmp")); 
-			System.out.println("File: " + str);
-			Mat m = Imgcodecs.imread(str, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			List<BinShape> shapes = getAllShapes(m);
-			if (shapes.size() != 1) System.out.println("FAIL");
-			if (shapes.get(0).getNPoints() != 600) System.out.println("FAIL");
+			//ShapeBasedSegmenter shBsSeg = new ShapeBasedSegmenter();
+			//List<BinShape> shapes = getAllShapes(m);
+			//ShapeBasedSegmenter.getFinalShapes(m);
+			
+	
+			//System.out.println("N of Shapes = " + shapes.size() );
 
 			
-			//Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			//Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-			//Mat b = ImageUtils.localbin(m.clone(), 0.6);  //0.6
 			
-			
-			System.out.println("File: " + filestr);
+		
 			
 			lf.addImage(m, filestr, 5);			
 			//lf.addImage(b, filestr, 5);			
@@ -350,9 +353,87 @@ public class ShapeBasedSegmenter {
 		lf.pack();
 		lf.setVisible(true);
 		
-		//ShapeBasedSegmenter shBsSeg = new ShapeBasedSegmenter();
-		ShapeBasedSegmenter.getFinalShapes(m);
+       //Standard Tests
+		//doStandardTests();
 	
 	}
+	
+	private static void doStandardTests(){
+		
+			if (test1Passed("/ShapeSegmenterTest1.bmp")) System.out.println("Test1 Passed");
+			else System.out.println("Test1 FAIL");
+			if (test2Passed("/ShapeSegmenterTest2.bmp")) System.out.println("Test2 Passed");
+			else System.out.println("Test2 FAIL");
+			if (test3Passed("/ShapeSegmenterTest3.bmp")) System.out.println("Test3 Passed");
+			else System.out.println("Test3 FAIL");
+			if (test4Passed("/ShapeSegmenterTest4.bmp")) System.out.println("Test4 Passed");
+			else System.out.println("Test4 FAIL");
+	}
+	
+    /**  
+    does tests on a first Image */
+	private static boolean test1Passed(String URL_NAME){
+		
+		boolean temp = true;
+		
+		    String str = Utils.URL2FString(System.class.getResource(URL_NAME)); 
+			System.out.println("File: " + str);
+			Mat m = Imgcodecs.imread(str, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			List<BinShape> shapes = getAllShapes(m);
+			if (shapes.size() != 1) temp = false;
+			if (shapes.get(0).getNPoints() != 600) temp = false;
+			
+		return temp;
+	}
+    /**  
+    does tests on a first Image */
+	private static boolean test2Passed(String URL_NAME){
+		
+		boolean temp = true;
+		
+		    String str = Utils.URL2FString(System.class.getResource(URL_NAME)); 
+			System.out.println("File: " + str);
+			Mat m = Imgcodecs.imread(str, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			List<BinShape> shapes = getAllShapes(m);
+			if (shapes.size() != 0) temp = false;
+			
+			
+		return temp;
+	}
+    /**  
+    does tests on a first Image */
+	private static boolean test3Passed(String URL_NAME){
+		
+		boolean temp = true;
+		Rect testRect = new Rect(15, 3, 4, 10);
+		
+		    String str = Utils.URL2FString(System.class.getResource(URL_NAME)); 
+			System.out.println("File: " + str);
+			Mat m = Imgcodecs.imread(str, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			List<BinShape> shapes = getAllShapes(m);
+			if (shapes.size() != 6) temp = false;
+			if (shapes.get(2).getNPoints() != 26) temp = false;
+			if (!testRect.equals( shapes.get(2).getBoundingRect())) temp = false;
+			
+		return temp;
+	}
+    /**  
+    does tests on a first Image */
+	private static boolean test4Passed(String URL_NAME){
+		
+		boolean temp = true;
+		Rect testRect = new Rect(9, 5, 47, 36);
+		
+		    String str = Utils.URL2FString(System.class.getResource(URL_NAME)); 
+			System.out.println("File: " + str);
+			Mat m = Imgcodecs.imread(str, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			List<BinShape> shapes = getAllShapes(m);
+			if (shapes.size() != 5) temp = false;
+			if (shapes.get(0).getNPoints() != 338) temp = false;
+			if (!testRect.equals( shapes.get(0).getBoundingRect())) temp = false;
+			
+		return temp;
+	}
 }
+
 

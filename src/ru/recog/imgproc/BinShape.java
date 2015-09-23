@@ -25,7 +25,7 @@ public class BinShape {
 		lowerRight = new Point(0, 0);
 	}
 	
-	public Rect getRect(){
+	public Rect getBoundingRect(){
 		
 		Rect boundingRect = new Rect((int) upperLeft.x, (int) upperLeft.y, (int) (lowerRight.x - upperLeft.x+ 1), (int) (lowerRight.y - upperLeft.y  + 1));
 		return boundingRect;

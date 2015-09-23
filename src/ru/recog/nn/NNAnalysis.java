@@ -30,7 +30,7 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-		readErrorFile("/Users/pps/segmented/NN/errorGS.txt", "testFilesGS.txt");
+		readErrorFile("c:\\dev\\frames\\AllSegmented\\NN\\50Terror112.txt", "testFilesGS.txt");
 		
 		
 //		printAverageFeatures("/Users/pps/dev/NNTrain/goodshit");
@@ -147,11 +147,14 @@ public class NNAnalysis {
 		
 		System.out.println("Read lines: "+errorList.size());
 		
-		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
-				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
-						new GravityGridFeatureExtractor(10, 20),
-						new SymmetryFeatureExtractor(),
-						new EdgeIntersectionFeatureExtractor(3, 3)));
+		NNWrapper nn =
+//				new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
+//				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
+//						new GravityGridFeatureExtractor(10, 20),
+//						new SymmetryFeatureExtractor(),
+//						new EdgeIntersectionFeatureExtractor(3, 3)));
+				new NNWrapper("c:\\dev\\frames\\AllSegmented\\NN\\BSS724021.nnet",
+						new MultipleFeatureExtractor(new OverlapGradientGridFeatureExtractor()));
 		
 		
 		
