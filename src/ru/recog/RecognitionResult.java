@@ -28,5 +28,8 @@ public class RecognitionResult {
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
+	public Mat getSinglePlateImage() {
+		return getPlateImages().isEmpty()? new Mat() : getPlateImages().get(0);
+	}
 
 }

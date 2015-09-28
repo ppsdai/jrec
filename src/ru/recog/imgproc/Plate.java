@@ -11,10 +11,12 @@ public class Plate {
 	private List<Long> timeOfRecord = new ArrayList<Long>();
 	private List<Rect>    positionRect = new ArrayList<Rect>();
 	private List<Mat> plateImage = new ArrayList<Mat>();
+	private long timestamp;
 
 	public static final Rect EMPTY_RECT = new Rect(0,0,0,0);
 	
 	public Plate(long t, Rect r, Mat m) {
+		timestamp = t;
 		add(t, r, m);
 	}
 	
@@ -56,5 +58,6 @@ public class Plate {
 	    return getTimeOfRecord( timeOfRecord.size() - 1 );
 	}
 	
+	public long getTimestamp() { return timestamp; }
 	
 }

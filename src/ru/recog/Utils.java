@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.opencv.core.*;
@@ -72,6 +73,36 @@ public class Utils {
 		return parent.getAbsolutePath().concat(File.separator)
 				.concat(name);
 	}
+	
+//	public static File[] getOrderedFiles(String dir) {
+//		return getOrderedList(dir).toArray();
+//	}
+	
+	public static List<File> getOrderedList(String dir) {
+		File cardir = new File(dir); 
+		
+		List<File> fl = Arrays.asList(cardir.listFiles(FILTER_BMP_PNG));
+		Collections.sort(fl, new Comparator<File>() {
+			@Override
+			public int compare(File o1, File o2) {
+				return Integer.compare(getLastDigits(o1.getName()), getLastDigits(o2.getName()));
+			}
+		});
+		return fl;
+	}
+	
+	private static Pattern digitPattern = null;
+	
+    public static int getLastDigits(String s) {
+	    if (digitPattern == null)
+	    	digitPattern = Pattern.compile("\\d+");
+	    Matcher m = digitPattern.matcher(s); 
+	    String digitStr = "-1";
+	    while (m.find()) 
+	    	digitStr = m.group();
+	    
+	    return Integer.parseInt(digitStr);
+    }
 
 	
 	public static Mat produceSumMat(Mat m) {
