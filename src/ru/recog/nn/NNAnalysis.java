@@ -31,6 +31,7 @@ public class NNAnalysis {
 	public static void main(String[] args)  throws Exception {
 		
 		readErrorFile("/Users/pps/AllSegmented/NN/50kerror72.txt", "testFilesTGS.txt");
+
 		
 //		checkCharFolder("/Users/pps/dev/NNTrain/NNet724021.nnet", "/Users/pps/symbols/3");
 		
@@ -160,11 +161,9 @@ public class NNAnalysis {
 		
 		System.out.println("Read lines: "+errorList.size());
 		
-//		NNWrapper nn = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/Net496021.nnet", 
-//				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
-//						new GravityGridFeatureExtractor(10, 20),
-//						new SymmetryFeatureExtractor(),
-//						new EdgeIntersectionFeatureExtractor(3, 3)));
+
+				new NNWrapper("c:\\dev\\frames\\AllSegmented\\NN\\BSS724021.nnet",
+						new MultipleFeatureExtractor(new OverlapGradientGridFeatureExtractor()));
 		
 		
 		

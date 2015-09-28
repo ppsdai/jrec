@@ -156,7 +156,7 @@ public class Utils {
 	
 	public static String URL2FString(URL url) {
 		try {
-			return new File(CASCADE_LPR.toURI()).getAbsolutePath();
+			return new File(url.toURI()).getAbsolutePath();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			return "";
