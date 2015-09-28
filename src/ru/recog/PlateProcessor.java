@@ -53,7 +53,6 @@ public class PlateProcessor extends LabelFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				System.out.println("Hola!");
 				String label = rr.getNumber()+" n: "+rr.getPlateImages().size()+" tmpst: "+rr.getTimestamp();
 				addImage(rr.getSinglePlateImage(), label, 3);
 				repaint();
@@ -76,8 +75,6 @@ public class PlateProcessor extends LabelFrame {
 		PlateProcessor pl = new PlateProcessor(nn);
 		
 		List<Plate> plates = AggregatePlates.readFormattedFolder(args[1]);
-		
-//		pp.pack();
 		
 		
 		File dir = new File(args[1]);

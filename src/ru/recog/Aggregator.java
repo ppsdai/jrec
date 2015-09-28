@@ -14,9 +14,7 @@ import ru.recog.imgproc.Plate;
 public class Aggregator implements Runnable {
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 	
-	
 	private static final double MIN_DISTANCE = 200; //cause great shaman told us so
-	
 	
     private Detector detector;
     
@@ -70,30 +68,9 @@ public class Aggregator implements Runnable {
 		}
 	}
 	
-//	private void addFrame(Mat image, long timestamp) {
-////	    MatOfRect plateDetections = new MatOfRect();
-////	    classifier.detectMultiScale(image, plateDetections,1.05,3,0, new Size(30,10), new Size(120,40));
-//		System.out.println("detections: "+detectionCounter+"tmstmp: "+timestamp);
-//	    MatOfRect plateDetections = detector.detect(image);
-//
-//	    frameCounter++;
-//	    if (plateDetections.empty()) {
-////		    process();
-//	    	return;
-//	    }
-//	    detectionCounter = detectionCounter + plateDetections.toList().size();
-//	    
-////	    sm.put(timestamp, plateDetections);
-//	    
-//	    // adding images, looks like a FIX, need to change datastructure
-//	    List<Mat> lm = new ArrayList<Mat>();
-//	    for (Rect rect : plateDetections.toArray()) 
-//	    	lm.add(image.submat(rect));
-////	    smMat.put(timestamp, lm);
-//	}
 	
 	private void addFrame(Mat image, long timestamp) {
-		System.out.println("detections: "+detectionCounter+"tmstmp: "+timestamp);
+//		System.out.println("detections: "+detectionCounter+"tmstmp: "+timestamp);
 	    MatOfRect plateDetections = detector.detect(image);
 
 	    frameCounter++;
@@ -103,7 +80,6 @@ public class Aggregator implements Runnable {
 	    detectionCounter = detectionCounter + plateDetections.toList().size();
 		for (Rect r : plateDetections.toArray()) {
 			Plate p = findClosestPlate(r, openPlateList);
-			System.out.println("Rect: "+r+" closest: "+p);
 			Mat smallImage = image.submat(r);
 			if (p!=null) 
 				p.add(timestamp, r, smallImage);
@@ -114,7 +90,6 @@ public class Aggregator implements Runnable {
 		for (Iterator<Plate> it = openPlateList.iterator(); it.hasNext();) {
 			Plate p = it.next();
 			if (p.getLastAddedTime() != timestamp) {
-				System.out.println("have some plates");
 //				finalPlateList.add(p);
 				sendPlateList.add(p);
 				it.remove();
@@ -137,53 +112,12 @@ public class Aggregator implements Runnable {
 			addFrame(carfile.getAbsolutePath());
 	}
 	
-
-	
-//	public void process() {
-//		// loop by time on the sorted list
-//		System.out.println(sm.keySet());
-//		for (long t: sm.keySet() ) {
-//			List<Rect> lor = sm.get(t).toList();
-//			
-//			for (Rect r : lor) {
-//				Plate p = findClosestPlate(r, openPlateList);
-//				Mat smallImage = smMat.get(t).get(lor.indexOf(r));
-//				if (p!=null) 
-//					p.add(t, r, smallImage);
-//				else 
-//					openPlateList.add(new Plate(t, r, smallImage));
-//			}
-//			
-//			for (Iterator<Plate> it = openPlateList.iterator(); it.hasNext();) {
-//				Plate p = it.next();
-//				if (p.getLastAddedTime() != t) {
-//					System.out.println("have some plates");
-////					finalPlateList.add(p);
-//					sendPlateList.add(p);
-//					it.remove();
-//				}
-//			}
-//			if (!sendPlateList.isEmpty()) sendPlates();
-////		    sm.clear();;
-////		    smMat.clear(); // = new TreeMap<Long, List<Mat>>();
-//		}
-////	    sm.clear();;
-////	    smMat.clear(); // = new TreeMap<Long, List<Mat>>();
-//		
-////		flushPlates(); //FIXME we shall do this separately when we switch to streaming
-//	}
-	
 	public void sendPlates() {
 		for (Plate p : sendPlateList) {
 			plateProcessor.processPlate(p);
 		}
 		sendPlateList.clear();
 	}
-	
-//	public void flushPlates() {
-//		finalPlateList.addAll(openPlateList);
-//		openPlateList.clear();
-//	}
 	
 	private Plate findClosestPlate(Rect r, List<Plate> plateList) {
 		Plate closest = null; double distance = 10000;
@@ -230,7 +164,7 @@ public class Aggregator implements Runnable {
 			Mat m = Imgcodecs.imread(carfile.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			String filename = carfile.getName();
 			String prefix = filename.substring(0, filename.lastIndexOf("t"));
-			int time = getLastDigits(filename);
+			int time = Utils.getLastDigits(filename);
 			if (prefixes.containsKey(prefix))
 				prefixes.get(prefix).add(time, m);
 			else
@@ -242,16 +176,6 @@ public class Aggregator implements Runnable {
     
     public List<Plate> getPlates() {
     	return null;//finalPlateList;
-    }
-    
-    private static int getLastDigits(String s) {
-	    LinkedList<String> timeOfFrame = new LinkedList<String>();
-	    Pattern p = Pattern.compile("\\d+");
-	    Matcher m = p.matcher(s); 
-	    while (m.find()) {
-	    	timeOfFrame.add(m.group()); 
-	    }
-	    return Integer.parseInt(timeOfFrame.get( timeOfFrame.size() - 1 ));
     }
     
     private static float rectDistance(Rect r1, Rect r2) {
