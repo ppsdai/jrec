@@ -147,6 +147,8 @@ public class Segmenter {
 			for (int col=0; col < m.cols(); col ++)
 				for (int row = UpperPoint; row <= LowerPoint; row++)
 					projX[col] += 255 - (int) m.get(row, col)[0];
+			
+			segResult.setIntensity(new MatOfInt(projX));
 	
 			// Calculate local minimum
 	

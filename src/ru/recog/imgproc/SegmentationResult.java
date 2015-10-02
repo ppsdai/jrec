@@ -17,8 +17,17 @@ public class SegmentationResult {
 	private List<Integer> cutPoints;
 	
 	private int lengthEstimate = 0;
-	private int CenterLine = 0;
+	private int centerLine = 0;
+	private MatOfInt intensity;
 	
+	public MatOfInt getIntensity() {
+		return intensity;
+	}
+
+
+	public void setIntensity(MatOfInt intensity) {
+		this.intensity = intensity;
+	}
 	private List<Rect> rectangles = null;
 	
 	
@@ -138,9 +147,9 @@ public class SegmentationResult {
 	}
 
 	public int getCenterLine() {
-		return CenterLine;
+		return centerLine;
 	}
 	public void setCenterLine(int CenterLine) {
-		this.CenterLine = CenterLine;
+		this.centerLine = CenterLine;
 	}
 }
