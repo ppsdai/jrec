@@ -34,7 +34,7 @@ public class Sequencer {
 		// if there is no matches
 		if (mPossibleSequences.size() == 0)
 		{
-			System.out.println(" No matches ");
+//			System.out.println(" No matches ");
 			return outputStr;
 		}
 		// if there is 1 match and it was matched more than 3 times
@@ -42,7 +42,7 @@ public class Sequencer {
 			String str = mPossibleSequences.keySet().iterator().next();
 			int[] arr = mPossibleSequences.get(str);
 			if (arr[0] >= 2) {
-				System.out.println(" One matches >2  = " + arr[0]);
+//				System.out.println(" One matches >2  = " + arr[0]);
 				return str;
 			} else
 				return outputStr; // as in no matches
@@ -54,7 +54,7 @@ public class Sequencer {
 		// we use Russian idea: " One time doesn't count" - Odin raz ne pidaraz.
 		if ((firstMax>=3) && (secondMax<=1))
 		{
-			System.out.println(" >2 Matches, but first >=3, other 1 or less ");
+//			System.out.println(" >2 Matches, but first >=3, other 1 or less ");
 			return firstMaxKey;
 		}
 		

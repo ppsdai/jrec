@@ -5,13 +5,13 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import ru.recog.LabelFrame;
 import ru.recog.Utils;
 import ru.recog.feature.*;
+import ru.recog.ui.FrameProcessor;
 
 public class NNAnalysis {
 
@@ -30,7 +30,37 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
-		readErrorFile("/Users/pps/AllSegmented/NN/50kerror72.txt", "testFilesTGS.txt");
+		
+		double d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0;
+		int avglength = 0;
+		
+		List<String> rects = readSeglog("/Users/pps/dev/seglog/seglog.txt");
+		for (String s : rects) {
+			System.out.println(string2rect(s));
+			List<Rect> rrs = string2rect(s); 
+			int length = rrs.get(5).x+rrs.get(5).width-rrs.get(0).x;
+			avglength+=length;
+			d1 = d1 + (double)(rrs.get(1).x-rrs.get(0).x)/length;
+			d2 = d2 + (double)(rrs.get(2).x-rrs.get(0).x)/length;
+			d3 = d3 + (double)(rrs.get(3).x-rrs.get(0).x)/length;
+			d4 = d4 + (double)(rrs.get(4).x-rrs.get(0).x)/length;
+			d5 = d5 + (double)(rrs.get(5).x-rrs.get(0).x)/length;
+		}
+		
+		System.out.println("avg length: "+(double)avglength/rects.size());
+		System.out.println("d1: "+(double)d1/rects.size());
+		System.out.println("d2: "+(double)d2/rects.size());
+		System.out.println("d3: "+(double)d3/rects.size());
+		System.out.println("d4: "+(double)d4/rects.size());
+		System.out.println("d5: "+(double)d5/rects.size());
+
+
+
+
+
+
+		
+//		readErrorFile("/Users/pps/AllSegmented/NN/50kerror72.txt", "testFilesTGS.txt");
 
 		
 //		checkCharFolder("/Users/pps/dev/NNTrain/NNet724021.nnet", "/Users/pps/symbols/3");
@@ -134,15 +164,58 @@ public class NNAnalysis {
 			}
 		}
 		return doubles;
-		
+	}
+	
+	public static List<Integer> parseToInteger(String stringOfDoubles) {
+		List<Integer> doubles = new ArrayList<Integer>();
+		StringTokenizer st = new StringTokenizer(stringOfDoubles, ";");
+		NumberFormat nf = NumberFormat.getInstance(); //work around, neuroph uses ',' as decimal separator
+		while (st.hasMoreTokens()) {
+			String s = st.nextToken().trim();
+			try {
+				Number n = nf.parse(s);
+				doubles.add(n.intValue());
+			} catch (ParseException e) {
+				System.err.println("Could not parse '"+s+"' in a string '"+stringOfDoubles+"'");
+				e.printStackTrace();
+			}
+		}
+		return doubles;
 	}
 	
 	public static int readIndexFromOutput(String desired) {
-		
 		List<Double> nums = parseToDouble(desired);
 		for (int i = 0; i < nums.size(); i++)
 			if (nums.get(i)>0) return i;
 		return -1;
+	}
+	
+	public static List<String> readSeglog(String segLogPath) throws Exception {
+		List<String> segLines = new ArrayList<String>();
+		LineNumberReader lnr = new LineNumberReader(new FileReader(segLogPath));
+		for (String line; (line = lnr.readLine()) != null;) {
+			if (!line.endsWith(FrameProcessor.RFAULT) && !line.endsWith(FrameProcessor.SFAULT)) {
+				int firstindex = line.indexOf(";");
+				segLines.add(line.substring(line.indexOf(";",firstindex+1)+1));
+			}
+		}
+		return segLines;
+	}
+	
+	public static List<Rect> string2rect(String seglogString) throws Exception {
+		List<Rect> rectangles = new ArrayList<Rect>();
+		List<Integer> rects = parseToInteger(seglogString);
+		if (rects.size() % 4 != 0) throw new IllegalArgumentException("amount of numbers should be dividable by 4");
+		for (int i = 0; i < rects.size() / 4; i++) {
+			int x = rects.get(i*4);
+			int y = rects.get(i*4+1);
+			int width  =rects.get(i*4+2);
+			int height = rects.get(i*4+3);
+			Rect r = new Rect(x, y, width, height);
+			rectangles.add(r);
+		}
+		return rectangles;
+		
 	}
 	
 	

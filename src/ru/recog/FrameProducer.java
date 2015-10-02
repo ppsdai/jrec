@@ -74,7 +74,7 @@ public class FrameProducer implements Runnable {
 		Imgproc.medianBlur(fgMask, blur, 25); // rudimentary noise cancellation
 
 		Scalar s = Core.sumElems(blur);
-		System.out.println("sum="+s.val[0]);
+//		System.out.println("sum="+s.val[0]);
 		return s.val[0] < MASK_THRESHOLD;
 		
 	}

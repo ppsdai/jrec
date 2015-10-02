@@ -53,17 +53,6 @@ public class LabelFrame extends JFrame implements ActionListener {
 	}
 	
 	
-//	public void addImage(Image image, String label) {
-//		JLabel jlabel = new JLabel(label);
-//		jlabel.setIcon(new ImageIcon(DetectUtil.Mat2BufferedImage(m)));
-//		
-//		if (useBorders) 
-//			jlabel.setBorder(new LineBorder(Color.green, 1));
-//		labelPanel.add(jlabel);
-//		
-//		imageList.add(image);
-//	}
-	
 	public void addImage(Mat m, String label) {
 		JLabel jlabel = new JLabel(label);
 		jlabel.setIcon(new ImageIcon(ImageUtils.mat2Image(m)));
@@ -97,6 +86,7 @@ public class LabelFrame extends JFrame implements ActionListener {
 		if (useBorders) 
 			jlabel.setBorder(new LineBorder(Color.green, 1));
 		labelPanel.add(jlabel);
+//		validate();
 		
 		imageList.add(m);
 	}

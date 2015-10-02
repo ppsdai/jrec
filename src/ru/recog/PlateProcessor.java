@@ -1,33 +1,43 @@
 package ru.recog;
 
-import java.io.File;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
 
 import ru.recog.feature.MultipleFeatureExtractor;
 import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.imgproc.*;
-import ru.recog.nn.*;
+import ru.recog.nn.NNWrapper;
 
 public class PlateProcessor extends LabelFrame {
 	
 	
 	private NNWrapper nn;
 	private Sequencer sequencer = new Sequencer();
+	private JLabel statusBar;// = new JLabel()
+	private long t0;
+	private volatile long total, correct, partial;
 	
 	public PlateProcessor(NNWrapper nn)  {
+		super("smee",false);
+		t0 = System.nanoTime();
+		total = 0;
+		correct = 0;
+		partial = 0;
+		statusBar = new JLabel("Status:");
+		statusBar.setBorder(new LineBorder(Color.black, 1));
+		add(statusBar, BorderLayout.SOUTH);
 		this.nn = nn;
 	}
 	
 	public RecognitionResult processPlate(Plate plate) {
-//		List<SegmentationResult> segList = new ArrayList<SegmentationResult>(plate.getPlateImages().size());
-		// segmentation
 		List<String> possibleNumbers = new ArrayList<String>();
 		for (Mat m : plate.getPlateImages()) {
 			SegmentationResult sr = Segmenter.segment(m);
@@ -41,8 +51,15 @@ public class PlateProcessor extends LabelFrame {
 		}
 		// sequencing of nn output
 		String number = sequencer.doSequence(possibleNumbers);
+		total++;
+		if ( ( number != "")  && !(number.contains("*")) )
+			correct++;
+		else if ( ( number != "") )
+			partial++;
+		
 		RecognitionResult rr = new RecognitionResult();
-		rr.setTimestamp(plate.getTimestamp());
+//		rr.setTimestamp(plate.getTimestamp());
+		rr.setTimestamp(System.nanoTime());
 		rr.setPlateImages(plate.getPlateImages());
 		rr.setNumber(number);
 		addRR(rr);
@@ -53,9 +70,11 @@ public class PlateProcessor extends LabelFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String label = rr.getNumber()+" n: "+rr.getPlateImages().size()+" tmpst: "+rr.getTimestamp();
+				String label = rr.getNumber()+" n: "+rr.getPlateImages().size()+" tmpst: "
+			+(rr.getTimestamp()-t0)/1000000;
 				addImage(rr.getSinglePlateImage(), label, 3);
-				repaint();
+				statusBar.setText("Total: "+total+" Correct: "+correct+" Partial: "+partial);
+				validate();
 			}
 		});
 	}
@@ -77,9 +96,11 @@ public class PlateProcessor extends LabelFrame {
 		List<Plate> plates = AggregatePlates.readFormattedFolder(args[1]);
 		
 		
-		File dir = new File(args[1]);
+//		File dir = new File(args[1]);
 		PlateProcessor pp = new PlateProcessor(nn);
 		pp.setSize(800, 600);
+		pp.setPreferredSize(new Dimension(800, 600));
+
 		pp.setVisible(true);
 		
 		int total = plates.size();

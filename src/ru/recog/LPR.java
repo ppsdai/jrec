@@ -72,10 +72,11 @@ public class LPR {
 		ag.setPlateProcessor(pp);
 		
 		pp.setPreferredSize(new Dimension(800,600));
+		pp.setSize(800, 600);
 		pp.setVisible(true);
 		
 		BlockingQueue<Mat> queue = new LinkedBlockingQueue<Mat>();
-		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video-052.avi", queue);
+		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video-046.avi", queue);
 		Thread t1 = new Thread(producer);
 		t1.start();
 		

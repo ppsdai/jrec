@@ -265,7 +265,7 @@ public class DetectUtil {
 //		buildFramesFolder(vc, "/Users/pps/dev/frames/snap", System.out);
 		
 		if (args.length<2) {
-			System.err.println("DetectUtil picFolder cascadeFile [cascadeFile]");
+			System.err.println("DetectUtil picFolder destination [cascadeFile]");
 			System.exit(1);
 		}
 		

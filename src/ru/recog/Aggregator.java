@@ -62,7 +62,7 @@ public class Aggregator implements Runnable {
 		while (true) {
 			Mat m = queue.poll();
 			if (m !=null) {
-				System.out.println(m.size()+" "+CvType.typeToString(m.type()));
+//				System.out.println(m.size()+" "+CvType.typeToString(m.type()));
 				addFrame(m, System.nanoTime());
 			}
 		}

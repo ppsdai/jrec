@@ -1,6 +1,10 @@
 package ru.recog;
 
+import java.io.File;
+
 import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 public class Detector {
@@ -32,7 +36,19 @@ public class Detector {
 	}
 	
 	public static void main(String[] args) {
-		
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		Detector d = new Detector();
+		File dest = new File("/Users/pps/dev/detected46");
+		for (File f : Utils.getOrderedList("/Users/pps/frames/046")) {
+			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
+			MatOfRect mr = d.detect(m);
+			if (!mr.empty()) {
+				for (Rect r : mr.toArray())
+					Imgproc.rectangle(m, r.tl(), r.br(), new Scalar(0,255,0));
+				Imgcodecs.imwrite(Utils.fullPath(dest, f.getName()),m);
+			}
+		}
+			
 	}
 
 }
