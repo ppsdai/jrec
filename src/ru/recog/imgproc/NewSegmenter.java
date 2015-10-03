@@ -16,13 +16,14 @@ public class NewSegmenter {
 	public static void main(String[] args) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		File dir = new File("c:\\dev\\PlatesSegmentation"); //Good");
+		//File dir = new File("c:\\dev\\PlatesSegmentation"); //Good");
+		File dir = new File("c:\\dev\\SFAULT");
 		//File dir = new File("c:\\dev\\Summ");
 		LabelFrame lf = new LabelFrame("GOOD", true);
 //
-		//for (String filestr : dir.list()) 
+		for (String filestr : dir.list()) 
 		{
-		    String filestr = "25.bmp";
+		    //String filestr = "25.bmp";
 			String filename = new File(dir, filestr).getAbsolutePath();
 			Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
@@ -47,8 +48,8 @@ public class NewSegmenter {
 			if ( (p >= result.getleftPoint()) && ( p <= result.getrightPoint()) )  // checks boundary of number plate
 				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
 			
-			lf.addImage(m1, filestr, 5);			
-			lf.addImage( Histogram(m, result ) ,"hist", 1);
+			lf.addImage(m1, filestr, 3);			
+			//lf.addImage( Histogram(m, result ) ,"hist", 1);
 			//lf.addImage( Histogram(b, result ) ,"hist", 1);
 			
 		}
@@ -406,7 +407,7 @@ public class NewSegmenter {
 		int x_Max = x;
 		float ValueMax = minD[x];
 		int x_Start = x;
-		for (x = 0; x < 5; x++) {
+		for (x = 0; x < 5 && (x_Start - x > 0); x++) {
 			if (ValueMax < minD[x_Start - x]) {
 				ValueMax = minD[x_Start - x];
 				x_Max = x_Start - x;

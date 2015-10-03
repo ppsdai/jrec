@@ -41,10 +41,24 @@ public class ShapeBasedSegmenter {
 		Mat binImg = plImg.clone(); //ImageUtils.localbin(plImg.clone(), 0.6);
 		// get all bin shapes
 		List<BinShape> allShapeList = getAllShapes(binImg);
+		System.out.println("All Shapes  " +  allShapeList.size());
+		// filter list
+		int[] configValues = { 100, 10, 16, 3, 26, 6 }; //wider filter { 250, 4, 40, 3, 30, 3 };//{ 200, 4, 16, 3, 27, 9 };
+		BinShape.configFilter( 0.3 , configValues);  // density, values
+		List<BinShape> filteredShapeList = BinShape.filter(allShapeList);
+		
+		System.out.println("FIltered Output  " +  filteredShapeList.size());
+
+		for(int key = 0; key < filteredShapeList.size(); key++){
+			System.out.println( " Shape N = " + (key));
+			BinShape shp = filteredShapeList.get(key);
+			System.out.println(" N oF Points = " + shp.getNPoint());
+			System.out.println(" Bouinding Rect = " + shp.getBoundingRect());
+		}
 		
 		
 		
-		return allShapeList;
+		return filteredShapeList;
 	}
 	
     /**  
@@ -323,32 +337,94 @@ public class ShapeBasedSegmenter {
 	
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		File dir = new File("c:\\dev\\TestImages"); 
+		//File dir = new File("c:\\dev\\PlatesSegmentation"); 
+		File dir = new File("c:\\dev\\SFAULT047");
+		
 		
 		LabelFrame lf = new LabelFrame("GOOD", true);
-
-		    String filestr = "46Bin.bmp"; // "4.bmp";  //"46Bin.bmp"; //"test.bmp";
+		
+		
+		for (String filestr : dir.list()) 
+		{
+		   // String filestr = "1.bmp"; 
 			String filename = new File(dir, filestr).getAbsolutePath();
 			
 			System.out.println("File: " + filestr);
 			Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			//Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-			//Mat b = ImageUtils.localbin(m.clone(), 0.6);  //0.6		  
+			Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+			Mat b = ImageUtils.localbin(m.clone(), 0.6);  //0.6		  
 			
 			//ShapeBasedSegmenter shBsSeg = new ShapeBasedSegmenter();
-			//List<BinShape> shapes = getAllShapes(m);
-			//ShapeBasedSegmenter.getFinalShapes(m);
+			List<BinShape> shapes = getFinalShapes(b);
 			
 	
 			//System.out.println("N of Shapes = " + shapes.size() );
-
-			
-			
+			for (int i = 0; i < shapes.size() ; i++){
+				BinShape shp = shapes.get(i); 
+				Imgproc.rectangle(m1, shp.getULPoint() , shp.getLRPoint(), new Scalar(0,255,0)); 
+			}
 		
+			// add shapes with another binarisation 0.4
+		    Mat b2 = ImageUtils.localbin(m.clone(), 0.4);  //0.6		  
 			
-			lf.addImage(m, filestr, 5);			
-			//lf.addImage(b, filestr, 5);			
-
+			//ShapeBasedSegmenter shBsSeg = new ShapeBasedSegmenter();
+			List<BinShape> shapes2 = getFinalShapes(b2);
+			
+	
+			//System.out.println("N of Shapes = " + shapes.size() );
+			for (int i = 0; i < shapes2.size() ; i++){
+				BinShape shp = shapes2.get(i); 
+				Imgproc.rectangle(m1, shp.getULPoint() , shp.getLRPoint(), new Scalar(255,0,0)); 
+			}
+			
+			// add shapes with another binarisation 0.2
+		    Mat b3 = ImageUtils.localbin(m.clone(), 0.2);  //0.6		  
+			
+			//ShapeBasedSegmenter shBsSeg = new ShapeBasedSegmenter();
+			List<BinShape> shapes3 = getFinalShapes(b3);
+			
+	
+			//System.out.println("N of Shapes = " + shapes.size() );
+			for (int i = 0; i < shapes3.size() ; i++){
+				BinShape shp = shapes3.get(i); 
+				Imgproc.rectangle(m1, shp.getULPoint() , shp.getLRPoint(), new Scalar(0,0,255)); 
+			}
+			
+			
+			//lf.addImage(m, filestr, 2);			
+			//lf.addImage(b, filestr, 2);	
+			lf.addImage(m1, filestr, 3);
+			
+			// SEGMENTER OUTPUT
+			
+			// outputs a binary image instead of a grayscale
+			b = ImageUtils.localbin(m.clone(), 0.6);
+		    Imgproc.cvtColor(b, m1, Imgproc.COLOR_GRAY2RGB);// CV_GRAY2RGB);
+			
+		    System.out.println("File: " + filestr);
+		    //SegmentationResult result = new SegmentationResult(); 
+		    //result = Segmenter.segment(m);
+		    
+		    SegmentationResult result = Segmenter.segment(m);
+		    //result = NewSegmenter.segment(m, result);
+			// second time with adjusted length
+			//result = NewSegmenter.segment(m, result);
+			
+			//System.out.println("File: " + filestr);
+			//System.out.println(localMaximums.size());
+			
+			//List<Mat> pieces = NewSegmenter.getSegments(result);
+		 
+			
+			for (int p : result.getCutPoints())
+			//if ( (p >= result.getleftPoint()) && ( p <= result.getrightPoint()) )  // checks boundary of number plate
+				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
+			
+			lf.addImage(m1, filestr, 3);			
+			
+			
+			
+		}
 	
 		lf.pack();
 		lf.setVisible(true);
