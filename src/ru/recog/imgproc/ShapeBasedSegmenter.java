@@ -1,14 +1,11 @@
 package ru.recog.imgproc;
 
-import java.io.File;
-import java.net.URL;
 import java.util.*;
 
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
-import ru.recog.*;
+import ru.recog.Utils;
 
 
 /**
@@ -25,7 +22,7 @@ import ru.recog.*;
 public class ShapeBasedSegmenter {
 	
 	
-	private static List<Integer> numbCorr;
+//	private static List<Integer> numbCorr;
 	
 	
     /**  
@@ -69,7 +66,7 @@ public class ShapeBasedSegmenter {
 	public static List<BinShape> getAllShapes(Mat binImg){
 		
 	
-		numbCorr = new ArrayList<Integer>();
+		List<Integer> numbCorr = new ArrayList<Integer>();
 		
 		//cycle through binImg and fill an array with numbers
 		int SizeX = binImg.cols();
@@ -143,7 +140,7 @@ public class ShapeBasedSegmenter {
 								
 								
 								//recursive substitution back to the beggining
-								recursiveSubstitution(max, min);
+								recursiveSubstitution(max, min, numbCorr);
 								
 							}
 								
@@ -183,7 +180,7 @@ public class ShapeBasedSegmenter {
 									numbCorr.set(max, numbCorr.get(min));*/
 								
 								//recursive substitution back to the beggining
-								recursiveSubstitution(max, min);
+								recursiveSubstitution(max, min, numbCorr);
 								
 							}
 						}
@@ -206,7 +203,7 @@ public class ShapeBasedSegmenter {
 								int max = Math.max(temp, valueFound);
 								
 								//recursive substitution back to the beggining
-								recursiveSubstitution(max, min);
+								recursiveSubstitution(max, min, numbCorr);
 								
 							}
 						}
@@ -295,21 +292,21 @@ public class ShapeBasedSegmenter {
     /**  
     This is a scary KOLDUNSTVO, a recursive method that looks through all branches
     of the tree and corrects so that numbers are in their proper places */
-	private static void recursiveSubstitution(int max, int min){
+	private static void recursiveSubstitution(int max, int min, List<Integer> numbCorr){
 	
 	if ( numbCorr.get(max) < min)
 	{
 		int temp = max;
 		max = min; 
 	    min = numbCorr.get(temp);
-	    recursiveSubstitution( max, min);
+	    recursiveSubstitution( max, min, numbCorr);
 	}
 	else 
 	{
 	    // correct previous if there is one
 		if (( max > numbCorr.get(max)) && (numbCorr.get(max) > numbCorr.get(min)))
 		{
-			recursiveSubstitution( numbCorr.get(max), numbCorr.get(min));
+			recursiveSubstitution( numbCorr.get(max), numbCorr.get(min), numbCorr);
 		  
 		}
 		
@@ -339,7 +336,7 @@ public class ShapeBasedSegmenter {
 	public static void main(String[] args){
 	
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
+	/*	
 		//File dir = new File("c:\\dev\\PlatesSegmentation"); 
 		File dir = new File("c:\\dev\\SFAULT047");
 		
@@ -431,9 +428,9 @@ public class ShapeBasedSegmenter {
 	
 		lf.pack();
 		lf.setVisible(true);
-		
+*/		
        //Standard Tests
-		//doStandardTests();
+		doStandardTests();
 	
 	}
 	
