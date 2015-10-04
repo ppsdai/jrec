@@ -41,20 +41,23 @@ public class ShapeBasedSegmenter {
 		Mat binImg = plImg.clone(); //ImageUtils.localbin(plImg.clone(), 0.6);
 		// get all bin shapes
 		List<BinShape> allShapeList = getAllShapes(binImg);
-		System.out.println("All Shapes  " +  allShapeList.size());
-		// filter list
-		int[] configValues = { 100, 10, 16, 3, 26, 6 }; //wider filter { 250, 4, 40, 3, 30, 3 };//{ 200, 4, 16, 3, 27, 9 };
-		BinShape.configFilter( 0.3 , configValues);  // density, values
-		List<BinShape> filteredShapeList = BinShape.filter(allShapeList);
 		
-		System.out.println("FIltered Output  " +  filteredShapeList.size());
+		List<BinShape> filteredShapeList = ShapeFilter.defaultFilterList(allShapeList);
 
-		for(int key = 0; key < filteredShapeList.size(); key++){
-			System.out.println( " Shape N = " + (key));
-			BinShape shp = filteredShapeList.get(key);
-			System.out.println(" N oF Points = " + shp.getNPoint());
-			System.out.println(" Bouinding Rect = " + shp.getBoundingRect());
-		}
+		/******///debug printouts
+		
+//		System.out.println("All Shapes  " +  allShapeList.size());
+//		// filter list
+//
+//		
+//		System.out.println("FIltered Output  " +  filteredShapeList.size());
+//
+//		for(int key = 0; key < filteredShapeList.size(); key++){
+//			System.out.println( " Shape N = " + (key));
+//			BinShape shp = filteredShapeList.get(key);
+//			System.out.println(" N oF Points = " + shp.getNPoint());
+//			System.out.println(" Bouinding Rect = " + shp.getBoundingRect());
+//		}
 		
 		
 		

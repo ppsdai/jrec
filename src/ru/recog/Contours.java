@@ -1,14 +1,14 @@
 package ru.recog;
 
-import java.util.*;
+import java.io.File;
+import java.util.Comparator;
+import java.util.List;
 
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.*;
-import ru.recog.nn.NNAnalysis;
-import ru.recog.nn.NNWrapper;
 
 public class Contours {
 	
@@ -24,7 +24,45 @@ public class Contours {
 		}
 	};
 	
+	public static void darkside() {
+		List<File> files = Utils.getOrderedList("/Users/pps/dev/detect46");
+		LabelFrame lf = new LabelFrame("Hola!");
+		
+		for (File f : files) {
+			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			Mat b = ImageUtils.localbin(m, 0.6);
+			List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
+			Mat c = new Mat();
+			Imgproc.cvtColor(b, c, Imgproc.COLOR_GRAY2RGB);
+			for (BinShape shape : shapes) {
+				System.out.println(shape);
+				Imgproc.rectangle(c, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+			}
+			lf.addImage(c, f.getName(), 3);
+			
+			Mat orig = new Mat();
+			SegmentationResult sr0 = Segmenter.segment(m);
+			Imgproc.cvtColor(m, orig, Imgproc.COLOR_GRAY2RGB);
+			for (int p : sr0.getCutPoints())
+				Imgproc.line(orig, new Point(p, 0), new Point(p, orig.rows()-1), new Scalar(0,255,0));
+			lf.addImage(orig, "orig", 3);
+			
+			Mat shm = new Mat();
+			SegmentationResult sr1 = Segmenter.shapesegment(m);
+			Imgproc.cvtColor(m, shm, Imgproc.COLOR_GRAY2RGB);
+			for (int p : sr1.getCutPoints())
+				Imgproc.line(shm, new Point(p, 0), new Point(p, shm.rows()-1), new Scalar(0,255,0));
+			lf.addImage(shm, "orig", 3);
+
+		}
+		
+		lf.pack();
+		lf.setVisible(true);
+	}
+	
 	public static void main(String[] args) {
+		
+		darkside();
 		/*
 		//load image
 		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame100001.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
@@ -79,7 +117,7 @@ public class Contours {
 //		cmp.addImageProcessor(new Resizer(new Size(10,20)));
 //		cmp.addImageProcessor(new Binarization(1, 255, Imgproc.THRESH_BINARY));
 //		Resizer resizer = new Resizer(new Size(10,20));
-		NNWrapper nnw = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/GoodNet375021.nnet");
+/*		NNWrapper nnw = new NNWrapper("/Users/pps/dev/NNTrain/goodshit/GoodNet375021.nnet");
 		
 //		System.out.println(mfx);
 		
@@ -153,7 +191,7 @@ public class Contours {
 		bf.setVisible(true);
 
 
-
+*/
 
 	}
 	
@@ -176,10 +214,10 @@ public class Contours {
 		
 	}
 	
-	public static boolean isContourGood(MatOfPoint mop) {
-		Rect r = getContourRect(mop);
-		return r.height>=6 && r.height<=25 && r.width>=4 && r.width<=15;
-		
-	}
+//	public static boolean isContourGood(MatOfPoint mop) {
+//		Rect r = getContourRect(mop);
+//		return r.height>=6 && r.height<=25 && r.width>=4 && r.width<=15;
+//		
+//	}
 
 }

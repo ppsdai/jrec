@@ -292,5 +292,102 @@ public class Segmenter {
 			return segResult;
 			
 		}
+	
+	public static SegmentationResult shapesegment(Mat m) throws ArrayIndexOutOfBoundsException {
+		int[] blackLength = new int[m.rows()];
+//		int MaxBlackLength, CountStart;
+		
+		SegmentationResult segResult = new SegmentationResult();
+		segResult.setOriginalMat(m.clone());
+		
+		Mat b = ImageUtils.localbin(m.clone(), 0.6);
+
+		for (int row = 0; row < b.rows(); row++) {    // loop on y
+			int col = 0;
+			int maxBlackLength = 0; int countStart = 0;
+			while (col < (b.cols() - 1)) {    // looking inside a line
+				if (b.get(row, col)[0] == 0) { // if it is black then start to look for a line
+					countStart = col;
+					while ((!((b.get(row, col)[0] == 255) && (b.get(row, col+1)[0] == 255))) && (col < (b.cols() - 1)))       // checks whether it is a line of two white in a row
+						col++;
+					blackLength[row] = col - countStart;
+					if (blackLength[row] > maxBlackLength)  maxBlackLength = blackLength[row];
+				}
+				else col++;                    // else go to the next pixel
+			}
+			blackLength[row] = maxBlackLength;
+		}
+			
+		Mat sobelx = new Mat(m.size(), m. type());
+		Imgproc.Sobel(m.clone(), sobelx, CvType.CV_32F, 1, 0);
+
+		double rowAvg = 0; double sumI = 0; double sqrI = 0;
+		for (int row = 0; row < sobelx.rows(); row++) {
+			double sobelI = 0;
+			for (int col = 0; col < sobelx.cols(); col++) 
+				sobelI = sobelI + Math.abs(sobelx.get(row, col)[0]);
+			rowAvg = rowAvg + row * sobelI;
+			sqrI = sqrI + row * row * sobelI;
+			sumI = sumI + sobelI;
+		}
+		rowAvg = rowAvg / sumI;
+		sqrI = Math.sqrt(sqrI/sumI - rowAvg*rowAvg);
+
+
+		int UpperPoint, LowerPoint;
+
+		UpperPoint = (int) Math.floor(rowAvg);
+		while ((UpperPoint > 0) && (blackLength[UpperPoint] < 5 * Math.round(sqrI)))  //4
+			UpperPoint--;
+
+		LowerPoint = (int) Math.ceil(rowAvg);
+		while ((LowerPoint < m.rows()) && (blackLength[LowerPoint] < 6 * Math.round(sqrI))) //4
+			LowerPoint++;
+		
+		segResult.setUpperBound(UpperPoint);
+		segResult.setLowerBound(LowerPoint);
+
+		
+//		System.out.println("Yavg= "+rowAvg+" from "+UpperPoint+" to "+LowerPoint);
+
+
+		int[] projX = new int[m.cols()];
+		Arrays.fill(projX, 0);
+		for (int col=0; col < m.cols(); col ++)
+			for (int row = UpperPoint; row <= LowerPoint; row++)
+				projX[col] += 255 - (int) m.get(row, col)[0];
+		
+		segResult.setIntensity(new MatOfInt(projX));
+
+		// Calculate local minimum
+
+//		int minCount = 0; int maxCount = 0;
+		List<Integer> localMinimums = new ArrayList<Integer>();
+		List<Integer> localMaximums = new ArrayList<Integer>();
+		for (int x = 1; x < m.cols()-1; x++) {
+			if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) localMaximums.add(x);
+			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
+		}
+		
+		List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
+		List<Integer> divPoints = new ArrayList<Integer>();
+
+		for (int min : localMinimums)
+			if (between(shapes, min)) divPoints.add(min);
+		
+		segResult.setCutPoints(divPoints);
+		
+		return segResult;
+		
+	}
+	
+	private static boolean between(List<BinShape> shapes, int x) {
+		for (BinShape shape : shapes)
+			if (x <= shape.getLRPoint().x && x >= shape.getULPoint().x)
+				return false;
+		
+		return true;
+	}
+
 
 }

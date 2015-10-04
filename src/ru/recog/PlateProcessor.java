@@ -39,10 +39,16 @@ public class PlateProcessor extends LabelFrame {
 	
 	public RecognitionResult processPlate(Plate plate) {
 		List<String> possibleNumbers = new ArrayList<String>();
+//		List<String> pn = new ArrayList<String>();
 		for (Mat m : plate.getPlateImages()) {
 			SegmentationResult sr = Segmenter.segment(m);
+			SegmentationResult sr1 = Segmenter.shapesegment(m);
 			String possible = nn.getLPString(sr.getRevisedSegments());
 			possibleNumbers.add(possible);
+			possibleNumbers.add(nn.getLPString(sr1.getRevisedSegments()));
+//			pn.add(nn.getLPString(sr1.getRevisedSegments()));
+			
+			
 			
 		
 		// feature extraction
@@ -51,6 +57,7 @@ public class PlateProcessor extends LabelFrame {
 		}
 		// sequencing of nn output
 		String number = sequencer.doSequence(possibleNumbers);
+//		String n2 = sequencer.doSequence(pn);
 		total++;
 		if ( ( number != "")  && !(number.contains("*")) )
 			correct++;
@@ -63,6 +70,14 @@ public class PlateProcessor extends LabelFrame {
 		rr.setPlateImages(plate.getPlateImages());
 		rr.setNumber(number);
 		addRR(rr);
+		
+//		RecognitionResult rr2 = new RecognitionResult();
+////		rr.setTimestamp(plate.getTimestamp());
+//		rr2.setTimestamp(System.nanoTime());
+//		rr2.setPlateImages(plate.getPlateImages());
+//		rr2.setNumber(n2);
+//		addRR(rr2);
+
 		return rr;
 	}
 	
@@ -103,19 +118,22 @@ public class PlateProcessor extends LabelFrame {
 
 		pp.setVisible(true);
 		
-		int total = plates.size();
-		int correct = 0; int nomatches = 0;
+		for (Plate p : plates)
+			pp.processPlate(p);
 		
-		for (Plate p : plates) {
-			RecognitionResult rr = pl.processPlate(p);
-			if (rr.getNumber().isEmpty())
-				nomatches++;
-			else if (!rr.getNumber().contains("*"))
-				correct++;
-			pp.addRR(rr);
-		}
-		
-		System.out.println("Total: "+total+" correct: "+correct+" no matches: "+nomatches);
+//		int total = plates.size();
+//		int correct = 0; int nomatches = 0;
+//		
+//		for (Plate p : plates) {
+//			RecognitionResult rr = pl.processPlate(p);
+//			if (rr.getNumber().isEmpty())
+//				nomatches++;
+//			else if (!rr.getNumber().contains("*"))
+//				correct++;
+//			pp.addRR(rr);
+//		}
+//		
+//		System.out.println("Total: "+total+" correct: "+correct+" no matches: "+nomatches);
 
 	}
 

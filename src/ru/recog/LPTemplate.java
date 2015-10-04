@@ -52,6 +52,40 @@ public class LPTemplate {
 		return map;
 	}
 	
+	public void printTemplate() {
+		System.out.println("["+width+"x"+height+"]");
+		for (Square sq : squares) 
+			System.out.println(sq.point1+" "+sq.point2);
+	}
+	
+	public void scaleToHeight(int height) {
+		float ratio = (float) height / this.height;
+		System.out.println("ratio: "+ratio);
+		width = (int) Math.round(width * ratio);
+		this.height = height;
+		for (Square sq : squares) {
+			sq.point1.x = (int) Math.round(sq.point1.x * ratio);
+			sq.point1.y = (int) Math.round(sq.point1.y * ratio);
+			sq.point2.x = (int) Math.round(sq.point2.x * ratio);
+			sq.point2.y = (int) Math.round(sq.point2.y * ratio);
+		}
+		calcAlpha();
+		
+	}
+	
+	public void cutTop(int cut) {
+		for (Square sq : squares) {
+			sq.point1.y = sq.point1.y - cut;
+			sq.point2.y = sq.point2.y - cut;
+		}
+		height = height - cut;
+		calcAlpha();
+	}
+	
+	public void cutBottom(int cut) {
+		height = height - cut;
+	}
+	
 	public Map<Point, Double> betterscan(Mat m) {
 		//build sum matrix for m
 		Mat sm = Utils.produceSumMat(m);
@@ -143,8 +177,10 @@ public class LPTemplate {
 //		System.out.println("total "+ totalI);
 		double bI = 0;
 		for (Square sq : squares) 
-			bI = bI + pointSum(sm, sq.point2.y, sq.point2.x) + pointSum(sm, sq.point1.y-1, sq.point1.x-1) 
-				- pointSum(sm, sq.point2.y, sq.point1.x-1) - pointSum(sm, sq.point1.y-1, sq.point2.x);
+			bI = bI + pointSum(sm, sq.point2.y, sq.point2.x) 
+			+ pointSum(sm, sq.point1.y-1, sq.point1.x-1) 
+				- pointSum(sm, sq.point2.y, sq.point1.x-1) 
+				- pointSum(sm, sq.point1.y-1, sq.point2.x);
 		
 		/*
 		 * Sab = Sb - Sc - Sd + Sa
@@ -168,6 +204,8 @@ public class LPTemplate {
 	}
 	
 	public static double pointSum(Mat sum, int row, int col) {
+		System.out.println(sum.size());
+		System.out.println(row + " "+ col);
 		if (row < 0 || col < 0) return 0;
 //		else if (row < 0) return sum.get(0, col)[0];
 //		else if (col < 0) return sum.get(row, 0)[0];
