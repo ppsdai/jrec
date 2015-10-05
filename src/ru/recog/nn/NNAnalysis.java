@@ -11,6 +11,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import ru.recog.LabelFrame;
 import ru.recog.Utils;
 import ru.recog.feature.*;
+import ru.recog.imgproc.SegmentationLog;
 import ru.recog.ui.FrameProcessor;
 
 public class NNAnalysis {
@@ -36,8 +37,8 @@ public class NNAnalysis {
 		
 		List<String> rects = readSeglog("/Users/pps/dev/seglog/seglog.txt");
 		for (String s : rects) {
-			System.out.println(string2rect(s));
-			List<Rect> rrs = string2rect(s); 
+			System.out.println(SegmentationLog.string2rect(s));
+			List<Rect> rrs = SegmentationLog.string2rect(s); 
 			int length = rrs.get(5).x+rrs.get(5).width-rrs.get(0).x;
 			avglength+=length;
 			d1 = d1 + (double)(rrs.get(1).x-rrs.get(0).x)/length;
@@ -201,23 +202,6 @@ public class NNAnalysis {
 		}
 		return segLines;
 	}
-	
-	public static List<Rect> string2rect(String seglogString) throws Exception {
-		List<Rect> rectangles = new ArrayList<Rect>();
-		List<Integer> rects = parseToInteger(seglogString);
-		if (rects.size() % 4 != 0) throw new IllegalArgumentException("amount of numbers should be dividable by 4");
-		for (int i = 0; i < rects.size() / 4; i++) {
-			int x = rects.get(i*4);
-			int y = rects.get(i*4+1);
-			int width  =rects.get(i*4+2);
-			int height = rects.get(i*4+3);
-			Rect r = new Rect(x, y, width, height);
-			rectangles.add(r);
-		}
-		return rectangles;
-		
-	}
-	
 	
 	public static void readErrorFile(String errorFile, String testFilesList) throws Exception {
 		
