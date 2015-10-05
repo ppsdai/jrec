@@ -300,7 +300,7 @@ public class Segmenter {
 		SegmentationResult segResult = new SegmentationResult();
 		segResult.setOriginalMat(m.clone());
 		
-		Mat b = ImageUtils.localbin(m.clone(), 0.6);
+		Mat b = ImageUtils.localbin(m.clone(), 0.4);
 
 		for (int row = 0; row < b.rows(); row++) {    // loop on y
 			int col = 0;
@@ -383,7 +383,7 @@ public class Segmenter {
 	
 	private static boolean between(List<BinShape> shapes, int x) {
 		for (BinShape shape : shapes)
-			if (x <= shape.getLRPoint().x && x >= shape.getULPoint().x)
+			if (x <= shape.getLRPoint().x-1 && x >= shape.getULPoint().x+1)
 				return false;
 		
 		return true;
