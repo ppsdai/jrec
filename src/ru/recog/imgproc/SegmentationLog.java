@@ -4,8 +4,11 @@ import java.io.FileReader;
 import java.io.LineNumberReader;
 import java.util.*;
 
-import org.opencv.core.Rect;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
+import ru.recog.LabelFrame;
 import ru.recog.nn.NNAnalysis;
 import ru.recog.ui.FrameProcessor;
 
@@ -57,6 +60,77 @@ public class SegmentationLog {
 //		FrameProcessor.SFAULT
 //	}
 	
+	public static boolean isValidSegmentation(List<Rect> symbolsList, List<Integer> cutPointsList){
+		if ( isSegmentation(symbolsList, cutPointsList) == -1) return false;
+		return true;	
+		
+	}
+	
+	
+	public static int isSegmentation(List<Rect> symbolsList, List<Integer> cutPointsList){
+	
+		boolean isValid = true; 
+		if (cutPointsList.size() < 6) {
+			System.out.println("Not enough of cutPoints");
+			isValid = false;
+			return -1;
+		}
+						
+		//find first point
+		int xPoint = symbolsList.get(0).x;
+		int firstPoint = -1;
+		for( int i = 0;  i < cutPointsList.size() ; i++ ){
+		   if ( (( cutPointsList.get(i) - 2 ) <= xPoint) && (( cutPointsList.get(i) + 2 ) >= xPoint) )
+		   {
+			   firstPoint = i;
+			   break;
+		   }
+		}
+		if (firstPoint == -1) 
+		{
+			isValid = false;
+			return -1;
+		}	
+		
+		// other points
+		int otherPoints = firstPoint;
+		for( int i = 1; i <= 5 ; i++){
+			otherPoints++;
+			if (otherPoints > cutPointsList.size())
+			   {
+				   isValid = false;
+				   break;
+			   }	
+			xPoint = symbolsList.get(i).x;
+			if ( (( cutPointsList.get(otherPoints) - 2 ) >= xPoint) 
+					            || (( cutPointsList.get(otherPoints) + 2 ) <= xPoint) )
+			   {
+				   isValid = false;
+				   break;
+			   }
+		}
+		
+		// last point
+		otherPoints++;
+		if (otherPoints >= cutPointsList.size())
+		   {
+			   isValid = false;
+			   return -1;
+		   }	
+		xPoint = symbolsList.get(5).x + symbolsList.get(5).width ;
+		if ( (( cutPointsList.get(otherPoints) - 2 ) >= xPoint) 
+				            || (( cutPointsList.get(otherPoints) + 2 ) <= xPoint) )
+		   {
+			   isValid = false;
+			   return -1;
+		   }
+			
+		if (!isValid) return -1;
+			return firstPoint;
+		
+	}
+	
+	
 	public static List<SegmentationLogEntry> readSegmentationLog(String seglogFilename) throws Exception {
 		List<SegmentationLogEntry> list = new ArrayList<SegmentationLogEntry>();
 		
@@ -94,9 +168,67 @@ public class SegmentationLog {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		List<SegmentationLogEntry> list = readSegmentationLog("/Users/pps/dev/seglog/seglog.txt");
+		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
 		for (SegmentationLogEntry entry : list)
 			System.out.println(entry);
+		
+		LabelFrame lf = new LabelFrame("GOOD", true);
+		
+		for (SegmentationLogEntry entry : list)
+		{
+			if (entry.getResult() == "SUCCESS")
+			{
+				String filestr = entry.getFilename();
+				Mat m = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+				Mat m1 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+				Mat m2 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+				
+				SegmentationResult result = Segmenter.segment(m);
+				
+				/*
+				SegmentationResult result = new SegmentationResult();
+				result = NewSegmenter.segment(m, result);
+				if (result == null) {
+					System.out.println("Some problem happened");
+					continue;
+				}
+				*/
+				
+				// Validate cut points
+				List<Rect> symbolsList = entry.getRectangles();
+				List<Integer> cutPointsList = result.getCutPoints();
+				
+
+				int temp = isSegmentation( symbolsList, cutPointsList);
+				//System.out.println("PROBLEMS " + temp); 
+				if (temp!= -1) {
+					for( int i = temp;  i <= ( temp + 6) ; i++ )
+					{
+						Imgproc.line(m2, new Point(cutPointsList.get(i), 0), 
+								new Point(cutPointsList.get(i), m2.rows()-1), new Scalar(0,0,255));	
+					}
+				}
+				else
+					System.out.println("Is Not VALID, FILE:  " + filestr);
+				
+				
+				
+				// End of cut points, PUT it into a method later
+				for (int p : result.getCutPoints())
+						Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
+				
+				
+					
+				lf.addImage(m1, filestr, 3);
+				lf.addImage(m2, filestr, 3);
+			}
+					
+		}
+		
+		lf.pack();
+		lf.setVisible(true);
+		
+		
 	}
 
 }

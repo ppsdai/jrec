@@ -48,8 +48,8 @@ public class NewSegmenter {
 			if ( (p >= result.getleftPoint()) && ( p <= result.getrightPoint()) )  // checks boundary of number plate
 				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
 			
-			lf.addImage(m1, filestr, 3);			
-			//lf.addImage( Histogram(m, result ) ,"hist", 1);
+			lf.addImage(m1, filestr, 5);			
+			lf.addImage( Histogram(m, result ) ,"hist", 1);
 			//lf.addImage( Histogram(b, result ) ,"hist", 1);
 			
 		}
