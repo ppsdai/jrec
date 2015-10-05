@@ -24,6 +24,7 @@ public class PlateProcessor extends LabelFrame {
 	private JLabel statusBar;// = new JLabel()
 	private long t0;
 	private volatile long total, correct, partial;
+	private volatile long consensus, disparity;
 	
 	public PlateProcessor(NNWrapper nn)  {
 		super("smee",false);
@@ -31,6 +32,8 @@ public class PlateProcessor extends LabelFrame {
 		total = 0;
 		correct = 0;
 		partial = 0;
+		disparity = 0;
+		consensus = 0;
 		statusBar = new JLabel("Status:");
 		statusBar.setBorder(new LineBorder(Color.black, 1));
 		add(statusBar, BorderLayout.SOUTH);
@@ -39,14 +42,13 @@ public class PlateProcessor extends LabelFrame {
 	
 	public RecognitionResult processPlate(Plate plate) {
 		List<String> possibleNumbers = new ArrayList<String>();
-//		List<String> pn = new ArrayList<String>();
+		List<String> pn = new ArrayList<String>();
 		for (Mat m : plate.getPlateImages()) {
 			SegmentationResult sr = Segmenter.segment(m);
 			SegmentationResult sr1 = Segmenter.shapesegment(m);
 			String possible = nn.getLPString(sr.getRevisedSegments());
 			possibleNumbers.add(possible);
-			possibleNumbers.add(nn.getLPString(sr1.getRevisedSegments()));
-//			pn.add(nn.getLPString(sr1.getRevisedSegments()));
+			pn.add(nn.getLPString(sr1.getRevisedSegments()));
 			
 			
 			
@@ -57,12 +59,35 @@ public class PlateProcessor extends LabelFrame {
 		}
 		// sequencing of nn output
 		String number = sequencer.doSequence(possibleNumbers);
-//		String n2 = sequencer.doSequence(pn);
+		String n2 = sequencer.doSequence(pn);
 		total++;
-		if ( ( number != "")  && !(number.contains("*")) )
+		boolean full1 = ( number != "")  && !(number.contains("*"));
+		boolean full2 = ( n2 != "")  && !(n2.contains("*"));
+		
+		if (full1 && full2)
+			if (number.equals(n2)) {
+				correct++;
+				consensus++;
+			} else {
+				disparity++;
+			}
+		else if (full1 || full2)
 			correct++;
-		else if ( ( number != "") )
-			partial++;
+
+		
+//		if ( ( number != "")  && !(number.contains("*")) ) {
+//			if (n2.equals(number)) {// || n2.contains("*") || n2.equals(""))
+//				correct++;
+//				consen
+//			}
+//		}
+//		else if ( ( number != "") )
+//			partial++;
+		
+//		if ( ( number != "")  && !(number.contains("*")) )
+//			full1++;
+//		else if ( ( number != "") )
+//			partial1++;
 		
 		RecognitionResult rr = new RecognitionResult();
 //		rr.setTimestamp(plate.getTimestamp());
@@ -71,12 +96,12 @@ public class PlateProcessor extends LabelFrame {
 		rr.setNumber(number);
 		addRR(rr);
 		
-//		RecognitionResult rr2 = new RecognitionResult();
-////		rr.setTimestamp(plate.getTimestamp());
-//		rr2.setTimestamp(System.nanoTime());
-//		rr2.setPlateImages(plate.getPlateImages());
-//		rr2.setNumber(n2);
-//		addRR(rr2);
+		RecognitionResult rr2 = new RecognitionResult();
+//		rr.setTimestamp(plate.getTimestamp());
+		rr2.setTimestamp(System.nanoTime());
+		rr2.setPlateImages(plate.getPlateImages());
+		rr2.setNumber(n2);
+		addRR(rr2);
 
 		return rr;
 	}
@@ -88,7 +113,8 @@ public class PlateProcessor extends LabelFrame {
 				String label = rr.getNumber()+" n: "+rr.getPlateImages().size()+" tmpst: "
 			+(rr.getTimestamp()-t0)/1000000;
 				addImage(rr.getSinglePlateImage(), label, 3);
-				statusBar.setText("Total: "+total+" Correct: "+correct+" Partial: "+partial);
+				statusBar.setText("Total: "+total+" Correct: "+correct+" Consensus: "+consensus
+						+" disparity: "+disparity);
 				validate();
 			}
 		});

@@ -246,7 +246,7 @@ public class ShapeBasedSegmenter {
 	
 		//System.out.println();
 		// after sorting
-		System.out.println("sorted: " + numbCorr);
+//		System.out.println("sorted: " + numbCorr);
 		
 
 		
@@ -255,11 +255,11 @@ public class ShapeBasedSegmenter {
 			for (int x = 0; x < SizeX; x++)
 				CMatrix[x][y] = numbCorr.get(CMatrix[x][y]);
 		
-		printArrDebug(CMatrix, SizeX, SizeY);
+//		printArrDebug(CMatrix, SizeX, SizeY);
 		
 		//determine what numbers correspond to unique shapes
 		Collections.sort(numbCorr);
-		System.out.println("sorted: " + numbCorr);
+//		System.out.println("sorted: " + numbCorr);
 		
 		// Map numbers to shapes
 		Map<Integer, BinShape> mapOfShapes = new HashMap<Integer, BinShape>();
@@ -276,13 +276,13 @@ public class ShapeBasedSegmenter {
 					BinShape shp = mapOfShapes.get(CMatrix[x][y]);
 					shp.addPoint(x, y);	
 				}
-		int nObjects = 0;
-		for(int key:mapOfShapes.keySet()){
-			System.out.println( " Shape N = " + (nObjects++));
-			BinShape shp = mapOfShapes.get(key);
-			System.out.println(" N oF Points = " + shp.getNPoint());
-			System.out.println(" Bouinding Rect = " + shp.getBoundingRect());
-		}
+//		int nObjects = 0;
+//		for(int key:mapOfShapes.keySet()){
+//			System.out.println( " Shape N = " + (nObjects++));
+//			BinShape shp = mapOfShapes.get(key);
+//			System.out.println(" N oF Points = " + shp.getNPoint());
+//			System.out.println(" Bouinding Rect = " + shp.getBoundingRect());
+//		}
 		
 		// transform map to list
 		List<BinShape> shapeList = new ArrayList<BinShape>(mapOfShapes.values());	

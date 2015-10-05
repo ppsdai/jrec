@@ -1,5 +1,6 @@
 package ru.recog;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.util.Comparator;
 import java.util.List;
@@ -25,39 +26,40 @@ public class Contours {
 	};
 	
 	public static void darkside() {
-		List<File> files = Utils.getOrderedList("/Users/pps/dev/detect46");
+		List<File> files = Utils.getOrderedList("/Users/pps/dev/SFAULT_0");
 		LabelFrame lf = new LabelFrame("Hola!");
+		lf.setPreferredSize(new Dimension(800,600));
+		lf.setSize(800,600);
+		lf.setVisible(true);
 		
 		for (File f : files) {
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			Mat b = ImageUtils.localbin(m, 0.6);
-			List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
-			Mat c = new Mat();
-			Imgproc.cvtColor(b, c, Imgproc.COLOR_GRAY2RGB);
+			
+			Mat b6 = ImageUtils.localbin(m, 0.6);
+			List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6);
+			Mat c6 = ImageUtils.bin2color(b6);
 			for (BinShape shape : shapes) {
-				System.out.println(shape);
-				Imgproc.rectangle(c, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+				Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
 			}
-			lf.addImage(c, f.getName(), 3);
+			lf.addImage(c6, f.getName(), 3);
 			
-			Mat orig = new Mat();
+			
+			Mat b4 = ImageUtils.localbin(m, 0.4);
+			shapes = ShapeBasedSegmenter.getFinalShapes(b4);
+			Mat c4 = ImageUtils.bin2color(b4);
+			for (BinShape shape : shapes) {
+				Imgproc.rectangle(c4, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+			}
+			lf.addImage(c4, f.getName(), 3);
+			
 			SegmentationResult sr0 = Segmenter.segment(m);
-			Imgproc.cvtColor(m, orig, Imgproc.COLOR_GRAY2RGB);
-			for (int p : sr0.getCutPoints())
-				Imgproc.line(orig, new Point(p, 0), new Point(p, orig.rows()-1), new Scalar(0,255,0));
-			lf.addImage(orig, "orig", 3);
+			lf.addImage(ImageUtils.drawSegLines(m, sr0), "orig", 3);
 			
-			Mat shm = new Mat();
 			SegmentationResult sr1 = Segmenter.shapesegment(m);
-			Imgproc.cvtColor(m, shm, Imgproc.COLOR_GRAY2RGB);
-			for (int p : sr1.getCutPoints())
-				Imgproc.line(shm, new Point(p, 0), new Point(p, shm.rows()-1), new Scalar(0,255,0));
-			lf.addImage(shm, "orig", 3);
+			lf.addImage(ImageUtils.drawSegLines(m, sr1), "shm", 3);
 
 		}
 		
-		lf.pack();
-		lf.setVisible(true);
 	}
 	
 	public static void main(String[] args) {

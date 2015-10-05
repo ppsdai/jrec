@@ -39,6 +39,19 @@ public class ImageUtils {
 		return sumImage;
 	}
 	
+	public static Mat bin2color(Mat m) {
+		Mat cvt = new Mat();
+		Imgproc.cvtColor(m, cvt, Imgproc.COLOR_GRAY2RGB);
+		return cvt;
+	}
+	
+	public static Mat drawSegLines(Mat m, SegmentationResult result) {
+		Mat cvt = bin2color(m);
+		for (int p : result.getCutPoints())
+			Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), new Scalar(0,255,0));
+		return cvt;
+	}
+	
 	
 	
 	public static Mat crop(Mat m) {

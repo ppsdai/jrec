@@ -294,11 +294,68 @@ public class Segmenter {
 		}
 	
 	public static SegmentationResult shapesegment(Mat m) throws ArrayIndexOutOfBoundsException {
-		int[] blackLength = new int[m.rows()];
-//		int MaxBlackLength, CountStart;
 		
 		SegmentationResult segResult = new SegmentationResult();
 		segResult.setOriginalMat(m.clone());
+		verticalCut(segResult);
+		
+		Mat b = ImageUtils.localbin(m.clone(), 0.6);
+
+		int[] projX = new int[m.cols()];
+		Arrays.fill(projX, 0);
+		for (int col=0; col < m.cols(); col ++)
+			for (int row = segResult.getUpperBound(); row <= segResult.getLowerBound(); row++)
+				projX[col] += 255 - (int) m.get(row, col)[0];
+		
+		segResult.setIntensity(new MatOfInt(projX));
+
+		// Calculate local minimum
+
+//		int minCount = 0; int maxCount = 0;
+		List<Integer> localMinimums = new ArrayList<Integer>();
+		List<Integer> localMaximums = new ArrayList<Integer>();
+		for (int x = 1; x < m.cols()-1; x++) {
+			if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) localMaximums.add(x);
+			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
+		}
+		
+		List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
+		List<BinShape> moreshapes = new ArrayList<BinShape>();
+		b = ImageUtils.localbin(m.clone(), 0.4);
+		for (BinShape shape : ShapeBasedSegmenter.getFinalShapes(b)) 
+			if (!covered(shape, shapes)) moreshapes.add(shape);
+		
+		shapes.addAll(moreshapes);
+		
+		List<Integer> divPoints = new ArrayList<Integer>();
+
+		for (int min : localMinimums)
+			if (between(shapes, min)) divPoints.add(min);
+		
+		segResult.setCutPoints(uniteClosePoints(divPoints));
+		
+		return segResult;
+		
+	}
+	
+	private static boolean covered(BinShape shape, List<BinShape> existingShapes) {
+		for (BinShape presentShape : existingShapes) {
+			Rect r = shape.getBoundingRect();
+			Rect pr = presentShape.getBoundingRect();
+			if (r.x >= pr.x && r.x<=pr.x+pr.width) return true;
+			if (r.x+r.width >= pr.x && r.x+r.width <=pr.x+pr.width) return true;
+		}
+		return false;
+	}
+	
+	
+	private static void verticalCut(SegmentationResult result) {
+		Mat m = result.getOriginalMat();
+		int[] blackLength = new int[m.rows()];
+//		int MaxBlackLength, CountStart;
+		
+//		SegmentationResult segResult = new SegmentationResult();
+//		segResult.setOriginalMat(m.clone());
 		
 		Mat b = ImageUtils.localbin(m.clone(), 0.6);
 
@@ -344,46 +401,31 @@ public class Segmenter {
 		while ((LowerPoint < m.rows()) && (blackLength[LowerPoint] < 6 * Math.round(sqrI))) //4
 			LowerPoint++;
 		
-		segResult.setUpperBound(UpperPoint);
-		segResult.setLowerBound(LowerPoint);
-
+		result.setUpperBound(UpperPoint);
+		result.setLowerBound(LowerPoint);
+		result.setCenterLine((int) Math.floor(rowAvg));
+	}
+	
+	private static List<Integer> uniteClosePoints(List<Integer> divPoints) {
+		List<Integer> finalPoints = new ArrayList<Integer>();
 		
-//		System.out.println("Yavg= "+rowAvg+" from "+UpperPoint+" to "+LowerPoint);
-
-
-		int[] projX = new int[m.cols()];
-		Arrays.fill(projX, 0);
-		for (int col=0; col < m.cols(); col ++)
-			for (int row = UpperPoint; row <= LowerPoint; row++)
-				projX[col] += 255 - (int) m.get(row, col)[0];
-		
-		segResult.setIntensity(new MatOfInt(projX));
-
-		// Calculate local minimum
-
-//		int minCount = 0; int maxCount = 0;
-		List<Integer> localMinimums = new ArrayList<Integer>();
-		List<Integer> localMaximums = new ArrayList<Integer>();
-		for (int x = 1; x < m.cols()-1; x++) {
-			if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) localMaximums.add(x);
-			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
+		for (int i = 0; i < divPoints.size() - 1; i++) {
+			int x1 = divPoints.get(i);
+			int x2 = divPoints.get(i+1);
+			if (x2 - x1 <= 3) {
+				finalPoints.add((x2+x1)/2);
+				i++;
+			}
+			else finalPoints.add(x1);
+			
 		}
 		
-		List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
-		List<Integer> divPoints = new ArrayList<Integer>();
-
-		for (int min : localMinimums)
-			if (between(shapes, min)) divPoints.add(min);
-		
-		segResult.setCutPoints(divPoints);
-		
-		return segResult;
-		
+		return finalPoints;
 	}
 	
 	private static boolean between(List<BinShape> shapes, int x) {
 		for (BinShape shape : shapes)
-			if (x <= shape.getLRPoint().x && x >= shape.getULPoint().x)
+			if (x <= shape.getLRPoint().x-1 && x >= shape.getULPoint().x+1)
 				return false;
 		
 		return true;
