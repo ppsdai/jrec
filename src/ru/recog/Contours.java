@@ -34,13 +34,23 @@ public class Contours {
 		
 		for (File f : files) {
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			Mat b = ImageUtils.localbin(m, 0.4);
-			List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
-			Mat c = ImageUtils.bin2color(b);
+			
+			Mat b6 = ImageUtils.localbin(m, 0.6);
+			List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6);
+			Mat c6 = ImageUtils.bin2color(b6);
 			for (BinShape shape : shapes) {
-				Imgproc.rectangle(c, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+				Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
 			}
-			lf.addImage(c, f.getName(), 3);
+			lf.addImage(c6, f.getName(), 3);
+			
+			
+			Mat b4 = ImageUtils.localbin(m, 0.4);
+			shapes = ShapeBasedSegmenter.getFinalShapes(b4);
+			Mat c4 = ImageUtils.bin2color(b4);
+			for (BinShape shape : shapes) {
+				Imgproc.rectangle(c4, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+			}
+			lf.addImage(c4, f.getName(), 3);
 			
 			SegmentationResult sr0 = Segmenter.segment(m);
 			lf.addImage(ImageUtils.drawSegLines(m, sr0), "orig", 3);
