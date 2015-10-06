@@ -22,13 +22,13 @@ public class Segmenter {
 
 	public static void main(String[] args) throws IllegalArgumentException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
+	/*	
 		NNWrapper nn = new NNWrapper("c:\\dev\\Net496021.nnet", 
 				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
 						new GravityGridFeatureExtractor(10, 20),
 						new SymmetryFeatureExtractor(),
 						new EdgeIntersectionFeatureExtractor(3, 3)));
-		
+		*/
 		CompoundImageProcessor cip = new CompoundImageProcessor();
 		cip.addImageProcessor(new Binarization(40, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU));
 //		cip.addImageProcessor(new LocalBinarization(0.6));
@@ -61,8 +61,8 @@ public class Segmenter {
 //			for (int p : points)
 			for (int p : result.getCutPoints())
 				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
-			lf.addImage(m1, "orig", 5);
-			
+			lf.addImage(m1, filename , 5);  //"orig"
+/*			
 			for (Mat piece : pieces) {
 				Mat proc = cip.processImage(piece);
 				lf.addImage(piece, "orig",3);
@@ -77,6 +77,7 @@ public class Segmenter {
 			}
 
 //			lf.addImage(ImageUtils.localbin(m.clone(), 0.6), "bin",5);
+	*/
 		}
 		
 	

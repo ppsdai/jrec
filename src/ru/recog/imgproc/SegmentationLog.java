@@ -78,7 +78,7 @@ public class SegmentationLog {
 		//find first point
 		int xPoint = symbolsList.get(0).x;
 		int firstPoint = -1;
-		for( int i = 0;  i < cutPointsList.size() ; i++ ){
+		for( int i = (cutPointsList.size()-1);  i >=0; i-- ){
 		   if ( (( cutPointsList.get(i) - 2 ) <= xPoint) && (( cutPointsList.get(i) + 2 ) >= xPoint) )
 		   {
 			   firstPoint = i;
@@ -182,12 +182,20 @@ public class SegmentationLog {
 			
 //			System.out.println(entry);
 			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
-//			System.out.println(name);
+			System.out.println(name);
 
-			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+			Mat m = Imgcodecs.imread(entry.getFilename(), 
 					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 //			System.out.println(m.size());
 			SegmentationResult sr = Segmenter.segment(m);
+/*			
+			SegmentationResult sr = new SegmentationResult();
+			sr = NewSegmenter.segment(m, sr);
+			if (sr == null) {
+			System.out.println("Some problem happened");
+			continue;
+		    }
+*/			
 			List<Integer> cutPoints = new ArrayList<Integer>();
 
 			cutPoints.add(0);
@@ -195,6 +203,8 @@ public class SegmentationLog {
 			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
 			if (!isValid) {
 				System.out.println("Problem with: "+name);
+				System.out.println(" cutPoints " + cutPoints);
+				isValidSegmentation(entry.getRectangles(), cutPoints);
 				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
 				Mat c = ImageUtils.bin2color(m);
 				for (Rect r : entry.getRectangles())
@@ -212,7 +222,12 @@ public class SegmentationLog {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		testShit("/Users/pps/dev/detected", "/Users/pps/dev/seglog/seglog.txt");
+		testShit("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
+		
+		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
+		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
+		//testShit("C:\\dev\\frames\\processed047", "C:\\dev\\frames\\segmented047\\seglog047.txt");
+		//testShit("c:\\CppProjects\\detected", "C:\\dev\\frames\\segmented\\seglog.txt");
 //		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
 //		for (SegmentationLogEntry entry : list)
 //			System.out.println(entry);
@@ -276,4 +291,17 @@ public class SegmentationLog {
 //		
 	}
 
+    /**  
+    does some tests */
+	private static boolean test1Passed(){
+		
+		boolean temp = true;
+		List<Rect> symbolsList = new ArrayList<Rect>();
+		//Rect testRect = new Rect(9, 11, 11, 10); symbolsList.add(testRect)
+
+		List<Integer> cutPointsList = new ArrayList<Integer>();
+			
+		return temp;
+	}
+	
 }
