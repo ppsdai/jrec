@@ -1,14 +1,13 @@
 package ru.recog.imgproc;
 
-import java.io.FileReader;
-import java.io.LineNumberReader;
+import java.io.*;
 import java.util.*;
 
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.LabelFrame;
+import ru.recog.*;
 import ru.recog.nn.NNAnalysis;
 import ru.recog.ui.FrameProcessor;
 
@@ -167,68 +166,114 @@ public class SegmentationLog {
 		
 	}
 	
-	public static void main(String[] args) throws Exception {
-		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
-		for (SegmentationLogEntry entry : list)
-			System.out.println(entry);
+	public static void testShit(String picFolder, String seglogFilename) throws Exception {
+		LabelFrame lf = new LabelFrame("pidarasy!!!!!!!!!!!!!!!!!!!!!!!");
 		
-		LabelFrame lf = new LabelFrame("GOOD", true);
 		
-		for (SegmentationLogEntry entry : list)
-		{
-			if (entry.getResult() == "SUCCESS")
-			{
-				String filestr = entry.getFilename();
-				Mat m = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-				Mat m1 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-				Mat m2 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-				
-				SegmentationResult result = Segmenter.segment(m);
-				
-				/*
-				SegmentationResult result = new SegmentationResult();
-				result = NewSegmenter.segment(m, result);
-				if (result == null) {
-					System.out.println("Some problem happened");
-					continue;
-				}
-				*/
-				
-				// Validate cut points
-				List<Rect> symbolsList = entry.getRectangles();
-				List<Integer> cutPointsList = result.getCutPoints();
-				
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
+		int total = 0;
+		int wrong = 0;
+		for (SegmentationLogEntry entry : entries) {
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			total++;
+			
+//			System.out.println(entry);
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+//			System.out.println(name);
 
-				int temp = isSegmentation( symbolsList, cutPointsList);
-				//System.out.println("PROBLEMS " + temp); 
-				if (temp!= -1) {
-					for( int i = temp;  i <= ( temp + 6) ; i++ )
-					{
-						Imgproc.line(m2, new Point(cutPointsList.get(i), 0), 
-								new Point(cutPointsList.get(i), m2.rows()-1), new Scalar(0,0,255));	
-					}
-				}
-				else
-					System.out.println("Is Not VALID, FILE:  " + filestr);
-				
-				
-				
-				// End of cut points, PUT it into a method later
-				for (int p : result.getCutPoints())
-						Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
-				
-				
-					
-				lf.addImage(m1, filestr, 3);
-				lf.addImage(m2, filestr, 3);
+			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//			System.out.println(m.size());
+			SegmentationResult sr = Segmenter.segment(m);
+			List<Integer> cutPoints = new ArrayList<Integer>();
+
+			cutPoints.add(0);
+			cutPoints.addAll(sr.getCutPoints());
+			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+			if (!isValid) {
+				System.out.println("Problem with: "+name);
+				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
+				Mat c = ImageUtils.bin2color(m);
+				for (Rect r : entry.getRectangles())
+					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+				lf.addImage(c, "SLE",3);
+				wrong++;
 			}
-					
 		}
-		
+		System.out.println("Total: "+total+" wrong: "+wrong);
 		lf.pack();
 		lf.setVisible(true);
 		
 		
+		
+	}
+	
+	public static void main(String[] args) throws Exception {
+		testShit("/Users/pps/dev/detected", "/Users/pps/dev/seglog/seglog.txt");
+//		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
+//		for (SegmentationLogEntry entry : list)
+//			System.out.println(entry);
+//		
+//		LabelFrame lf = new LabelFrame("GOOD", true);
+//		
+//		for (SegmentationLogEntry entry : list)
+//		{
+//			if (entry.getResult() == "SUCCESS")
+//			{
+//				String filestr = entry.getFilename();
+//				Mat m = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//				Mat m1 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+//				Mat m2 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+//				
+//				SegmentationResult result = Segmenter.segment(m);
+//				
+//				/*
+//				SegmentationResult result = new SegmentationResult();
+//				result = NewSegmenter.segment(m, result);
+//				if (result == null) {
+//					System.out.println("Some problem happened");
+//					continue;
+//				}
+//				*/
+//				
+//				// Validate cut points
+//				List<Rect> symbolsList = entry.getRectangles();
+//				List<Integer> cutPointsList = result.getCutPoints();
+//				
+//
+//				int temp = isSegmentation( symbolsList, cutPointsList);
+//				//System.out.println("PROBLEMS " + temp); 
+//				if (temp!= -1) {
+//					for( int i = temp;  i <= ( temp + 6) ; i++ )
+//					{
+//						Imgproc.line(m2, new Point(cutPointsList.get(i), 0), 
+//								new Point(cutPointsList.get(i), m2.rows()-1), new Scalar(0,0,255));	
+//					}
+//				}
+//				else
+//					System.out.println("Is Not VALID, FILE:  " + filestr);
+//				
+//				
+//				
+//				// End of cut points, PUT it into a method later
+//				for (int p : result.getCutPoints())
+//						Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
+//				
+//				
+//					
+//				lf.addImage(m1, filestr, 3);
+//				lf.addImage(m2, filestr, 3);
+//			}
+//					
+//		}
+//		
+//		lf.pack();
+//		lf.setVisible(true);*/
+//		
+//		
 	}
 
 }
