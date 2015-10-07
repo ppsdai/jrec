@@ -166,6 +166,13 @@ public class SegmentationLog {
 		
 	}
 	
+	public static void testAll() throws Exception {
+//		testShit("/Users/pps/dev/test/frames/detect41", "/Users/pps/dev/seglog/seglog041.txt");
+		testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+		testShit("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
+		testShit("/Users/pps/dev/test/frames/processed050", "/Users/pps/dev/seglog/seglog050.txt");
+	}
+	
 	public static void testShit(String picFolder, String seglogFilename) throws Exception {
 		LabelFrame lf = new LabelFrame("pidarasy!!!!!!!!!!!!!!!!!!!!!!!");
 		
@@ -212,7 +219,8 @@ public class SegmentationLog {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		testShit("/Users/pps/dev/detected", "/Users/pps/dev/seglog/seglog.txt");
+		testAll();
+//		testShit("/Users/pps/dev/detect41", "/Users/pps/dev/seglog/seglog.txt");
 //		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
 //		for (SegmentationLogEntry entry : list)
 //			System.out.println(entry);
