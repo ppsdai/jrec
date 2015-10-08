@@ -51,6 +51,16 @@ public class SegmentationLog {
 			return sb.toString();
 		}
 		
+		public String toSeglogString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(filename).append(";").append(getResult()).append(";");
+			for (Rect r : rectangles)
+				sb.append(r.x).append(";").append(r.y).append(";")
+				.append(r.width).append(";").append(r.height).append(";");
+
+			return sb.toString();
+		}
+		
 		
 	}
 	
@@ -78,7 +88,7 @@ public class SegmentationLog {
 		//find first point
 		int xPoint = symbolsList.get(0).x;
 		int firstPoint = -1;
-		for( int i = 0;  i < cutPointsList.size() ; i++ ){
+		for( int i = (cutPointsList.size()-1);  i >=0; i-- ){
 		   if ( (( cutPointsList.get(i) - 2 ) <= xPoint) && (( cutPointsList.get(i) + 2 ) >= xPoint) )
 		   {
 			   firstPoint = i;
@@ -118,7 +128,7 @@ public class SegmentationLog {
 		   }	
 		xPoint = symbolsList.get(5).x + symbolsList.get(5).width ;
 		if ( (( cutPointsList.get(otherPoints) - 2 ) >= xPoint) 
-				            || (( cutPointsList.get(otherPoints) + 2 ) <= xPoint) )
+				            || (( cutPointsList.get(otherPoints) + 6 ) <= xPoint) )
 		   {
 			   isValid = false;
 			   return -1;
@@ -174,7 +184,7 @@ public class SegmentationLog {
 	}
 	
 	public static void testShit(String picFolder, String seglogFilename) throws Exception {
-		LabelFrame lf = new LabelFrame("pidarasy!!!!!!!!!!!!!!!!!!!!!!!");
+		LabelFrame lf = new LabelFrame(picFolder);
 		
 		
 		File picDir = new File(picFolder);
@@ -194,19 +204,55 @@ public class SegmentationLog {
 			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
 					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 //			System.out.println(m.size());
-			SegmentationResult sr = Segmenter.segment(m);
+			SegmentationResult sr = Segmenter.shapesegment(m);
+/*			
+			SegmentationResult sr = new SegmentationResult();
+			sr = NewSegmenter.segment(m, sr);
+			if (sr == null) {
+			System.out.println("Some problem happened");
+			continue;
+		    }
+*/			
 			List<Integer> cutPoints = new ArrayList<Integer>();
 
 			cutPoints.add(0);
 			cutPoints.addAll(sr.getCutPoints());
 			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
 			if (!isValid) {
-				System.out.println("Problem with: "+name);
+//				System.out.println("Problem with: "+name);
+//				System.out.println(" cutPoints " + cutPoints);
+				Mat b6 = ImageUtils.localbin(m, 0.6);
+//				List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6, ShapeFilter.WEAK);
+				double lengthEstimate =  0.66 * (sr.getLowerBound() - sr.getUpperBound());
+				ShapeFilter one = new ShapeFilter(ShapeFilter.WEAK);
+				one.setWidthMin(3);
+				one.setWidthMax((int)Math.round(lengthEstimate*1.2));
+				
+				ShapeFilter two = new ShapeFilter(ShapeFilter.WEAK);
+				two.setWidthMin(one.getWidthMax()+1);
+				two.setWidthMax((int)Math.round(lengthEstimate*2.4));
+				
+				ShapeFilter three = new ShapeFilter(ShapeFilter.WEAK);
+				three.setWidthMin(two.getWidthMax()+1);
+				three.setWidthMax((int)Math.round(lengthEstimate*3.3));
+
+				
+				Mat c6 = ImageUtils.bin2color(b6.submat(sr.getUpperBound(), sr.getLowerBound()+1, 0, b6.cols()));
+				for (BinShape shape : sr.shapes) {
+					Scalar color = one.accept(shape)? new Scalar(0,255,0) :
+						two.accept(shape)? new Scalar(255,0,0) : 
+						three.accept(shape)? new Scalar(0,0,255) : new Scalar(125,125,125);
+					Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), color);
+				}
+				lf.addImage(c6, "bin 0.6", 3);
+				
+//				isValidSegmentation(entry.getRectangles(), cutPoints);
 				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
+				
 				Mat c = ImageUtils.bin2color(m);
 				for (Rect r : entry.getRectangles())
 					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
-				lf.addImage(c, "SLE",3);
+				lf.addImage(c, entry.toString(), 3);
 				wrong++;
 			}
 		}
@@ -221,6 +267,11 @@ public class SegmentationLog {
 	public static void main(String[] args) throws Exception {
 		testAll();
 //		testShit("/Users/pps/dev/detect41", "/Users/pps/dev/seglog/seglog.txt");
+		
+		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
+		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
+		//testShit("C:\\dev\\frames\\processed047", "C:\\dev\\frames\\segmented047\\seglog047.txt");
+		//testShit("c:\\CppProjects\\detected", "C:\\dev\\frames\\segmented\\seglog.txt");
 //		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
 //		for (SegmentationLogEntry entry : list)
 //			System.out.println(entry);
@@ -284,4 +335,17 @@ public class SegmentationLog {
 //		
 	}
 
+    /**  
+    does some tests */
+	private static boolean test1Passed(){
+		
+		boolean temp = true;
+		List<Rect> symbolsList = new ArrayList<Rect>();
+		//Rect testRect = new Rect(9, 11, 11, 10); symbolsList.add(testRect)
+
+		List<Integer> cutPointsList = new ArrayList<Integer>();
+			
+		return temp;
+	}
+	
 }

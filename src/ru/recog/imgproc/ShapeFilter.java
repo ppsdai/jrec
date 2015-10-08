@@ -8,10 +8,28 @@ import org.opencv.core.Rect;
 public class ShapeFilter {
 	
 	private int nPointsMax, nPointsMin,  widthMax, widthMin, heightMax, heightMin;
+	public int getWidthMax() {
+		return widthMax;
+	}
+
+	public void setWidthMax(int widthMax) {
+		this.widthMax = widthMax;
+	}
+
+	public int getWidthMin() {
+		return widthMin;
+	}
+
+	public void setWidthMin(int widthMin) {
+		this.widthMin = widthMin;
+	}
+
 	private double density;
 	
 	private static final ShapeFilter defaultShapeFilter =
 			new ShapeFilter(0.3, 100, 10, 16, 3, 26, 6);
+	
+	public static final ShapeFilter WEAK = new ShapeFilter(0.1, 300, 4, 50, 2, 40, 2);
 	
 	
 	public ShapeFilter(double density, int nPointsMax, int nPointsMin, 
@@ -25,12 +43,22 @@ public class ShapeFilter {
 		this.heightMin = heightMin;
 	}
 	
+	public ShapeFilter(ShapeFilter sf) {
+		this.density = sf.density;
+		this.nPointsMax = sf.nPointsMax;//configValues[0];
+		this.nPointsMin = sf.nPointsMin;
+		this.widthMax = sf.widthMax;
+		this.widthMin = sf.widthMin;
+		this.heightMax = sf.heightMax;
+		this.heightMin = sf.heightMin;
+	}
+	
 	public boolean accept(BinShape shape) {
-		if ((shape.getNPoint() > nPointsMax) || (shape.getNPoint() < nPointsMin)) return false;
+		if ((shape.getNPoints() > nPointsMax) || (shape.getNPoints() < nPointsMin)) return false;
 		Rect tr = shape.getBoundingRect();
 		if ((tr.width > widthMax) || (tr.width < widthMin)) return false;
 		if ((tr.height > heightMax) || (tr.height < heightMin)) return false;
-		if ( ( (double)shape.getNPoint()/(tr.width * tr.height)) < density ) return false; 
+		if ( ( (double)shape.getNPoints()/(tr.width * tr.height)) < density ) return false; 
 		return true;
 	}
 	

@@ -26,6 +26,12 @@ public class Utils {
 			return name.endsWith(".bmp") || name.endsWith(".png");
 		}
 	};
+	
+	public static final FilenameFilter FILTER_BMP_PNG_JPG = new FilenameFilter() {
+		public boolean accept(File dir, String name) {
+			return name.endsWith(".bmp") || name.endsWith(".png") || name.endsWith(".jpg");
+		}
+	};
 	public static final List<Character> FULL_CHARACTERS_SET
 	= Arrays.asList('0','1','2','3','4','5','6','7','8','9', 
 			'A', 'B', 'C', 'E', 'H', 'K', 'M', 'P', 'T', 'X', 'Y');
@@ -81,7 +87,7 @@ public class Utils {
 	public static List<File> getOrderedList(String dir) {
 		File cardir = new File(dir); 
 		
-		List<File> fl = Arrays.asList(cardir.listFiles(FILTER_BMP_PNG));
+		List<File> fl = Arrays.asList(cardir.listFiles(FILTER_BMP_PNG_JPG));
 		Collections.sort(fl, new Comparator<File>() {
 			@Override
 			public int compare(File o1, File o2) {

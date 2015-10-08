@@ -37,11 +37,12 @@ public class Detector {
 	
 	public static void main(String[] args) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		Detector d = new Detector();
-		File dest = new File("/Users/pps/dev/detected46");
-		for (File f : Utils.getOrderedList("/Users/pps/frames/046")) {
+		Detector d = new Detector(Utils.CASCADE_LPR_PATH, new Size(30,10), new Size(360,120), 0.05);
+		File dest = new File(args[1]);
+		for (File f : Utils.getOrderedList(args[0])) {
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
 			MatOfRect mr = d.detect(m);
+			System.out.println(mr);
 			if (!mr.empty()) {
 				for (Rect r : mr.toArray())
 					Imgproc.rectangle(m, r.tl(), r.br(), new Scalar(0,255,0));

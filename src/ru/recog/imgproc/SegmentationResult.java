@@ -20,6 +20,8 @@ public class SegmentationResult {
 	private int centerLine = 0;
 	private MatOfInt intensity;
 	
+	public List<BinShape> shapes;
+	
 	public MatOfInt getIntensity() {
 		return intensity;
 	}
@@ -63,7 +65,7 @@ public class SegmentationResult {
 		if (rectangles != null) return rectangles;
 		
 		rectangles = new ArrayList<Rect>();
-		
+		//FIXME binarization parameters should be parameterized and uniform across whole segmentation process
 		Mat  bin = ImageUtils.localbin(getOriginalMat(), 0.6); 
 				
 		List<Integer> cutPoints = getCutPoints();
