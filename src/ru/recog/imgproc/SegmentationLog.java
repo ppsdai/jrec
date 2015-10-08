@@ -148,9 +148,6 @@ public class SegmentationLog {
 		for (String line; (line = lnr.readLine()) != null;) {
 			list.add(new SegmentationLogEntry(line));
 			
-			if (line.endsWith(FrameProcessor.RFAULT))
-			
-			
 			if (!line.endsWith(FrameProcessor.RFAULT) && !line.endsWith(FrameProcessor.SFAULT)) {
 				int firstindex = line.indexOf(";");
 				segLines.add(line.substring(line.indexOf(";",firstindex+1)+1));
@@ -181,6 +178,13 @@ public class SegmentationLog {
 		testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 		testShit("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
 		testShit("/Users/pps/dev/test/frames/processed050", "/Users/pps/dev/seglog/seglog050.txt");
+	}
+	
+	public static void testAllBasic() throws Exception {
+//		testBasicSegmentation("/Users/pps/dev/test/frames/detect41", "/Users/pps/dev/seglog/seglog041.txt");
+		testBasicSegmentation("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+		testBasicSegmentation("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
+		testBasicSegmentation("/Users/pps/dev/test/frames/processed050", "/Users/pps/dev/seglog/seglog050.txt");
 	}
 	
 	public static void testShit(String picFolder, String seglogFilename) throws Exception {
@@ -259,13 +263,52 @@ public class SegmentationLog {
 		System.out.println("Total: "+total+" wrong: "+wrong);
 		lf.pack();
 		lf.setVisible(true);
+	}
+	
+	public static void testBasicSegmentation(String picFolder, String seglogFilename) throws Exception {
+		LabelFrame lf = new LabelFrame(picFolder);
 		
 		
-		
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
+		int total = 0;
+		int wrong = 0;
+		for (SegmentationLogEntry entry : entries) {
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			total++;
+			
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+
+			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			SegmentationResult sr = Segmenter.segment(m);
+	
+			List<Integer> cutPoints = new ArrayList<Integer>();
+
+			cutPoints.add(0);
+			cutPoints.addAll(sr.getCutPoints());
+			
+			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+			if (!isValid) {
+				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
+				
+				Mat c = ImageUtils.bin2color(m);
+				for (Rect r : entry.getRectangles())
+					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+				lf.addImage(c, entry.toString(), 3);
+				wrong++;
+			}
+		}
+		System.out.println("Total: "+total+" wrong: "+wrong);
+		lf.pack();
+		lf.setVisible(true);
 	}
 	
 	public static void main(String[] args) throws Exception {
-		testAll();
+		testAllBasic();
+//		testAll();
 //		testShit("/Users/pps/dev/detect41", "/Users/pps/dev/seglog/seglog.txt");
 		
 		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
