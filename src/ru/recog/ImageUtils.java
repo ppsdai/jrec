@@ -17,6 +17,8 @@ import ru.recog.ui.PlatePanel;
 
 public class ImageUtils {
 	
+	public static final Scalar GREEN = new Scalar(0,255,0);
+	
 	
 	public static Image concatImages(BufferedImage...images) {
 		int maxwidth = 0;
@@ -49,6 +51,18 @@ public class ImageUtils {
 		Mat cvt = bin2color(m);
 		for (int p : result.getCutPoints())
 			Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), new Scalar(0,255,0));
+		
+		Imgproc.line(cvt, new Point(0,result.getUpperBound()), new Point(cvt.cols()-1, result.getUpperBound()),
+				new Scalar(0,255,0));
+		Imgproc.line(cvt, new Point(0,result.getLowerBound()), new Point(cvt.cols()-1, result.getLowerBound()),
+				new Scalar(0,255,0));
+		return cvt;
+	}
+	
+	public static Mat drawSegRectangles(Mat m, SegmentationResult result) {
+		Mat cvt = bin2color(m);
+		for (Rect r : result.getRevisedRectangles())
+			Imgproc.rectangle(cvt, r.tl(), r.br(), GREEN);
 		return cvt;
 	}
 	
