@@ -1,4 +1,4 @@
-package ru.recog.imgproc;
+package ru.recog.segment;
 
 import java.io.File;
 import java.util.*;
@@ -9,6 +9,8 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.ImageUtils;
 import ru.recog.LabelFrame;
+import ru.recog.imgproc.SegmentationResult;
+
 import java.util.Arrays;
 
 public class NewSegmenter {
