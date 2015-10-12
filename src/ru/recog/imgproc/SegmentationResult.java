@@ -20,6 +20,8 @@ public class SegmentationResult {
 	private int centerLine = 0;
 	private MatOfInt intensity;
 	
+	public List<BinShape> shapes;
+	
 	public MatOfInt getIntensity() {
 		return intensity;
 	}

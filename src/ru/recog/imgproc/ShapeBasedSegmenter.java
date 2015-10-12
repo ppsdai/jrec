@@ -61,6 +61,10 @@ public class ShapeBasedSegmenter {
 		return filteredShapeList;
 	}
 	
+	public static List<BinShape> getFinalShapes(Mat plImg, ShapeFilter filter){
+		return filter.filterList(getAllShapes(plImg.clone()));
+	}
+	
     /**  
     method returns all shapes on a binary image */
 	public static List<BinShape> getAllShapes(Mat binImg){

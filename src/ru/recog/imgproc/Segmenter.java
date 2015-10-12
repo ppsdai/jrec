@@ -320,23 +320,90 @@ public class Segmenter {
 			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
 		}
 		
-		List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b);
-		List<BinShape> moreshapes = new ArrayList<BinShape>();
-		b = ImageUtils.localbin(m.clone(), 0.4);
-		for (BinShape shape : ShapeBasedSegmenter.getFinalShapes(b)) 
-			if (!covered(shape, shapes)) moreshapes.add(shape);
+//		ShapeFilter filter = new ShapeFilter(0.1, 300, 4, 50, 2, 40, 2);
 		
-		shapes.addAll(moreshapes);
+		List<BinShape> shapes = uniteShapes(ShapeBasedSegmenter.getFinalShapes(
+				b.submat(segResult.getUpperBound(), segResult.getLowerBound()+1, 0, b.cols()),
+				ShapeFilter.WEAK));
+		
+		segResult.shapes = shapes;
+		
+		
+//		List<BinShape> moreshapes = new ArrayList<BinShape>();
+//		b = ImageUtils.localbin(m.clone(), 0.4);
+//		
+//		List<BinShape> thinnerShapes = ShapeBasedSegmenter.getFinalShapes(
+//				b.submat(segResult.getUpperBound(), segResult.getLowerBound()+1, 0, b.cols()));
+//		
+//		for (BinShape shape : thinnerShapes) 
+//			if (!covered(shape, shapes)) moreshapes.add(shape);
+//		
+//		shapes.addAll(moreshapes);
 		
 		List<Integer> divPoints = new ArrayList<Integer>();
 
 		for (int min : localMinimums)
 			if (between(shapes, min)) divPoints.add(min);
 		
+		double lengthEstimate =  0.66 * (segResult.getLowerBound() - segResult.getUpperBound());
+
+		ShapeFilter one = new ShapeFilter(ShapeFilter.WEAK);
+		one.setWidthMin(3);
+		one.setWidthMax((int)Math.round(lengthEstimate*1.2));
+		
+		ShapeFilter two = new ShapeFilter(ShapeFilter.WEAK);
+		two.setWidthMin(one.getWidthMax()+1);
+		two.setWidthMax((int)Math.round(lengthEstimate*2.4));
+		
+		ShapeFilter three = new ShapeFilter(ShapeFilter.WEAK);
+		three.setWidthMin(two.getWidthMax()+1);
+		three.setWidthMax((int)Math.round(lengthEstimate*3.3));
+		
+		
+		TreeSet<Integer> mins = new TreeSet<Integer>(localMinimums);
+		
+		
+		for (BinShape shape : shapes) {
+			if (two.accept(shape)) {
+//				System.out.println("Adding "+shape);
+				int point = (int)Math.round(0.5*(shape.getLRPoint().x + shape.getULPoint().x) );
+//				System.out.println("Adding at "+point+" "+shape);
+//				System.out.println("before "+divPoints);
+//				int floor = mins.floor(point);
+//				int higher = mins.higher(point);
+//				
+//				addCutPoint(divPoints, point-floor<=higher-point? floor : higher);
+				addCutPoint(divPoints, findCutPoint(mins, point));
+//				System.out.println("after "+divPoints);
+
+//				divPoints.add( point );
+			} else if (three.accept(shape)) {
+				int point1 = (int)Math.round(0.33*(shape.getLRPoint().x - shape.getULPoint().x)+shape.getULPoint().x );
+				int point2 = (int)Math.round(0.67*(shape.getLRPoint().x - shape.getULPoint().x)+shape.getULPoint().x );
+				addCutPoint(divPoints, findCutPoint(mins, point1));
+				addCutPoint(divPoints, findCutPoint(mins, point2));
+			}
+		}
+		
 		segResult.setCutPoints(uniteClosePoints(divPoints));
 		
 		return segResult;
 		
+	}
+	
+	private static int findCutPoint(TreeSet<Integer> mins, int point) {
+		int floor = mins.floor(point);
+		int higher = mins.higher(point);
+		
+		return point-floor<=higher-point? floor : higher;
+	}
+	
+	private static void addCutPoint(List<Integer> cutPoints, int cutpoint) {
+		for (int i = 0; i < cutPoints.size();i++)
+			if (cutpoint < cutPoints.get(i)) {
+				cutPoints.add(i, cutpoint);
+				break;
+			}
 	}
 	
 	private static boolean covered(BinShape shape, List<BinShape> existingShapes) {
@@ -347,6 +414,23 @@ public class Segmenter {
 			if (r.x+r.width >= pr.x && r.x+r.width <=pr.x+pr.width) return true;
 		}
 		return false;
+	}
+	
+	private static List<BinShape> uniteShapes(List<BinShape> shapes) {
+		List<BinShape> united = new ArrayList<BinShape>();
+		BinShape.sortShapes(shapes);
+		
+		for (int i = 0; i < shapes.size()-1; i++) {
+			BinShape shape = shapes.get(i);
+			int count = 0;
+			for (int j = i+1; shape.intersects(shapes.get(j)) && j < shapes.size()-1;j++) {
+				shape.addShape(shapes.get(j));
+				count++;
+			}
+			united.add(shape);
+			i+=count;
+		}
+		return united;
 	}
 	
 	
