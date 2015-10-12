@@ -109,6 +109,23 @@ public class NNWrapper {
 		return sb.toString();
 	}
 	
+	public static String nnOutputToSymbols(double[] nnoutput, double epsilon) {
+		StringBuffer sb = new StringBuffer("[");
+		int found = 0;
+		char ch = 0;
+		for (int i = 0; i < nnoutput.length; i ++) {
+			if (nnoutput[i]> epsilon) {
+				found++;
+				ch = NNAnalysis.getChar(i);
+			}
+		}
+		if (found == 1 )
+			sb.append(ch);
+		else sb.append("*");
+		
+		return sb.toString();
+	}
+	
 	public String getLPString(List<Mat> pieces) {
 		StringBuilder sb = new StringBuilder();
 		
