@@ -3,11 +3,15 @@ package ru.recog.imgproc;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import ru.recog.ImageUtils;
+
 public class Binarization implements ImageProcessor {
 	
 	private double threshold;
 	private double maxValue;
 	private int binType;
+	
+	public static final int BIN_LOCAL_TYPE = 129;
 	
 	
 	public Binarization(double threshold, double maxValue, int binType) {
@@ -20,7 +24,10 @@ public class Binarization implements ImageProcessor {
 	@Override
 	public Mat processImage(Mat m) {
 		Mat pm = new Mat(m.size(), m.type());
-		Imgproc.threshold(m, pm, threshold, maxValue, binType);
+		if (binType == BIN_LOCAL_TYPE)
+			pm = ImageUtils.localbin(m, threshold);
+		else
+			Imgproc.threshold(m, pm, threshold, maxValue, binType);
 		return pm;
 
 	}
