@@ -26,8 +26,8 @@ public class Contours {
 		}
 	};
 	
-	public static void darkside() {
-		List<File> files = Utils.getOrderedList("/Users/pps/dev/newnumbers");
+	public static void darkside(String source) {
+		List<File> files = Utils.getOrderedList(source);
 		LabelFrame lf = new LabelFrame("Hola!");
 		lf.setPreferredSize(new Dimension(800,600));
 		lf.setSize(800,600);
@@ -73,7 +73,7 @@ public class Contours {
 	
 	public static void main(String[] args) {
 		
-		darkside();
+		darkside(args[0]);
 		/*
 		//load image
 		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame100001.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
