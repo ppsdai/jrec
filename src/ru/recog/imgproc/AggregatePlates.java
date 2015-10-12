@@ -53,7 +53,7 @@ public class AggregatePlates {
     
     
     public AggregatePlates() {
-    	this(new CascadeClassifier( Utils.CASCADE_LPR.getFile()) );
+    	this(new CascadeClassifier( Utils.CASCADE_LPR_PATH) );
 	}
     
     public AggregatePlates(CascadeClassifier cl) {
@@ -116,6 +116,7 @@ public class AggregatePlates {
 				Plate p = it.next();
 				if (p.getLastAddedTime() != t) {
 					finalPlateList.add(p);
+					System.out.println(" Added ");
 					it.remove();
 				}
 			}
@@ -206,14 +207,15 @@ public class AggregatePlates {
 	public static void main(String[] args) throws Exception {
 		
 		AggregatePlates ap = new AggregatePlates();
-		ap.loadFolder("/Users/pps/frames/046");
+		ap.loadFolder("C:\\dev\\frames\\VNew\\1411");
+		//ap.loadFolder("C:\\dev\\frames\\Try");
 		System.out.println("Total frames: "+ap.getFrames());
 		System.out.println(" Detected Numbers Count: " + ap.getDetections());
 		ap.process();
 		
 		System.out.println(ap.getPlates());
 		
-		savePlates("/Users/pps/dev/aggr", ap.getPlates(), "V046");
+		savePlates("C:\\dev\\frames\\VNew\\detected1411", ap.getPlates(), "V1411");
 
 //		System.out.println(readFormattedFolder("/Users/pps/dev/aggr"));
 	}

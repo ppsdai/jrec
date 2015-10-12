@@ -22,13 +22,10 @@ public class Segmenter {
 
 	public static void main(String[] args) throws IllegalArgumentException {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-	/*	
-		NNWrapper nn = new NNWrapper("c:\\dev\\Net496021.nnet", 
-				new MultipleFeatureExtractor(new AreaFeatureExtractor(),
-						new GravityGridFeatureExtractor(10, 20),
-						new SymmetryFeatureExtractor(),
-						new EdgeIntersectionFeatureExtractor(3, 3)));
-		*/
+		
+		NNWrapper nn = new NNWrapper("C:\\dev\\frames\\AllSegmented\\NN\\BSS724021.nnet", 
+				new MultipleFeatureExtractor(new OverlapGradientGridFeatureExtractor()));
+		
 		CompoundImageProcessor cip = new CompoundImageProcessor();
 		cip.addImageProcessor(new Binarization(40, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU));
 //		cip.addImageProcessor(new LocalBinarization(0.6));
@@ -36,7 +33,8 @@ public class Segmenter {
 		cip.addImageProcessor(new Cropper());
 		
 		
-		File dir = new File("c:\\dev\\PlatesSegmentation"); //Good");
+		//File dir = new File("C:\\dev\\frames\\VNew\\detected76635"); //Good");
+		File dir = new File("C:\\dev\\frames\\VNew\\detected1411"); //Good");
 		LabelFrame lf = new LabelFrame("GOOD", true);
 //
 //		
@@ -59,9 +57,11 @@ public class Segmenter {
 			
 			
 //			for (int p : points)
-			for (int p : result.getCutPoints())
-				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
-			lf.addImage(m1, filename , 5);  //"orig"
+//			for (int p : result.getCutPoints())
+//				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
+			for (Rect r : result.getRevisedRectangles())
+				Imgproc.rectangle(m1, r.tl(), r.br(), new Scalar(0,255,0));
+			lf.addImage(m1, nn.getLPString(result.getRevisedSegments()) , 5);  //"orig"
 /*			
 			for (Mat piece : pieces) {
 				Mat proc = cip.processImage(piece);

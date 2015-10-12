@@ -221,13 +221,53 @@ public class SegmentationLog {
 		
 	}
 	
-	public static void main(String[] args) throws Exception {
-		testShit("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
+	public static void regionTest(String picFolder, String seglogFilename) throws Exception {
+		LabelFrame lf = new LabelFrame("region TEST");
 		
+		
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
+		int total = 0;
+		int wrong = 0;
+		for (SegmentationLogEntry entry : entries) {
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			total++;
+			
+//			System.out.println(entry);
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+			System.out.println(name);
+
+			Mat m = Imgcodecs.imread(entry.getFilename(), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+
+			Mat c = ImageUtils.bin2color(m);
+				for (Rect r : entry.getRectangles())
+					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+				lf.addImage(c, "SLE",3);
+			
+			}
+		
+		System.out.println("Total: "+total+" wrong: "+wrong);
+		lf.pack();
+		lf.setVisible(true);
+		
+		
+		
+	}
+	
+	
+	public static void main(String[] args) throws Exception {
+		//testShit("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
 		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
 		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
 		//testShit("C:\\dev\\frames\\processed047", "C:\\dev\\frames\\segmented047\\seglog047.txt");
 		//testShit("c:\\CppProjects\\detected", "C:\\dev\\frames\\segmented\\seglog.txt");
+		
+		
+		regionTest("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
+		
 //		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
 //		for (SegmentationLogEntry entry : list)
 //			System.out.println(entry);

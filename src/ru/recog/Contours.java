@@ -26,7 +26,10 @@ public class Contours {
 	};
 	
 	public static void darkside() {
-		List<File> files = Utils.getOrderedList("/Users/pps/dev/SFAULT_0");
+		//List<File> files = Utils.getOrderedList("/Users/pps/dev/SFAULT_0");
+		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented051\\SFAULT");
+		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented050\\SFAULT");
+		List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented049\\SFAULT");
 		LabelFrame lf = new LabelFrame("Hola!");
 		lf.setPreferredSize(new Dimension(800,600));
 		lf.setSize(800,600);

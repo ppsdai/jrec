@@ -73,7 +73,8 @@ public class FrameBuilder {
 					+videoCapture.get(Videoio.CAP_PROP_POS_MSEC));
 			totalFrameCount++;
 			if (!IsCloseToBackground(m)) {
-				Imgcodecs.imwrite(fullPath("frame".concat(String.valueOf(mspos2))),m);
+				//Imgcodecs.imwrite(fullPath("frame".concat(String.valueOf(mspos2))),m);
+				Imgcodecs.imwrite(fullPath("frame".concat(String.valueOf((int) 40*pos/24))),m); // fixing names problem
 				savedFrameCount++;
 			}
 //			Imgcodecs.imwrite("/Users/pps/dev/frames4/frame".concat(String.valueOf(mspos2)).concat(".png"), m);

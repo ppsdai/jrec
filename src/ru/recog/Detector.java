@@ -38,8 +38,8 @@ public class Detector {
 	public static void main(String[] args) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		Detector d = new Detector();
-		File dest = new File("/Users/pps/dev/detected46");
-		for (File f : Utils.getOrderedList("/Users/pps/frames/046")) {
+		File dest = new File("C:\\dev\\moldava");
+		for (File f : Utils.getOrderedList("C:\\dev\\moldava")) {
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
 			MatOfRect mr = d.detect(m);
 			if (!mr.empty()) {
