@@ -10,6 +10,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.*;
+//import ru.recog.segment.SBSegmenter;
 
 public class Contours {
 	
@@ -25,19 +26,19 @@ public class Contours {
 		}
 	};
 	
-	public static void darkside() {
-		//List<File> files = Utils.getOrderedList("/Users/pps/dev/SFAULT_0");
-		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented051\\SFAULT");
-		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented050\\SFAULT");
-		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented049\\SFAULT");
-		
-		List<File> files = Utils.getOrderedList("C:\\dev\\PlatesSegmentation");
+
+	public static void darkside(String source) {
+		List<File> files = Utils.getOrderedList(source);
 		LabelFrame lf = new LabelFrame("Hola!");
 		lf.setPreferredSize(new Dimension(800,600));
 		lf.setSize(800,600);
 		lf.setVisible(true);
 		
+		
+		int count =0;
 		for (File f : files) {
+			count++;
+			if (count > 300) break;
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			
 			Mat b6 = ImageUtils.localbin(m, 0.6);
@@ -50,6 +51,8 @@ public class Contours {
 			
 			
 			Mat b4 = ImageUtils.localbin(m, 0.4);
+//			Mat b4 = SBSegmenter.BIN_OTSU.processImage(m);
+			
 			shapes = ShapeBasedSegmenter.getFinalShapes(b4);
 			Mat c4 = ImageUtils.bin2color(b4);
 			for (BinShape shape : shapes) {
@@ -60,8 +63,10 @@ public class Contours {
 			SegmentationResult sr0 = Segmenter.segment(m);
 			lf.addImage(ImageUtils.drawSegLines(m, sr0), "orig", 3);
 			
-			SegmentationResult sr1 = Segmenter.shapesegment(m);
-			lf.addImage(ImageUtils.drawSegLines(m, sr1), "shm", 3);
+//    		SegmentationResult sr1 = SBSegmenter.shapesegment(m);
+//			SegmentationResult sr1 = SBSegmenter.segment(m, SBSegmenter.BIN_OTSU);
+
+//			lf.addImage(ImageUtils.drawSegLines(m, sr1), "shm", 3);
 
 		}
 		
@@ -69,7 +74,7 @@ public class Contours {
 	
 	public static void main(String[] args) {
 		
-		darkside();
+		darkside(args[0]);
 		/*
 		//load image
 		Mat m = Imgcodecs.imread("/Users/pps/dev/detected/frame100001.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);

@@ -195,6 +195,26 @@ public class ImageUtils {
 		return lb;
 	}
 	
+	
+	public static double contrastRMS(Mat om) {
+		if (om.channels() > 1) {
+			System.out.println("We only work with single channel images for now");
+			return -1;
+		}
+		
+		Mat m = om.clone();
+		for (int row = 0; row < m.rows(); row++)
+			for (int col = 0; col < m.cols(); col++)
+				m.put(row, col, m.get(row, col)[0]/255);
+		
+		double mean = Core.mean(m).val[0];
+		double sum = 0;
+		for (int row = 0; row < m.rows(); row++)
+			for (int col = 0; col < m.cols(); col++)
+				sum+=Math.pow(m.get(row, col)[0]-mean, 2);
+		return Math.sqrt(sum/m.rows()/m.cols());
+	}
+	
 	public static Mat localbin(Mat m, double threshK) {
 		//TODO remove copying from Mat and back to it
 		

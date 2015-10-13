@@ -76,18 +76,13 @@ public class LPR {
 		pp.setVisible(true);
 		
 		BlockingQueue<Mat> queue = new LinkedBlockingQueue<Mat>();
-		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video-046.avi", queue);
+		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video_ador7_92_20150807_09-30.avi", queue);
 		Thread t1 = new Thread(producer);
 		t1.start();
 		
 		ag.setQueue(queue);
 		Thread t2 = new Thread(ag);
 		t2.start();
-		
-//		CvType.typeToString(type)
-		
-//		ag.loadFolder("/Users/pps/frames/046");
-		
 		
 		
 	}

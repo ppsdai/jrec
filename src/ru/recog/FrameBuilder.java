@@ -31,6 +31,7 @@ public class FrameBuilder {
 	public FrameBuilder(String videoURL, String folderURL) throws IOException {
 //		makeDir(videoURL);
 		videoCapture = new BasicVideoCapture(videoURL);
+		BasicVideoCapture.printVCInfo(videoCapture, System.out);
 		makeDir(folderURL);
 		
 	}

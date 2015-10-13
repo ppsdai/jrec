@@ -38,21 +38,28 @@ public class Detector {
 	public static void main(String[] args) {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
+		//Detector d = new Detector(Utils.CASCADE_LPR_PATH, new Size(30,10), new Size(360,120), 0.05);
+
 		Detector d = new Detector();
-		File dest = new File("C:\\dev\\moldava");
-		for (File f : Utils.getOrderedList("C:\\dev\\moldava")) {
-/*
-		Detector d = new Detector(Utils.CASCADE_LPR_PATH, new Size(30,10), new Size(360,120), 0.05);
+
 		File dest = new File(args[1]);
+		File numDest = null;
+		if (args.length == 3) 
+			numDest = new File(args[2]);
+		long t0 = System.currentTimeMillis();
+		
 		for (File f : Utils.getOrderedList(args[0])) {
-*/
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
 			MatOfRect mr = d.detect(m);
 			System.out.println(mr);
 			if (!mr.empty()) {
+				long t1 = System.currentTimeMillis();
 				for (Rect r : mr.toArray())
 					Imgproc.rectangle(m, r.tl(), r.br(), new Scalar(0,255,0));
 				Imgcodecs.imwrite(Utils.fullPath(dest, f.getName()),m);
+				if (numDest!=null ) {
+					String name = "frame"+(t1-t0)+".png";
+				}
 			}
 		}
 			
