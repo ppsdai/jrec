@@ -29,7 +29,9 @@ public class Contours {
 		//List<File> files = Utils.getOrderedList("/Users/pps/dev/SFAULT_0");
 		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented051\\SFAULT");
 		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented050\\SFAULT");
-		List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented049\\SFAULT");
+		//List<File> files = Utils.getOrderedList("C:\\dev\\frames\\segmented049\\SFAULT");
+		
+		List<File> files = Utils.getOrderedList("C:\\dev\\PlatesSegmentation");
 		LabelFrame lf = new LabelFrame("Hola!");
 		lf.setPreferredSize(new Dimension(800,600));
 		lf.setSize(800,600);
@@ -39,7 +41,7 @@ public class Contours {
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			
 			Mat b6 = ImageUtils.localbin(m, 0.6);
-			List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6);
+			List<BinShape> shapes = ShapeBasedSegmenter.getAllShapes(b6); //FinalShapes(b6);
 			Mat c6 = ImageUtils.bin2color(b6);
 			for (BinShape shape : shapes) {
 				Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));

@@ -306,6 +306,7 @@ public class SegmentationLog {
 		lf.setVisible(true);
 	}
 	
+/*	
 <<<<<<< HEAD
 	public static void regionTest(String picFolder, String seglogFilename) throws Exception {
 		LabelFrame lf = new LabelFrame("region TEST");
@@ -348,17 +349,17 @@ public class SegmentationLog {
 		
 		
 	}
-	
+*/	
 	
 	public static void main(String[] args) throws Exception {
-		//testShit("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
+	    testShit("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
 		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
 		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
 		//testShit("C:\\dev\\frames\\processed047", "C:\\dev\\frames\\segmented047\\seglog047.txt");
 		//testShit("c:\\CppProjects\\detected", "C:\\dev\\frames\\segmented\\seglog.txt");
 		
 		
-		regionTest("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
+		//regionTest("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
 		
 //		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
 //		for (SegmentationLogEntry entry : list)

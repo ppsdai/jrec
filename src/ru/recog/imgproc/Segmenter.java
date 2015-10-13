@@ -61,7 +61,7 @@ public class Segmenter {
 //				Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
 			for (Rect r : result.getRevisedRectangles())
 				Imgproc.rectangle(m1, r.tl(), r.br(), new Scalar(0,255,0));
-			lf.addImage(m1, nn.getLPString(result.getRevisedSegments()) , 5);  //"orig"
+			lf.addImage(m1, nn.getLPString(result.getRevisedSegments()) + " " + filestr , 5);  //"orig"
 /*			
 			for (Mat piece : pieces) {
 				Mat proc = cip.processImage(piece);
