@@ -18,6 +18,9 @@ import ru.recog.ui.PlatePanel;
 public class ImageUtils {
 	
 	public static final Scalar GREEN = new Scalar(0,255,0);
+	public static final Scalar BLUE = new Scalar(255,0,0);
+	public static final Scalar RED = new Scalar(0,0,255);
+
 	
 	
 	public static Image concatImages(BufferedImage...images) {
@@ -49,8 +52,15 @@ public class ImageUtils {
 	
 	public static Mat drawSegLines(Mat m, SegmentationResult result) {
 		Mat cvt = bin2color(m);
-		for (int p : result.getCutPoints())
-			Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), new Scalar(0,255,0));
+		List<Integer> points = result.getCutPoints();
+		for (int p : points)
+			if (points.indexOf(p)==0)
+				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), RED);
+			else if (points.indexOf(p)==points.size()-1)
+				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), BLUE);
+			else
+				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), GREEN);
+
 		
 		Imgproc.line(cvt, new Point(0,result.getUpperBound()), new Point(cvt.cols()-1, result.getUpperBound()),
 				new Scalar(0,255,0));
