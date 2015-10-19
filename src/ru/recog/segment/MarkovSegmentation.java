@@ -58,7 +58,6 @@ public class MarkovSegmentation {
 		LabelFrame lf = new LabelFrame(picFolder);
 		
 		
-		Distribution[] SD = MarkovLD.buildLengthDistribution();
 		MarkovLD mld = MarkovLD.getDefaultMLD();
 //		Arrays.fill(SD, new Distrib());
 		
@@ -67,12 +66,6 @@ public class MarkovSegmentation {
 		double[] l1 = new double[] {1,1,1,1,1,1};
 		System.out.println(mld.probability(l1));
 		
-//		Mat m = Imgcodecs.imread("/Users/pps/dev/Preprocessing/Good_plates/2.bmp",
-//				Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//		
-//		SegmentationResult sr = MarkovSegmentation.segment(m, SD);
-//		
-//		System.out.println(sr.getCutPoints());
 			
 		for (File f : Utils.getOrderedList("/Users/pps/dev/newnumbers")) {
 			Mat pm = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
@@ -141,22 +134,21 @@ public class MarkovSegmentation {
 					for (int i6 = 1; i6<=3; i6++) {
 						if (startingPoint+i1+i2+i3+i4+i5+i6>=localMinimums.size()) probList.add(0.0);
 						else {
-							int[] points = new int[7];
-							points[0] = localMinimums.get(startingPoint);
-							points[1] = localMinimums.get(startingPoint+i1);
-							points[2] = localMinimums.get(startingPoint+i1+i2);
-							points[3] = localMinimums.get(startingPoint+i1+i2+i3);
-							points[4] = localMinimums.get(startingPoint+i1+i2+i3+i4);
-							points[5] = localMinimums.get(startingPoint+i1+i2+i3+i4+i5);
-							points[6] = localMinimums.get(startingPoint+i1+i2+i3+i4+i5+i6);
+							CutIndices indices = new CutIndices(startingPoint,
+									startingPoint+i1,
+									startingPoint+i1+i2,
+									startingPoint+i1+i2+i3,
+									startingPoint+i1+i2+i3+i4,
+									startingPoint+i1+i2+i3+i4+i5,
+									startingPoint+i1+i2+i3+i4+i5+i6);
 							
-							int length = points[6] - points[0];
-							if (points[6] > (double) m.cols()*400/527 || length >= (double) m.cols()*400/527 || length <= m.cols()/2) 
+							int[] points = indices.getPoints(localMinimums);
+							
+							if (!pointsAcceptable(points, m)) 
 								probList.add(0.0);
 							else {
 								double[] ls = buildLength(points);
 								double p = mld.probability(ls);
-	//							System.out.println(Arrays.toString(points)+" - "+p);
 								probList.add(p);
 							}
 							
@@ -180,9 +172,6 @@ public class MarkovSegmentation {
 		int i1 = (N % 3) +1;
 		N = N / 3;
 		int startingPoint = N ;
-		
-		
-		System.out.println("Cuts "+startingPoint+" "+i1+" "+i2+" "+i3+" "+i4+" "+i5+" "+i6);
 		
 		List<Integer> cutPoints = new ArrayList<Integer>();
 		cutPoints.add(localMinimums.get(startingPoint));
@@ -224,9 +213,6 @@ public class MarkovSegmentation {
 		if (!localMinimums.contains(0)) localMinimums.add(0, 0);
 		if (!localMinimums.contains(m.cols()-1)) localMinimums.add(m.cols()-1);
 		
-//		System.out.println(localMinimums);
-		
-//		List<Double> probList = new ArrayList<Double>();
 		Map<CutIndices, Double> cutMap = new HashMap<CutIndices,Double>();
 		
 		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
@@ -238,15 +224,6 @@ public class MarkovSegmentation {
 					for (int i6 = 1; i6<=3; i6++) {
 						if (startingPoint+i1+i2+i3+i4+i5+i6>=localMinimums.size()) continue;
 						else {
-//							int[] points = new int[7];
-//							points[0] = localMinimums.get(startingPoint);
-//							points[1] = localMinimums.get(startingPoint+i1);
-//							points[2] = localMinimums.get(startingPoint+i1+i2);
-//							points[3] = localMinimums.get(startingPoint+i1+i2+i3);
-//							points[4] = localMinimums.get(startingPoint+i1+i2+i3+i4);
-//							points[5] = localMinimums.get(startingPoint+i1+i2+i3+i4+i5);
-//							points[6] = localMinimums.get(startingPoint+i1+i2+i3+i4+i5+i6);
-							
 							CutIndices indices = new CutIndices(startingPoint,
 									startingPoint+i1,
 									startingPoint+i1+i2,
@@ -257,7 +234,6 @@ public class MarkovSegmentation {
 							
 							
 							int[] points = indices.getPoints(localMinimums);
-							int length = points[6] - points[0];
 							if (pointsAcceptable(points, m)) {
 								double[] ls = buildLength(points);
 								double p = mld.probability(ls);
@@ -270,10 +246,7 @@ public class MarkovSegmentation {
 			
 		}
 		
-		System.out.println(cutMap.size());
-		
 		SortedMap<Integer, Double> lineMap = new TreeMap<Integer,Double>();
-		
 		
 		List<AdvancedSegmentationResult> results = new ArrayList<AdvancedSegmentationResult>();
 		for (CutIndices indices : cutMap.keySet()) {
