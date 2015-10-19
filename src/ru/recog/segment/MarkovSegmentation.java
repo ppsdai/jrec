@@ -10,7 +10,19 @@ import org.opencv.imgcodecs.Imgcodecs;
 import ru.recog.*;
 import ru.recog.imgproc.*;
 
-public class MarkovSegmentation {
+public class MarkovSegmentation implements Segmentation {
+	
+	private MarkovLD mld;
+	
+	private static MarkovSegmentation defaultMS = null;
+	
+	public MarkovSegmentation() {
+		mld = MarkovLD.getDefaultMLD();
+	}
+	
+	private static void buildDefaultMS() {
+		if (defaultMS == null) defaultMS = new MarkovSegmentation();
+	}
 	
 	public static class CutIndices {
 		private int[] indices;
@@ -191,6 +203,96 @@ public class MarkovSegmentation {
 		return multisegment(m, MarkovLD.getDefaultMLD());
 	} 
 	
+	public List<? extends SegmentationResult> segment(Mat m) {
+		AdvancedSegmentationResult segResult = new AdvancedSegmentationResult();
+		segResult.setOriginalMat(m.clone());
+		SBSegmenter.verticalCut(segResult);
+		
+		int[] projX = new int[m.cols()];
+		Arrays.fill(projX, 0);
+		for (int col=0; col < m.cols(); col ++)
+			for (int row = segResult.getUpperBound(); row <= segResult.getLowerBound(); row++)
+				projX[col] += 255 - (int) m.get(row, col)[0];
+		
+		segResult.setIntensity(new MatOfInt(projX));
+		
+		List<Integer> localMinimums = new ArrayList<Integer>();
+		for (int x = 1; x < m.cols()-1; x++) {
+			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
+		}
+		
+		if (!localMinimums.contains(0)) localMinimums.add(0, 0);
+		if (!localMinimums.contains(m.cols()-1)) localMinimums.add(m.cols()-1);
+		
+		Map<CutIndices, Double> cutMap = new HashMap<CutIndices,Double>();
+		
+		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
+			for (int i1 = 1; i1<=3; i1++)
+			 for (int i2 = 1; i2<=3; i2++)
+	 		  for (int i3 = 1; i3<=3; i3++)
+				for (int i4 = 1; i4<=3; i4++)
+				 for (int i5 = 1; i5<=3; i5++)
+					for (int i6 = 1; i6<=3; i6++) {
+						if (startingPoint+i1+i2+i3+i4+i5+i6>=localMinimums.size()) continue;
+						else {
+							CutIndices indices = new CutIndices(startingPoint,
+									startingPoint+i1,
+									startingPoint+i1+i2,
+									startingPoint+i1+i2+i3,
+									startingPoint+i1+i2+i3+i4,
+									startingPoint+i1+i2+i3+i4+i5,
+									startingPoint+i1+i2+i3+i4+i5+i6);
+							
+							
+							int[] points = indices.getPoints(localMinimums);
+							if (pointsAcceptable(points, m)) {
+								double[] ls = buildLength(points);
+								double p = mld.probability(ls);
+								if (p!=0)
+								cutMap.put(indices, p);
+							}
+							
+						}
+					}
+			
+		}
+		
+		SortedMap<Integer, Double> lineMap = new TreeMap<Integer,Double>();
+		
+		List<AdvancedSegmentationResult> results = new ArrayList<AdvancedSegmentationResult>();
+		for (CutIndices indices : cutMap.keySet()) {
+			AdvancedSegmentationResult newResult = cloneResult(segResult);
+			List<Integer> cutPoints = indices.getPointsList(localMinimums);
+			newResult.alpha = 0;//calcAlpha(indices.getPoints(localMinimums), localMinimums, projX);
+			newResult.setCutPoints(cutPoints);
+			newResult.energy = calcEnergy(cutPoints, projX);
+			newResult.probability = cutMap.get(indices);
+			for (Integer i : cutPoints) {
+				double val = newResult.energy * newResult.probability;
+				double cval = lineMap.getOrDefault(i, 0.0);
+				lineMap.put(i, cval+val);
+			}
+				
+			results.add(newResult);
+		}
+		
+		AdvancedSegmentationResult newResult = cloneResult(segResult);
+		newResult.energy = -1;
+		
+		newResult.probability = -1;
+		newResult.setCutPoints(findBestLines(lineMap));
+		Collections.sort(newResult.getCutPoints());
+		
+		results.add(0,newResult);
+		
+		return results;
+
+	}
+	
+	public List<? extends SegmentationResult> segment(Mat m, double...paramaters) {
+		return segment(m);
+	}
+	
 	
 	public static List<AdvancedSegmentationResult> multisegment(Mat m, MarkovLD mld) {
 		AdvancedSegmentationResult segResult = new AdvancedSegmentationResult();
@@ -282,7 +384,6 @@ public class MarkovSegmentation {
 			@Override
 			public int compare(Entry<Integer, Double> o1,
 					Entry<Integer, Double> o2) {
-				// TODO Auto-generated method stub
 				return Double.compare(o1.getValue(), o2.getValue());
 			}
 		});

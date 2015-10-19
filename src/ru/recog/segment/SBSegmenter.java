@@ -8,7 +8,7 @@ import org.opencv.imgproc.Imgproc;
 import ru.recog.ImageUtils;
 import ru.recog.imgproc.*;
 
-public class SBSegmenter {
+public class SBSegmenter implements Segmentation {
 	
 	
 	public static final ImageProcessor BIN_OTSU = new Binarization(40, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU);
@@ -28,20 +28,12 @@ public class SBSegmenter {
 		this(BIN_LOCAL06);
 	}
 	
-	
 
 	public static void main(String[] args) throws IllegalArgumentException {
 		
 		
 	}
 
-	
-	
-	
-	public SegmentationResult segment(Mat m) {
-		return segment(m, processor);
-	}
-	
 	public SegmentationResult sobelsegment(Mat m) {
 		SegmentationResult segResult = new SegmentationResult();
 		segResult.setOriginalMat(m.clone());
@@ -66,20 +58,6 @@ public class SBSegmenter {
 			if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) localMaximums.add(x);
 			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
 		}
-		
-//		Mat sobely = new Mat(m.size(), m. type());
-//		Imgproc.Sobel(m.clone(), sobely, CvType.CV_32F, 0, 1);
-//		
-//		projX = new int[m.cols()];
-//		Arrays.fill(projX, 0);
-//		for (int col=0; col < m.cols(); col ++)
-//			for (int row = 0; row <= sobely.rows()-1; row++)
-//				projX[col] += Math.abs(sobely.get(row, col)[0]);
-//		
-//		List<Integer> sobelYMinimums = new ArrayList<Integer>();
-//		for (int x = 1; x < m.cols()-1; x++) {
-//			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) sobelYMinimums.add(x);
-//		}
 		
 		List<Integer> sobelXMinimums = sobelCurve(m, 1, 0);
 		List<Integer> sobelYMinimums = sobelCurve(m, 0, 1);
@@ -131,7 +109,7 @@ public class SBSegmenter {
 		return processor;
 	}
 
-	public SegmentationResult segment(Mat m, ImageProcessor processor) {
+	public List<? extends SegmentationResult> segment(Mat m, ImageProcessor processor) {
 		SegmentationResult segResult = new SegmentationResult();
 		segResult.setOriginalMat(m.clone());
 		verticalCut(segResult);
@@ -226,7 +204,7 @@ public class SBSegmenter {
 		
 		segResult.setCutPoints(uniteClosePoints(divPoints));
 		
-		return segResult;
+		return Collections.singletonList(segResult);
 	}
 	
 	
@@ -355,6 +333,18 @@ public class SBSegmenter {
 				return false;
 		
 		return true;
+	}
+
+	@Override
+	public List<? extends SegmentationResult> segment(Mat m) {
+		return segment(m, processor);
+	}
+
+	@Override
+	public List<? extends SegmentationResult> segment(Mat m,
+			double... parameters) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

@@ -2,9 +2,7 @@ package ru.recog.segment;
 
 import java.util.*;
 
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Mat;
 
 /**
  *  
@@ -35,8 +33,8 @@ public class SegData {
 	public SegData(Mat m, int ub, int lb){
 		
 		originalM = m.clone();
-		this.setUpperBound(ub);
-		this.setLowerBound(lb);
+		setUpperBound(ub);
+		setLowerBound(lb);
 		this.calculateProjection();
 		this.calculateLocalMaximums();
 		this.calculateLocalMinimums();
@@ -64,12 +62,12 @@ public class SegData {
     method calculates a projection *
     of gray scale array */
 	public void calculateProjection() {
-	
-	projX = new int[originalM.cols()];	
-	Arrays.fill(projX, 0);
-	for (int col=0; col < originalM.cols(); col ++)
-		for (int row = upperBound; row <= lowerBound; row++)
-			projX[col] += 255 - (int) originalM.get(row, col)[0];
+
+		projX = new int[originalM.cols()];
+		Arrays.fill(projX, 0);
+		for (int col = 0; col < originalM.cols(); col++)
+			for (int row = upperBound; row <= lowerBound; row++)
+				projX[col] += 255 - (int) originalM.get(row, col)[0];
 	}
 	
 	
