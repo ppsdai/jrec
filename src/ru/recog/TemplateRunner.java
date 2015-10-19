@@ -27,6 +27,8 @@ public class TemplateRunner {
 		big = new LPTemplate(131, 37, squares);
 //		big.cutTop(4);
 //		big.cutBottom(6);
+//		big.cutLeft(10);
+//		big.cutRight(5);
 	}
 
 	public static void main(String[] args) {
@@ -80,7 +82,9 @@ public class TemplateRunner {
 	}
 	
 	public static void doit() {
+//		List<File> files = Utils.getOrderedList("/Users/pps/dev/Preprocessing/Good_plates");
 		List<File> files = Utils.getOrderedList("/Users/pps/dev/TEMPLATE");
+
 		LabelFrame lf = new LabelFrame("Hola!");
 //		lf.pack();
 //		lf.setVisible(true);
@@ -89,9 +93,11 @@ public class TemplateRunner {
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			TemplateRunner tr = new TemplateRunner();
 			tr.buildTemplate();
+			tr.big.scaleToHeight(m.rows());
 			tr.big.printTemplate();
 			Point p = getTemplatePoint(m, tr.big);
-			drawTemplateAtPoint(tr.big, p, m);
+			if (p!=null)
+				drawTemplateAtPoint(tr.big, p, m);
 			lf.addImage(m, f.getName(), 3);
 
 		}
@@ -121,6 +127,7 @@ public class TemplateRunner {
 		long t1 = System.currentTimeMillis();
 //		Map<Point, Double> map = template.scan(m1, template);
 		Map<Point, Double> map = template.betterscan(m1);//, template);
+		if (map.isEmpty()) return null;
 
 		System.out.println(map);
 		long t2 = System.currentTimeMillis();
@@ -135,6 +142,7 @@ public class TemplateRunner {
 				return o1.getValue().compareTo(o2.getValue());
 			};
 		});
+		
 		
 //		for (Map.Entry<Point, Double> entry : list)
 //			System.out.println(entry.getValue()+" at "+entry.getKey().x+" "+entry.getKey().y);

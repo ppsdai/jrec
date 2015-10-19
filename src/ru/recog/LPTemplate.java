@@ -84,6 +84,21 @@ public class LPTemplate {
 	
 	public void cutBottom(int cut) {
 		height = height - cut;
+		calcAlpha();
+	}
+	
+	public void cutLeft(int cut) {
+		for (Square sq : squares) {
+			sq.point1.x = sq.point1.x - cut;
+			sq.point2.x = sq.point2.x - cut;
+		}
+		width = width - cut;
+		calcAlpha();
+	}
+	
+	public void cutRight(int cut) {
+		width = width - cut;
+		calcAlpha();
 	}
 	
 	public Map<Point, Double> betterscan(Mat m) {
