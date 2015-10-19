@@ -2,7 +2,9 @@ package ru.recog.segment;
 
 import java.util.*;
 
-import org.opencv.core.Mat;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 /**
  *  
@@ -22,21 +24,42 @@ public class SegData {
 	private List<Integer> localMaximums;
 	private List<Integer> minDepth;
 	private Mat originalM;
+	private List<List<Integer>> cutPointsList;
 	
 	private int upperBound, lowerBound;
+	
+	
     /**  
     constructor takes only matrix *
     as a parameter */
-	public SegData(Mat m){
+	public SegData(Mat m, int ub, int lb){
 		
 		originalM = m.clone();
+		this.setUpperBound(ub);
+		this.setLowerBound(lb);
+		this.calculateProjection();
+		this.calculateLocalMaximums();
+		this.calculateLocalMinimums();
+		this.calculateMinDepth();
+		//FIXME
+		// need to add boundary checks on minimums and maximums calculation
 	}
 	
+    /**  
+    method generates cuts *
+    that are stored in cutPointsList */
+	public void generateCuts(int startPoint){
+	
+		// start to go forward
+		
+		
+	}
 	
 	public int[] getProjection() {
 		
 	    return projX;
 	}
+	
     /**  
     method calculates a projection *
     of gray scale array */
@@ -164,7 +187,7 @@ public class SegData {
 	while (localMaximums.size() <= localMinimums.size())
 	  localMaximums.add(localMaximums.get(localMaximums.size() - 1));
 		
-	for (int x = 0; x < ( localMinimums.size() - 1); x++)
+	for (int x = 0; x <  localMinimums.size() ; x++)
 		minDepth.add( projX[localMaximums.get(x)] + projX[localMaximums.get(x + 1)]
 			- 2 * projX[localMinimums.get(x)] );
 		
@@ -194,4 +217,74 @@ public class SegData {
 		this.lowerBound = lowerBound;
 	}
 	
+	
+	/**  
+    method finds an intra symbols space *
+    according to some method *
+    */
+	public int findStartPoint( int findMethod, double approxPos) {
+	
+		int pointStart; 
+		int x;
+		int x_Max;
+		float ValueMax;
+		int x_Start;
+		
+		switch (findMethod){
+		case 0:  // old method of choosing the deepest minimumu
+			
+			pointStart = (int) Math.round(approxPos * originalM.cols());
+			x = 1;
+			while ((localMinimums.get(x) < pointStart) && x < localMinimums.size()  ) x++;
+
+			 x_Max = x;
+			 ValueMax = minDepth.get(x);
+			 x_Start = x;
+			for (x = 0; x < 5 && (x_Start - x > 0); x++) {
+				if (ValueMax < minDepth.get(x_Start - x)) {
+					ValueMax = minDepth.get(x_Start - x);
+					x_Max = x_Start - x;
+				}
+			}
+			return (x_Max);
+			//break;
+			
+		case 1:  // choosing position by absolute minimum
+			
+			pointStart = (int) Math.round(approxPos * originalM.cols());
+			x = 1;
+			while ((localMinimums.get(x) < pointStart) && x < localMinimums.size()  ) x++;
+			
+			x_Max = x;
+			ValueMax = projX[localMinimums.get(x)];
+			x_Start = x;
+			for (x = 0; x < 5 && (x_Start - x > 0); x++) {
+				if (ValueMax > projX[localMinimums.get(x_Start - x)]) {            // actually looking for a minimum
+					ValueMax = projX[localMinimums.get(x_Start - x)];
+					x_Max = x_Start - x;
+				}
+			}
+			return (x_Max);
+			//break;
+		
+		case 2:  // choosing position between shapes
+			 
+			break;
+
+		case 3:  // choosing position in minimums of sobel
+	
+			//Mat mTemp = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			//Imgproc.Sobel(mTemp.clone(), m, CvType.CV_32F, 0, 1);
+			//Core.absdiff(m, Scalar.all(0), m);
+            break;			
+			
+		default:
+			break;
+		
+			
+		}
+		
+		return 0;
+		
+	}
 }

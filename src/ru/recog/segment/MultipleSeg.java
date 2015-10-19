@@ -58,16 +58,26 @@ public class MultipleSeg {
 		Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 		Mat b = ImageUtils.localbin(m.clone(), 0.6);  //0.6
 		
-		int median = m.rows() / 2;
-		SegData trySegment = new SegData(m);
-		trySegment.setUpperBound(median - leInteger);
-		trySegment.setLowerBound(median + leInteger);
-		trySegment.calculateProjection();
-		trySegment.calculateLocalMaximums();
-		trySegment.calculateLocalMinimums();
 		
-		lf.addImage(m1, key, 5);
-		lf.addImage( makeHistogram(m, trySegment, 5 ) ,"hist", 1);
+		int median = m.rows() / 2;
+		SegData trySegment = new SegData(m, median - leInteger, median + leInteger );
+		
+		// first method looking for starting point
+		int sPoint1 = trySegment.findStartPoint(0, 0.4);
+		int xCoord1 = trySegment.getLocalMinimums().get(sPoint1);
+		int xCoord2 = trySegment.getLocalMinimums().get(sPoint1 + 1);
+		Imgproc.line(m1, new Point(xCoord1, 0), new Point(xCoord1, m1.rows()-1), new Scalar(0,255,0));
+		Imgproc.line(m1, new Point(xCoord2, 0), new Point(xCoord2, m1.rows()-1), new Scalar(125,0,0));
+		//second looking for starting point
+		sPoint1 = trySegment.findStartPoint(1, 0.5);
+		xCoord1 = trySegment.getLocalMinimums().get(sPoint1);	
+		Imgproc.line(m1, new Point(xCoord1, 0), new Point(xCoord1, m1.rows()-1), new Scalar(0,0,125));
+		
+		// generate cut variants
+		// trySegment.generateCuts( sPoint1 );
+		
+		lf.addImage(m1, key, 8);
+		lf.addImage( makeHistogram(m, trySegment, 8 ) ,"hist", 1);
 	}
 	
 	lf.pack();
