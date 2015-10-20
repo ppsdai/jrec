@@ -92,37 +92,6 @@ public class MarkovLD {
 		return SD;
 	}
 
-	public static Distribution[] buildLengthDistribution() throws Exception {
-		Distribution[] SD = new Distribution[]{new Distribution(),new Distribution(),new Distribution(),
-				new Distribution(),new Distribution(),new Distribution()};
-		
-		long t0 = System.nanoTime();
-		
-		List<SegmentationLogEntry> totalEntries = new ArrayList<SegmentationLogEntry>();
-		totalEntries.addAll(SegmentationLog.readSegmentationLog("/Users/pps/dev/seglog/seglog047.txt"));
-		totalEntries.addAll(SegmentationLog.readSegmentationLog("/Users/pps/dev/seglog/seglog049.txt"));
-		totalEntries.addAll(SegmentationLog.readSegmentationLog("/Users/pps/dev/seglog/seglog050.txt"));
-	
-		for (SegmentationLogEntry entry : totalEntries) {
-			if (entry.getResult().equals("SUCCESS")) {
-				double[] probs = MarkovSegmentation.countProbs(entry);
-				for (int i = 0; i < 6; i++)
-					SD[i].addSample(probs[i]);
-			}
-	
-		}
-		
-		System.out.println("Build distribution in "+(System.nanoTime()-t0)/1000000+" ms");
-		for (Distribution d : SD) {
-			d.norm();
-			System.out.println(d);
-		}
-			
-		return SD;
-	}
-
-
-
 	public double probability(double[] lengths) {
 		if (lengths.length != distributions.length)
 			throw new IllegalArgumentException("MLD ERROR");

@@ -85,12 +85,14 @@ public class MarkovSegmentation implements Segmentation {
 	
 	public SegmentationResult segment(Mat m) {
 		
-		SegmentationData data = new SegmentationData(m);//, ub, lb);
+		// calculating vertical cuts, minimums, etc
+		SegmentationData data = new SegmentationData(m);
 		
 		if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
 		
 		Map<CutData, Double> cutMap = new HashMap<CutData,Double>();
 		
+		//building table of all cuts with probability above zero
 		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
 			for (int i1 = 1; i1<=3; i1++)
 			 for (int i2 = 1; i2<=3; i2++)
@@ -100,7 +102,7 @@ public class MarkovSegmentation implements Segmentation {
 					for (int i6 = 1; i6<=3; i6++) {
 						if (startingPoint+i1+i2+i3+i4+i5+i6>=data.getMinimums().size()) continue;
 						else {
-							CutData indices = new CutData(data,
+							CutData cut = new CutData(data,
 									startingPoint,
 									startingPoint+i1,
 									startingPoint+i1+i2,
@@ -110,23 +112,22 @@ public class MarkovSegmentation implements Segmentation {
 									startingPoint+i1+i2+i3+i4+i5+i6);
 							
 							
-							if (pointsAcceptable(indices.getCutPointsArray(), m)) {
-								double p = mld.probability(indices.buildLength());
+							if (pointsAcceptable(cut.getCutPointsArray(), m)) {
+								double p = mld.probability(cut.buildLength());
 								if (p!=0)
-									cutMap.put(indices, p);
+									cutMap.put(cut, p);
 							}
 						}
 					}
 			
 		}
 		
+		// now using table of cuts we find which lines are more likely to be actual segmentation lines
 		SortedMap<Integer, Double> lineMap = new TreeMap<Integer,Double>();
-		
-		for (CutData indices : cutMap.keySet()) {
-			List<Integer> cutPoints = indices.getCutPoints();
-			double energy = indices.calcEnergy(data);
-			double probability = cutMap.get(indices);
-			for (Integer i : cutPoints) {
+		for (CutData cut : cutMap.keySet()) {
+			double energy = cut.calcEnergy(data);
+			double probability = cutMap.get(cut);
+			for (Integer i : cut.getCutPoints()) {
 				double val = energy * probability;
 				double cval = lineMap.getOrDefault(i, 0.0);
 				lineMap.put(i, cval+val);
@@ -134,11 +135,12 @@ public class MarkovSegmentation implements Segmentation {
 				
 		}
 
+		// find top 7 lines and make sure they are in order
 		List<Integer> cutPoints = findBestLines(lineMap);
 		Collections.sort(cutPoints);
-		List<CutData> possibleCuts = new ArrayList<CutData>();
-		possibleCuts.add(new CutData(cutPoints));
-		possibleCuts.addAll(cutMap.keySet());
+		
+		List<CutData> possibleCuts = new ArrayList<CutData>(cutMap.keySet());
+		possibleCuts.add(0, new CutData(cutPoints)); //TODO it's possible that this one is already in the table somewhere
 		
 		return new SegmentationResult(data, possibleCuts);
 
@@ -159,7 +161,6 @@ public class MarkovSegmentation implements Segmentation {
 			}
 		});
 		Collections.reverse(entries);
-//		System.out.println(entries);
 		if (entries.size()< 7) return bestList;
 		else for (int i = 0; i < 7; i++) 
 			bestList.add(entries.get(i).getKey());

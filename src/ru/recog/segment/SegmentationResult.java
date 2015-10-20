@@ -5,9 +5,7 @@ import java.util.*;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.Contours;
 import ru.recog.ImageUtils;
-import ru.recog.imgproc.BinShape;
 
 public class SegmentationResult {
 	
@@ -95,7 +93,7 @@ public class SegmentationResult {
 			int topBorder = data.getUpperBound();
 			int bottomBorder = data.getLowerBound();
 			for (MatOfPoint mop : contours) {
-				Rect r = Contours.getContourRect(mop);
+				Rect r = ImageUtils.getContourRect(mop);
 				if (r.width < 25 && r.height < 30) {
 					if (r.y < data.getUpperBound() && (r.y+r.height) > data.getUpperBound() && r.y < topBorder)
 						topBorder = r.y;

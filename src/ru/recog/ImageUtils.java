@@ -3,8 +3,7 @@ package ru.recog;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.core.*;
@@ -12,9 +11,9 @@ import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.imgproc.*;
+import ru.recog.imgproc.CompoundImageProcessor;
+import ru.recog.imgproc.ImageProcessor;
 import ru.recog.segment.SegmentationResult;
-import ru.recog.ui.PlatePanel;
 
 public class ImageUtils {
 	
@@ -245,8 +244,8 @@ public class ImageUtils {
 		
 		
 		 double k =  - 0.0;  // - 0.2
-		 double k2 = 0.1;
-		 int R = 40;
+//		 double k2 = 0.1;
+//		 int R = 40;
 		 int y_smooth;
 
 		//d = round( 0.75 * ISqr_av);
@@ -428,6 +427,24 @@ public class ImageUtils {
 	    System.arraycopy(b, 0, targetPixels, 0, b.length);  
 	    return image;
 	
+	}
+
+	public static Rect getContourRect(MatOfPoint mop) {
+		Point p1 = null, p2 = null;
+		for (Point p : mop.toList()) {
+			//TODO think about the cases when points have negative values
+			if (p1 == null) {
+				p1 = new Point(p.x, p.y);
+				p2 = new Point(p.x, p.y);
+			} else {
+				if (p.x < p1.x) p1.x = p.x;
+				if (p.y < p1.y) p1.y = p.y;
+				if (p.x > p2.x) p2.x = p.x;
+				if (p.y > p2.y) p2.y = p.y;
+			}
+		}
+		return p1==null? new Rect(0,0,0,0) : new Rect(p1, p2);
+		
 	}
 	
 	//TODO for testing scale

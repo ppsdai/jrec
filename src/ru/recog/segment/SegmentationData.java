@@ -6,8 +6,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.ImageUtils;
-
 /**
  * 
  Segmentation Data Input: Mat - which should be a plate Image. Output: Useful

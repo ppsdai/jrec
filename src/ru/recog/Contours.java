@@ -21,8 +21,8 @@ public class Contours {
 	public static Comparator<MatOfPoint> RECT_COMPARATOR = new Comparator<MatOfPoint>() {
 		@Override
 		public int compare(MatOfPoint o1, MatOfPoint o2) {
-			Rect r1 = getContourRect(o1);
-			Rect r2 = getContourRect(o2);
+			Rect r1 = ImageUtils.getContourRect(o1);
+			Rect r2 = ImageUtils.getContourRect(o2);
 			return Integer.compare(r1.x, r2.x);
 		}
 	};
@@ -231,25 +231,6 @@ public class Contours {
 
 */
 
-	}
-	
-	
-	public static Rect getContourRect(MatOfPoint mop) {
-		Point p1 = null, p2 = null;
-		for (Point p : mop.toList()) {
-			//TODO think about the cases when points have negative values
-			if (p1 == null) {
-				p1 = new Point(p.x, p.y);
-				p2 = new Point(p.x, p.y);
-			} else {
-				if (p.x < p1.x) p1.x = p.x;
-				if (p.y < p1.y) p1.y = p.y;
-				if (p.x > p2.x) p2.x = p.x;
-				if (p.y > p2.y) p2.y = p.y;
-			}
-		}
-		return p1==null? new Rect(0,0,0,0) : new Rect(p1, p2);
-		
 	}
 	
 //	public static boolean isContourGood(MatOfPoint mop) {
