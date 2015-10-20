@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import ru.recog.LabelFrame;
@@ -23,19 +22,6 @@ public class MarkovSegmentation implements Segmentation {
 	
 	private static void buildDefaultMS() {
 		if (defaultMS == null) defaultMS = new MarkovSegmentation();
-	}
-	
-	public static double[] countProbs(SegmentationLog.SegmentationLogEntry sle) {
-		Rect r1 = sle.getRectangles().get(0);
-		Rect r2 = sle.getRectangles().get(5);
-		double length = r2.br().x-r1.x;
-		
-		double avLength = length/6;
-		double[] ls = new double[sle.getRectangles().size()];
-		for (int i = 0; i < sle.getRectangles().size(); i++) {
-			ls[i] = (double) sle.getRectangles().get(i).width/avLength;
-		}
-		return ls;
 	}
 	
 	public static void main(String[] args) throws Exception {

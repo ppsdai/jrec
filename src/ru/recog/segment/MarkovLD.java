@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
+import org.opencv.core.Rect;
+
 import ru.recog.segment.SegmentationLog.SegmentationLogEntry;
 
 public class MarkovLD {
@@ -76,7 +78,7 @@ public class MarkovLD {
 	
 		for (SegmentationLogEntry entry : totalEntries) {
 			if (entry.getResult().equals("SUCCESS")) {
-				double[] probs = MarkovSegmentation.countProbs(entry);
+				double[] probs = MarkovLD.countProbs(entry);
 				for (int i = 0; i < 6; i++)
 					SD[i].addSample(probs[i]);
 			}
@@ -101,6 +103,20 @@ public class MarkovLD {
 		return p;
 	}
 	
+	public static double[] countProbs(SegmentationLog.SegmentationLogEntry sle) {
+		Rect r1 = sle.getRectangles().get(0);
+		Rect r2 = sle.getRectangles().get(5);
+		double length = r2.br().x-r1.x;
+		
+		double avLength = length/6;
+		double[] ls = new double[sle.getRectangles().size()];
+		for (int i = 0; i < sle.getRectangles().size(); i++) {
+			ls[i] = (double) sle.getRectangles().get(i).width/avLength;
+		}
+		return ls;
+	}
+
+
 	public static double[] parseToDouble(String stringOfDoubles) {
 		List<Double> doubles = new ArrayList<Double>();
 		StringTokenizer st = new StringTokenizer(stringOfDoubles, ",");
