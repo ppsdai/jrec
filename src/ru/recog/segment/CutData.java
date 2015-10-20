@@ -18,7 +18,7 @@ public class CutData {
 	}
 	
 	
-	public int[] getPoints(SegmentationData data) {
+	public int[] getCutPointsArray() {
 		int[] points = new int[cutPoints.size()];
 		for (int i = 0; i < points.length; i++)
 			points[i] = cutPoints.get(i);

@@ -12,8 +12,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.ImageUtils;
-import ru.recog.imgproc.SegmentationResult;
 import ru.recog.imgproc.Segmenter;
+import ru.recog.segment.SegmentationResult;
 
 public class PlatePanel extends JPanel implements ActionListener {
 	

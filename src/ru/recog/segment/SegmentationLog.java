@@ -1,4 +1,4 @@
-package ru.recog.imgproc;
+package ru.recog.segment;
 
 import java.io.*;
 import java.util.*;
@@ -8,6 +8,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.*;
+import ru.recog.imgproc.Segmenter;
+import ru.recog.imgproc.ShapeFilter;
 import ru.recog.nn.NNAnalysis;
 import ru.recog.segment.*;
 import ru.recog.ui.FrameProcessor;
@@ -65,10 +67,6 @@ public class SegmentationLog {
 		
 	}
 	
-//	public static enum Result {
-//		FrameProcessor.RFAULT,
-//		FrameProcessor.SFAULT
-//	}
 	
 	public static boolean isValidSegmentation(List<Rect> symbolsList, List<Integer> cutPointsList){
 		if ( isSegmentation(symbolsList, cutPointsList) == -1) return false;
@@ -174,91 +172,67 @@ public class SegmentationLog {
 		
 	}
 	
-	public static void testAll() throws Exception {
-//		testShit("/Users/pps/dev/test/frames/detect41", "/Users/pps/dev/seglog/seglog041.txt");
-		testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-		testShit("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
-		testShit("/Users/pps/dev/test/frames/processed050", "/Users/pps/dev/seglog/seglog050.txt");
+	public static void testAll(String picRoot, String seglogRoot) throws Exception {
+		
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt") );
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+		
+		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
+		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
 	}
 	
-	public static void testAllBasic() throws Exception {
-//		testBasicSegmentation("/Users/pps/dev/test/frames/detect41", "/Users/pps/dev/seglog/seglog041.txt");
-		testBasicSegmentation("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-		testBasicSegmentation("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
-		testBasicSegmentation("/Users/pps/dev/test/frames/processed050", "/Users/pps/dev/seglog/seglog050.txt");
+	
+	public static void testSegmenter(Segmentation segmenter, String picFolder, String seglogFilename) 
+			throws Exception {
+		LabelFrame lf = new LabelFrame(picFolder);
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		
+		System.out.println("Checking "+seglogFilename+" with "+segmenter);
+		
+		int total = 0;
+		int wrong = 0;
+		for (SegmentationLogEntry entry : readSegmentationLog(seglogFilename)) {
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			total++;
+			
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+
+			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			SegmentationResult sr = segmenter.segment(m);
+		
+			List<Integer> cutPoints = new ArrayList<Integer>();
+
+			cutPoints.add(0);
+			cutPoints.addAll(sr.getCutPoints());
+			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+			if (!isValid) {
+
+				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
+				
+				Mat c = ImageUtils.bin2color(m);
+				for (Rect r : entry.getRectangles())
+					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+				lf.addImage(c, entry.toString(), 3);
+				wrong++;
+			}
+		}
+		System.out.println("Total: "+total+" wrong: "+wrong);
+		lf.pack();
+		lf.setVisible(true);
+
 	}
 	
-	
-//	public static void testSegmenter(Segmentation segmenter, String picFolder, String seglogFilename) 
-//			throws Exception {
-//		LabelFrame lf = new LabelFrame(picFolder);
-//		
-//		
-//		File picDir = new File(picFolder);
-//		if (!picDir.exists() || !picDir.isDirectory())
-//			throw new IllegalArgumentException("Not a folder: "+picFolder);
-//		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
-//		int total = 0;
-//		int wrong = 0;
-//		for (SegmentationLogEntry entry : entries) {
-//			if (!entry.getResult().equals("SUCCESS")) continue;
-//			total++;
-//			
-//			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
-////			System.out.println(name);
-//
-//			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
-//					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-////			System.out.println(m.size());
-//			SegmentationResult sr = segmenter.segment(m);
-//		
-//			List<Integer> cutPoints = new ArrayList<Integer>();
-//
-//			cutPoints.add(0);
-//			cutPoints.addAll(sr.getCutPoints());
-//			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
-//			if (!isValid) {
-//				Mat b6 = ImageUtils.localbin(m, 0.6);
-////				List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6, ShapeFilter.WEAK);
-//				double lengthEstimate =  0.66 * (sr.getLowerBound() - sr.getUpperBound());
-//				ShapeFilter one = new ShapeFilter(ShapeFilter.WEAK);
-//				one.setWidthMin(3);
-//				one.setWidthMax((int)Math.round(lengthEstimate*1.2));
-//				
-//				ShapeFilter two = new ShapeFilter(ShapeFilter.WEAK);
-//				two.setWidthMin(one.getWidthMax()+1);
-//				two.setWidthMax((int)Math.round(lengthEstimate*2.4));
-//				
-//				ShapeFilter three = new ShapeFilter(ShapeFilter.WEAK);
-//				three.setWidthMin(two.getWidthMax()+1);
-//				three.setWidthMax((int)Math.round(lengthEstimate*3.3));
-//
-//				
-//				Mat c6 = ImageUtils.bin2color(b6.submat(sr.getUpperBound(), sr.getLowerBound()+1, 0, b6.cols()));
-//				for (BinShape shape : sr.shapes) {
-//					Scalar color = one.accept(shape)? new Scalar(0,255,0) :
-//						two.accept(shape)? new Scalar(255,0,0) : 
-//						three.accept(shape)? new Scalar(0,0,255) : new Scalar(125,125,125);
-//					Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), color);
-//				}
-//				lf.addImage(c6, "bin 0.6", 3);
-//				
-////				isValidSegmentation(entry.getRectangles(), cutPoints);
-//				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
-//				
-//				Mat c = ImageUtils.bin2color(m);
-//				for (Rect r : entry.getRectangles())
-//					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
-//				lf.addImage(c, entry.toString(), 3);
-//				wrong++;
-//			}
-//		}
-//		System.out.println("Total: "+total+" wrong: "+wrong);
-//		lf.pack();
-//		lf.setVisible(true);
-//
-//	}
-//	
 	public static void testShit(String picFolder, String seglogFilename) throws Exception {
 		
 		
@@ -337,120 +311,11 @@ public class SegmentationLog {
 		lf.setVisible(true);
 	}
 	
-	public static void testBasicSegmentation(String picFolder, String seglogFilename) throws Exception {
-		LabelFrame lf = new LabelFrame(picFolder);
-		
-		
-		File picDir = new File(picFolder);
-		if (!picDir.exists() || !picDir.isDirectory())
-			throw new IllegalArgumentException("Not a folder: "+picFolder);
-		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
-		int total = 0;
-		int wrong = 0;
-		for (SegmentationLogEntry entry : entries) {
-			if (!entry.getResult().equals("SUCCESS")) continue;
-			total++;
-			
-			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
-
-			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
-					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			SegmentationResult sr = Segmenter.segment(m);
-	
-			List<Integer> cutPoints = new ArrayList<Integer>();
-
-			cutPoints.add(0);
-			cutPoints.addAll(sr.getCutPoints());
-			
-			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
-			if (!isValid) {
-				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
-				
-				Mat c = ImageUtils.bin2color(m);
-				for (Rect r : entry.getRectangles())
-					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
-				lf.addImage(c, entry.toString(), 3);
-				wrong++;
-			}
-		}
-		System.out.println("Total: "+total+" wrong: "+wrong);
-		lf.pack();
-		lf.setVisible(true);
-	}
-	
 
 	public static void main(String[] args) throws Exception {
-//		testAll();
-	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
-		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
-		//testShit("C:\\dev\\frames\\processed047", "C:\\dev\\frames\\segmented047\\seglog047.txt");
-		//testShit("c:\\CppProjects\\detected", "C:\\dev\\frames\\segmented\\seglog.txt");
+		testAll(args[0], args[1]);
+//	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 		
-		
-		//regionTest("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
-		
-//		List<SegmentationLogEntry> list = readSegmentationLog("C:\\dev\\frames\\segmented050\\seglog050.txt");
-//		for (SegmentationLogEntry entry : list)
-//			System.out.println(entry);
-//		
-//		LabelFrame lf = new LabelFrame("GOOD", true);
-//		
-//		for (SegmentationLogEntry entry : list)
-//		{
-//			if (entry.getResult() == "SUCCESS")
-//			{
-//				String filestr = entry.getFilename();
-//				Mat m = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//				Mat m1 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-//				Mat m2 = Imgcodecs.imread(filestr, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-//				
-//				SegmentationResult result = Segmenter.segment(m);
-//				
-//				/*
-//				SegmentationResult result = new SegmentationResult();
-//				result = NewSegmenter.segment(m, result);
-//				if (result == null) {
-//					System.out.println("Some problem happened");
-//					continue;
-//				}
-//				*/
-//				
-//				// Validate cut points
-//				List<Rect> symbolsList = entry.getRectangles();
-//				List<Integer> cutPointsList = result.getCutPoints();
-//				
-//
-//				int temp = isSegmentation( symbolsList, cutPointsList);
-//				//System.out.println("PROBLEMS " + temp); 
-//				if (temp!= -1) {
-//					for( int i = temp;  i <= ( temp + 6) ; i++ )
-//					{
-//						Imgproc.line(m2, new Point(cutPointsList.get(i), 0), 
-//								new Point(cutPointsList.get(i), m2.rows()-1), new Scalar(0,0,255));	
-//					}
-//				}
-//				else
-//					System.out.println("Is Not VALID, FILE:  " + filestr);
-//				
-//				
-//				
-//				// End of cut points, PUT it into a method later
-//				for (int p : result.getCutPoints())
-//						Imgproc.line(m1, new Point(p, 0), new Point(p, m1.rows()-1), new Scalar(0,255,0));
-//				
-//				
-//					
-//				lf.addImage(m1, filestr, 3);
-//				lf.addImage(m2, filestr, 3);
-//			}
-//					
-//		}
-//		
-//		lf.pack();
-//		lf.setVisible(true);*/
-//		
-//		
 	}
 
 
@@ -465,6 +330,10 @@ public class SegmentationLog {
 		List<Integer> cutPointsList = new ArrayList<Integer>();
 			
 		return temp;
+	}
+	
+	private static String properPath(String parent, String child) {
+		return new File(parent, child).getAbsolutePath();
 	}
 	
 }

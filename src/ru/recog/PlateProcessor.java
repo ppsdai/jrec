@@ -15,6 +15,7 @@ import ru.recog.feature.MultipleFeatureExtractor;
 import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.imgproc.*;
 import ru.recog.nn.NNWrapper;
+import ru.recog.segment.SegmentationResult;
 
 public class PlateProcessor extends LabelFrame {
 	

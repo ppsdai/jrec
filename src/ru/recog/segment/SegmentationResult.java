@@ -1,4 +1,4 @@
-package ru.recog.imgproc;
+package ru.recog.segment;
 
 import java.util.*;
 
@@ -7,8 +7,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.Contours;
 import ru.recog.ImageUtils;
-import ru.recog.segment.CutData;
-import ru.recog.segment.SegmentationData;
+import ru.recog.imgproc.BinShape;
 
 public class SegmentationResult {
 	

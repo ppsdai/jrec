@@ -10,8 +10,6 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import ru.recog.LabelFrame;
 import ru.recog.Utils;
-import ru.recog.imgproc.SegmentationLog;
-import ru.recog.imgproc.SegmentationResult;
 
 public class MarkovSegmentation implements Segmentation {
 	
@@ -112,14 +110,11 @@ public class MarkovSegmentation implements Segmentation {
 									startingPoint+i1+i2+i3+i4+i5+i6);
 							
 							
-							int[] points = indices.getPoints(data);
-							if (pointsAcceptable(points, m)) {
-//								double[] ls = buildLength(points);
+							if (pointsAcceptable(indices.getCutPointsArray(), m)) {
 								double p = mld.probability(indices.buildLength());
 								if (p!=0)
-								cutMap.put(indices, p);
+									cutMap.put(indices, p);
 							}
-							
 						}
 					}
 			
@@ -171,16 +166,6 @@ public class MarkovSegmentation implements Segmentation {
 		return bestList;
 	}
 	
-	private static AdvancedSegmentationResult cloneResult(AdvancedSegmentationResult result) {
-		AdvancedSegmentationResult newResult = new AdvancedSegmentationResult();
-		newResult.setOriginalMat(result.getOriginalMat());
-		newResult.setUpperBound(result.getUpperBound());
-		newResult.setLowerBound(result.getLowerBound());
-		newResult.setCenterLine(result.getCenterLine());
-		return newResult;
-	}
-	
-	
 	private static boolean pointsAcceptable(int[] points, Mat m) {
 //		return true;
 		int length = points[6] - points[0];
@@ -208,17 +193,5 @@ public class MarkovSegmentation implements Segmentation {
 		
 		return cutAverage/totalAverage;
 	}
-	
-//	public static double[] buildLength(int[] points) {
-//		int length = points[6]-points[0];
-//		double avLength = (double)length/6;
-//		double[] ls = new double[6];
-//		for (int i = 0; i < 6; i++)
-//			ls[i] = (double)(points[i+1]-points[i])/avLength;
-//		return ls;
-//		
-//	}
-	
-	
 
 }

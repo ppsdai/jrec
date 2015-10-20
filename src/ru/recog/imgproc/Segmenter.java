@@ -13,6 +13,7 @@ import ru.recog.feature.MultipleFeatureExtractor;
 import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.nn.NNWrapper;
 import ru.recog.segment.CutData;
+import ru.recog.segment.SegmentationResult;
 
 public class Segmenter {
 	

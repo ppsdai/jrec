@@ -80,9 +80,6 @@ public class Utils {
 				.concat(name);
 	}
 	
-//	public static File[] getOrderedFiles(String dir) {
-//		return getOrderedList(dir).toArray();
-//	}
 	
 	public static List<File> getOrderedList(String dir) {
 		File cardir = new File(dir); 

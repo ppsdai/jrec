@@ -11,7 +11,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import ru.recog.LabelFrame;
 import ru.recog.Utils;
 import ru.recog.feature.*;
-import ru.recog.imgproc.SegmentationLog;
+import ru.recog.segment.SegmentationLog;
 import ru.recog.ui.FrameProcessor;
 
 public class NNAnalysis {

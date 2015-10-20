@@ -4,8 +4,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
-import ru.recog.imgproc.SegmentationLog;
-import ru.recog.imgproc.SegmentationLog.SegmentationLogEntry;
+import ru.recog.segment.SegmentationLog.SegmentationLogEntry;
 
 public class MarkovLD {
 	

@@ -12,6 +12,7 @@ import ru.recog.feature.*;
 import ru.recog.imgproc.*;
 import ru.recog.nn.NNAnalysis;
 import ru.recog.nn.NNWrapper;
+import ru.recog.segment.SegmentationResult;
 
 public class PlateProcessorTest {
 	

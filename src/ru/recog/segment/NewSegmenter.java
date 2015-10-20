@@ -9,7 +9,6 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.ImageUtils;
 import ru.recog.LabelFrame;
-import ru.recog.imgproc.SegmentationResult;
 
 import java.util.Arrays;
 

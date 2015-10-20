@@ -145,7 +145,7 @@ public class SegmentationData {
 	/**
 	 * method calculates * list of local minimums
 	 */
-	public void calculateLocalMinimums() {
+	public void calculateMinimums() {
 
 		int projX_Length = projX.length;
 		minimums = new ArrayList<Integer>();
@@ -192,7 +192,7 @@ public class SegmentationData {
 	 * method calculates * list of local maximums * , adds maximums on first and
 	 * last location
 	 */
-	public void calculateLocalMaximums() {
+	public void calculateMaximums() {
 
 		int projX_Length = projX.length;
 		maximums = new ArrayList<Integer>();

@@ -4,8 +4,6 @@ import java.util.*;
 
 import org.opencv.core.Mat;
 
-import ru.recog.imgproc.SegmentationResult;
-
 public class LegacySegmentation implements Segmentation {
 	
 	private static final int MAX_HOPS = 5; //cause great shaman told us so

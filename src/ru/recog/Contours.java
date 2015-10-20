@@ -12,6 +12,7 @@ import org.opencv.imgproc.Imgproc;
 import ru.recog.imgproc.*;
 //import ru.recog.segment.SBSegmenter;
 import ru.recog.segment.SBSegmenter;
+import ru.recog.segment.SegmentationResult;
 
 public class Contours {
 	

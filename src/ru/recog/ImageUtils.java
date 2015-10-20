@@ -13,6 +13,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.*;
+import ru.recog.segment.SegmentationResult;
 import ru.recog.ui.PlatePanel;
 
 public class ImageUtils {
