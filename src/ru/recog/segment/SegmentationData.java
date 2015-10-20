@@ -46,7 +46,7 @@ public class SegmentationData {
 		Mat m = originalM;
 		int[] blackLength = new int[m.rows()];
 
-		Mat b = ImageUtils.localbin(m.clone(), 0.6);
+		Mat b = SegmentationFactory.getDefaultBinarization().processImage(m);
 
 		for (int row = 0; row < b.rows(); row++) { // loop on y
 			int col = 0;
@@ -276,6 +276,10 @@ public class SegmentationData {
 	 */
 	public void setLowerBound(int lowerBound) {
 		this.lowerBound = lowerBound;
+	}
+	
+	public Mat getOriginalMat() {
+		return originalM;
 	}
 
 }

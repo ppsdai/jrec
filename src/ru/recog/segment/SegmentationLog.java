@@ -8,10 +8,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.*;
-import ru.recog.imgproc.Segmenter;
 import ru.recog.imgproc.ShapeFilter;
 import ru.recog.nn.NNAnalysis;
-import ru.recog.segment.*;
 import ru.recog.ui.FrameProcessor;
 
 public class SegmentationLog {
@@ -273,7 +271,7 @@ public class SegmentationLog {
 //				System.out.println(" cutPoints " + cutPoints);
 				Mat b6 = ImageUtils.localbin(m, 0.6);
 //				List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6, ShapeFilter.WEAK);
-				double lengthEstimate =  0.66 * (sr.getLowerBound() - sr.getUpperBound());
+				double lengthEstimate =  0.66 * (sr.getData().getLowerBound() - sr.getData().getUpperBound());
 				ShapeFilter one = new ShapeFilter(ShapeFilter.WEAK);
 				one.setWidthMin(3);
 				one.setWidthMax((int)Math.round(lengthEstimate*1.2));

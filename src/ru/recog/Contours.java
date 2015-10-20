@@ -11,8 +11,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.*;
 //import ru.recog.segment.SBSegmenter;
-import ru.recog.segment.SBSegmenter;
-import ru.recog.segment.SegmentationResult;
+import ru.recog.segment.*;
 
 public class Contours {
 	
@@ -65,7 +64,7 @@ public class Contours {
 //			}
 //			lf.addImage(c4, f.getName(), 3);
 			
-			SegmentationResult sr0 = Segmenter.segment(m);
+			SegmentationResult sr0 = SegmentationFactory.getLegacySegmentation().segment(m);
 			lf.addImage(ImageUtils.drawSegLines(m, sr0), "orig", 3);
 			
     		SegmentationResult sr1 = sbs.sobelsegment(m);

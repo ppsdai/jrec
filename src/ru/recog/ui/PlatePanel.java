@@ -12,7 +12,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.ImageUtils;
-import ru.recog.imgproc.Segmenter;
+import ru.recog.segment.SegmentationFactory;
 import ru.recog.segment.SegmentationResult;
 
 public class PlatePanel extends JPanel implements ActionListener {
@@ -75,7 +75,7 @@ public class PlatePanel extends JPanel implements ActionListener {
 		Mat orig = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 
-		segResult = Segmenter.segment(orig);
+		segResult = SegmentationFactory.getLegacySegmentation().segment(m);
 
 		for (int p : segResult.getCutPoints())
 			Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), new Scalar(0,255,0));

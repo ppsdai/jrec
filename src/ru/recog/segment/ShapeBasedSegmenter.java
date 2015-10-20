@@ -1,4 +1,4 @@
-package ru.recog.imgproc;
+package ru.recog.segment;
 
 import java.util.*;
 
@@ -6,6 +6,8 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import ru.recog.Utils;
+import ru.recog.imgproc.BinShape;
+import ru.recog.imgproc.ShapeFilter;
 
 
 /**

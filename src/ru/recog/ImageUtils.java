@@ -63,9 +63,9 @@ public class ImageUtils {
 				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), GREEN);
 
 		
-		Imgproc.line(cvt, new Point(0,result.getUpperBound()), new Point(cvt.cols()-1, result.getUpperBound()),
+		Imgproc.line(cvt, new Point(0,result.getData().getUpperBound()), new Point(cvt.cols()-1, result.getData().getUpperBound()),
 				new Scalar(0,255,0));
-		Imgproc.line(cvt, new Point(0,result.getLowerBound()), new Point(cvt.cols()-1, result.getLowerBound()),
+		Imgproc.line(cvt, new Point(0,result.getData().getLowerBound()), new Point(cvt.cols()-1, result.getData().getLowerBound()),
 				new Scalar(0,255,0));
 		return cvt;
 	}

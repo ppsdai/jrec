@@ -9,7 +9,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.imgproc.Segmenter;
+import ru.recog.segment.SegmentationFactory;
 import ru.recog.segment.SegmentationResult;
 
 public class TemplateRunner {
@@ -114,7 +114,7 @@ public class TemplateRunner {
 	
 	
 	public static Point getTemplatePoint(Mat m, LPTemplate template) {
-		SegmentationResult sr = Segmenter.segment(m);
+		SegmentationResult sr = SegmentationFactory.getLegacySegmentation().segment(m);
 //		Mat m1 = m.submat(sr.getUpperBound(), sr.getLowerBound()+1, 0, m.cols()).clone();
 		Mat m1 = m.clone();
 //		tr.big.printTemplate();
@@ -147,7 +147,7 @@ public class TemplateRunner {
 //		for (Map.Entry<Point, Double> entry : list)
 //			System.out.println(entry.getValue()+" at "+entry.getKey().x+" "+entry.getKey().y);
 		Point p = list.get(list.size()-1).getKey();
-		p.y = p.y + sr.getUpperBound();
+		p.y = p.y + sr.getData().getUpperBound();
 		return p;
 		
 //		return null;

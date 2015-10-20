@@ -15,6 +15,7 @@ import ru.recog.feature.MultipleFeatureExtractor;
 import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.imgproc.*;
 import ru.recog.nn.NNWrapper;
+import ru.recog.segment.SegmentationFactory;
 import ru.recog.segment.SegmentationResult;
 
 public class PlateProcessor extends LabelFrame {
@@ -45,8 +46,8 @@ public class PlateProcessor extends LabelFrame {
 		List<String> possibleNumbers = new ArrayList<String>();
 		List<String> pn = new ArrayList<String>();
 		for (Mat m : plate.getPlateImages()) {
-			SegmentationResult sr = Segmenter.segment(m);
-			SegmentationResult sr1 = Segmenter.shapesegment(m);
+			SegmentationResult sr = SegmentationFactory.getLegacySegmentation().segment(m); //Segmenter.segment(m);
+			SegmentationResult sr1 = SegmentationFactory.getShapeSegmentation().segment(m); //Segmenter.shapesegment(m);
 			String possible = nn.getLPString(sr.getRevisedSegments());
 			possibleNumbers.add(possible);
 			pn.add(nn.getLPString(sr1.getRevisedSegments()));

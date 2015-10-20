@@ -35,30 +35,6 @@ public class LPR {
 	}
 	
 	
-	public List<String> processPlates(List<Plate> plates) {
-		List<String> numbers = new ArrayList<String>();
-//		NNOutput nno = new NNOutput(nn);
-		for (Plate p : plates) {
-			try {
-			List<String> candidates = new ArrayList<String>();
-			for (Mat m : p.getPlateImages()) 
-				candidates.add(nn.getLPString(Segmenter.segment(m).getSegments()));
-			
-			String s;
-				s = sequencer.doSequence(candidates);
-				numbers.add(s);
-				System.out.println("Plate: "+p.getLength()+" :"+s);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-//				System.out.println("TRY: "+candidates);
-			}
-			
-			
-		}
-		return numbers;
-	}
-	
 	public static void main(String[] args) {
 //		List<Plate> plates = AggregatePlates.readFormattedFolder("/Users/pps/dev/aggr");
 //		LPR lpr = new LPR(new Sequencer(), new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
@@ -76,7 +52,9 @@ public class LPR {
 		pp.setVisible(true);
 		
 		BlockingQueue<Mat> queue = new LinkedBlockingQueue<Mat>();
-		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video_ador7_92_20150807_09-30.avi", queue);
+		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video-046.avi", queue);
+//		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video_ador7_92_20150807_09-30.avi", queue);
+
 		Thread t1 = new Thread(producer);
 		t1.start();
 		

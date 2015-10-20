@@ -12,6 +12,7 @@ import ru.recog.feature.*;
 import ru.recog.imgproc.*;
 import ru.recog.nn.NNAnalysis;
 import ru.recog.nn.NNWrapper;
+import ru.recog.segment.SegmentationFactory;
 import ru.recog.segment.SegmentationResult;
 
 public class PlateProcessorTest {
@@ -100,7 +101,7 @@ public class PlateProcessorTest {
 				
 				Mat m = pn.getPlateImage(xx);
 				try {
-					SegmentationResult result = Segmenter.segment(m);
+					SegmentationResult result = SegmentationFactory.getLegacySegmentation().segment(m);
 					
 					List<Mat> pieces = result.getRevisedSegments(); //FIXME
 					
