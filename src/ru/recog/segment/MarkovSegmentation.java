@@ -24,31 +24,31 @@ public class MarkovSegmentation implements Segmentation {
 		if (defaultMS == null) defaultMS = new MarkovSegmentation();
 	}
 	
-	public static class CutIndices {
-		private int[] indices;
-		
-		public CutIndices(int... cutIndex) {
-			this.indices = cutIndex;
-		}
-		
-		public int[] getIndices() {
-			return indices;
-		}
-		
-		public int[] getPoints(List<Integer> minimums) {
-			int[] points = new int[indices.length];
-			for (int i = 0; i < points.length; i++)
-				points[i] = minimums.get(indices[i]);
-			return points;
-		}
-		
-		public List<Integer> getPointsList(List<Integer> minimums) {
-			List<Integer> points = new ArrayList<Integer>();
-			for (int i = 0; i < indices.length; i++)
-				points.add(minimums.get(indices[i]));
-			return points;
-		}
-	}
+//	public static class CutIndices {
+//		private int[] indices;
+//		
+//		public CutIndices(int... cutIndex) {
+//			this.indices = cutIndex;
+//		}
+//		
+//		public int[] getIndices() {
+//			return indices;
+//		}
+//		
+//		public int[] getPoints(List<Integer> minimums) {
+//			int[] points = new int[indices.length];
+//			for (int i = 0; i < points.length; i++)
+//				points[i] = minimums.get(indices[i]);
+//			return points;
+//		}
+//		
+//		public List<Integer> getPointsList(List<Integer> minimums) {
+//			List<Integer> points = new ArrayList<Integer>();
+//			for (int i = 0; i < indices.length; i++)
+//				points.add(minimums.get(indices[i]));
+//			return points;
+//		}
+//	}
 	
 	public static double[] countProbs(SegmentationLog.SegmentationLogEntry sle) {
 		Rect r1 = sle.getRectangles().get(0);
@@ -82,7 +82,7 @@ public class MarkovSegmentation implements Segmentation {
 		for (File f : Utils.getOrderedList("/Users/pps/dev/newnumbers")) {
 			Mat pm = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 //			SegmentationResult res = MarkovSegmentation.segment(pm, SD);
-			List<AdvancedSegmentationResult> asrList = MarkovSegmentation.multisegment(pm);
+			List<? extends SegmentationResult> asrList = MarkovSegmentation.multisegment(pm);
 			lf.addImage(ImageUtils.drawSegLines(pm, asrList.get(0)), f.getName(),3);
 			
 		}
@@ -146,7 +146,7 @@ public class MarkovSegmentation implements Segmentation {
 					for (int i6 = 1; i6<=3; i6++) {
 						if (startingPoint+i1+i2+i3+i4+i5+i6>=localMinimums.size()) probList.add(0.0);
 						else {
-							CutIndices indices = new CutIndices(startingPoint,
+							CutData indices = new CutData(startingPoint,
 									startingPoint+i1,
 									startingPoint+i1+i2,
 									startingPoint+i1+i2+i3,
@@ -199,32 +199,37 @@ public class MarkovSegmentation implements Segmentation {
 		return segResult;
 	}
 	
-	public static List<AdvancedSegmentationResult> multisegment(Mat m) {
-		return multisegment(m, MarkovLD.getDefaultMLD());
+	public static List<? extends SegmentationResult> multisegment(Mat m) {
+		buildDefaultMS();
+		return defaultMS.segment(m);
+//		return multisegment(m, MarkovLD.getDefaultMLD());
 	} 
 	
 	public List<? extends SegmentationResult> segment(Mat m) {
-		AdvancedSegmentationResult segResult = new AdvancedSegmentationResult();
-		segResult.setOriginalMat(m.clone());
-		SBSegmenter.verticalCut(segResult);
 		
-		int[] projX = new int[m.cols()];
-		Arrays.fill(projX, 0);
-		for (int col=0; col < m.cols(); col ++)
-			for (int row = segResult.getUpperBound(); row <= segResult.getLowerBound(); row++)
-				projX[col] += 255 - (int) m.get(row, col)[0];
+		SegmentationData data = new SegmentationData(m);//, ub, lb);
 		
-		segResult.setIntensity(new MatOfInt(projX));
+//		AdvancedSegmentationResult segResult = new AdvancedSegmentationResult();
+//		segResult.setOriginalMat(m.clone());
+//		SBSegmenter.verticalCut(segResult);
+//		
+//		int[] projX = new int[m.cols()];
+//		Arrays.fill(projX, 0);
+//		for (int col=0; col < m.cols(); col ++)
+//			for (int row = segResult.getUpperBound(); row <= segResult.getLowerBound(); row++)
+//				projX[col] += 255 - (int) m.get(row, col)[0];
+//		
+//		segResult.setIntensity(new MatOfInt(projX));
+//		
+//		List<Integer> localMinimums = new ArrayList<Integer>();
+//		for (int x = 1; x < m.cols()-1; x++) {
+//			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
+//		}
+//		data.get
+//		if (!localMinimums.contains(0)) localMinimums.add(0, 0);
+		if (!data.getLocalMinimums().contains(m.cols()-1)) data.getLocalMinimums().add(m.cols()-1);
 		
-		List<Integer> localMinimums = new ArrayList<Integer>();
-		for (int x = 1; x < m.cols()-1; x++) {
-			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) localMinimums.add(x);
-		}
-		
-		if (!localMinimums.contains(0)) localMinimums.add(0, 0);
-		if (!localMinimums.contains(m.cols()-1)) localMinimums.add(m.cols()-1);
-		
-		Map<CutIndices, Double> cutMap = new HashMap<CutIndices,Double>();
+		Map<CutData, Double> cutMap = new HashMap<CutData,Double>();
 		
 		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
 			for (int i1 = 1; i1<=3; i1++)
@@ -233,9 +238,9 @@ public class MarkovSegmentation implements Segmentation {
 				for (int i4 = 1; i4<=3; i4++)
 				 for (int i5 = 1; i5<=3; i5++)
 					for (int i6 = 1; i6<=3; i6++) {
-						if (startingPoint+i1+i2+i3+i4+i5+i6>=localMinimums.size()) continue;
+						if (startingPoint+i1+i2+i3+i4+i5+i6>=data.getLocalMinimums().size()) continue;
 						else {
-							CutIndices indices = new CutIndices(startingPoint,
+							CutData indices = new CutData(startingPoint,
 									startingPoint+i1,
 									startingPoint+i1+i2,
 									startingPoint+i1+i2+i3,
@@ -244,7 +249,7 @@ public class MarkovSegmentation implements Segmentation {
 									startingPoint+i1+i2+i3+i4+i5+i6);
 							
 							
-							int[] points = indices.getPoints(localMinimums);
+							int[] points = indices.getPoints(data.getLocalMinimums());
 							if (pointsAcceptable(points, m)) {
 								double[] ls = buildLength(points);
 								double p = mld.probability(ls);
@@ -257,15 +262,20 @@ public class MarkovSegmentation implements Segmentation {
 			
 		}
 		
+		AdvancedSegmentationResult segResult = new AdvancedSegmentationResult();
+		segResult.setCenterLine(data.getCenterLine());
+		segResult.setLowerBound(data.getLowerBound());
+		segResult.setUpperBound(data.getUpperBound());
+		
 		SortedMap<Integer, Double> lineMap = new TreeMap<Integer,Double>();
 		
 		List<AdvancedSegmentationResult> results = new ArrayList<AdvancedSegmentationResult>();
-		for (CutIndices indices : cutMap.keySet()) {
+		for (CutData indices : cutMap.keySet()) {
 			AdvancedSegmentationResult newResult = cloneResult(segResult);
-			List<Integer> cutPoints = indices.getPointsList(localMinimums);
+			List<Integer> cutPoints = indices.getPointsList(data.getLocalMinimums());
 			newResult.alpha = 0;//calcAlpha(indices.getPoints(localMinimums), localMinimums, projX);
 			newResult.setCutPoints(cutPoints);
-			newResult.energy = calcEnergy(cutPoints, projX);
+			newResult.energy = calcEnergy(cutPoints, data.getProjection());
 			newResult.probability = cutMap.get(indices);
 			for (Integer i : cutPoints) {
 				double val = newResult.energy * newResult.probability;
@@ -315,7 +325,7 @@ public class MarkovSegmentation implements Segmentation {
 		if (!localMinimums.contains(0)) localMinimums.add(0, 0);
 		if (!localMinimums.contains(m.cols()-1)) localMinimums.add(m.cols()-1);
 		
-		Map<CutIndices, Double> cutMap = new HashMap<CutIndices,Double>();
+		Map<CutData, Double> cutMap = new HashMap<CutData,Double>();
 		
 		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
 			for (int i1 = 1; i1<=3; i1++)
@@ -326,7 +336,7 @@ public class MarkovSegmentation implements Segmentation {
 					for (int i6 = 1; i6<=3; i6++) {
 						if (startingPoint+i1+i2+i3+i4+i5+i6>=localMinimums.size()) continue;
 						else {
-							CutIndices indices = new CutIndices(startingPoint,
+							CutData indices = new CutData(startingPoint,
 									startingPoint+i1,
 									startingPoint+i1+i2,
 									startingPoint+i1+i2+i3,
@@ -351,7 +361,7 @@ public class MarkovSegmentation implements Segmentation {
 		SortedMap<Integer, Double> lineMap = new TreeMap<Integer,Double>();
 		
 		List<AdvancedSegmentationResult> results = new ArrayList<AdvancedSegmentationResult>();
-		for (CutIndices indices : cutMap.keySet()) {
+		for (CutData indices : cutMap.keySet()) {
 			AdvancedSegmentationResult newResult = cloneResult(segResult);
 			List<Integer> cutPoints = indices.getPointsList(localMinimums);
 			newResult.alpha = 0;//calcAlpha(indices.getPoints(localMinimums), localMinimums, projX);

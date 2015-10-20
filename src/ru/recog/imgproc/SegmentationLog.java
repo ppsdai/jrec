@@ -9,6 +9,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.*;
 import ru.recog.nn.NNAnalysis;
+import ru.recog.segment.*;
 import ru.recog.ui.FrameProcessor;
 
 public class SegmentationLog {
@@ -283,7 +284,8 @@ public class SegmentationLog {
 //			System.out.println(m.size());
 //			SegmentationResult sr = Segmenter.shapesegment(m);
 //			SegmentationResult sr = SBSegmenter.segment(m);
-			SegmentationResult sr = Segmenter.segment(m);
+//			SegmentationResult sr = Segmenter.segment(m);
+			SegmentationResult sr = MarkovSegmentation.multisegment(m).get(0);
 		
 			List<Integer> cutPoints = new ArrayList<Integer>();
 
@@ -309,14 +311,14 @@ public class SegmentationLog {
 				three.setWidthMax((int)Math.round(lengthEstimate*3.3));
 
 				
-				Mat c6 = ImageUtils.bin2color(b6.submat(sr.getUpperBound(), sr.getLowerBound()+1, 0, b6.cols()));
-				for (BinShape shape : sr.shapes) {
-					Scalar color = one.accept(shape)? new Scalar(0,255,0) :
-						two.accept(shape)? new Scalar(255,0,0) : 
-						three.accept(shape)? new Scalar(0,0,255) : new Scalar(125,125,125);
-					Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), color);
-				}
-				lf.addImage(c6, "bin 0.6", 3);
+//				Mat c6 = ImageUtils.bin2color(b6.submat(sr.getUpperBound(), sr.getLowerBound()+1, 0, b6.cols()));
+//				for (BinShape shape : sr.shapes) {
+//					Scalar color = one.accept(shape)? new Scalar(0,255,0) :
+//						two.accept(shape)? new Scalar(255,0,0) : 
+//						three.accept(shape)? new Scalar(0,0,255) : new Scalar(125,125,125);
+//					Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), color);
+//				}
+//				lf.addImage(c6, "bin 0.6", 3);
 				
 //				isValidSegmentation(entry.getRectangles(), cutPoints);
 				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
@@ -376,7 +378,7 @@ public class SegmentationLog {
 	
 
 	public static void main(String[] args) throws Exception {
-	    testShit("C:\\dev\\frames\\processed051", "C:\\dev\\frames\\segmented051\\seglog051.txt");
+	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
 		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
 		//testShit("C:\\dev\\frames\\processed047", "C:\\dev\\frames\\segmented047\\seglog047.txt");

@@ -8,6 +8,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.Contours;
 import ru.recog.ImageUtils;
+import ru.recog.segment.SegmentationData;
 
 public class SegmentationResult {
 	
@@ -20,6 +21,16 @@ public class SegmentationResult {
 	private int centerLine = 0;
 	private MatOfInt intensity;
 	
+	private SegmentationData data;
+	
+	public SegmentationData getData() {
+		return data;
+	}
+
+
+	public void setData(SegmentationData data) {
+		this.data = data;
+	}
 	public List<BinShape> shapes;
 	
 	public MatOfInt getIntensity() {
