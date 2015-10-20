@@ -109,7 +109,7 @@ public class SBSegmenter implements Segmentation {
 		return processor;
 	}
 
-	public List<? extends SegmentationResult> segment(Mat m, ImageProcessor processor) {
+	public SegmentationResult segment(Mat m, ImageProcessor processor) {
 		SegmentationResult segResult = new SegmentationResult();
 		segResult.setOriginalMat(m.clone());
 		verticalCut(segResult);
@@ -204,7 +204,7 @@ public class SBSegmenter implements Segmentation {
 		
 		segResult.setCutPoints(uniteClosePoints(divPoints));
 		
-		return Collections.singletonList(segResult);
+		return segResult;
 	}
 	
 	
@@ -336,12 +336,12 @@ public class SBSegmenter implements Segmentation {
 	}
 
 	@Override
-	public List<? extends SegmentationResult> segment(Mat m) {
+	public SegmentationResult segment(Mat m) {
 		return segment(m, processor);
 	}
 
 	@Override
-	public List<? extends SegmentationResult> segment(Mat m,
+	public SegmentationResult segment(Mat m,
 			double... parameters) {
 		// TODO Auto-generated method stub
 		return null;

@@ -20,8 +20,8 @@ import ru.recog.ImageUtils;
 public class SegmentationData {
 
 	private int[] projX;
-	private List<Integer> localMinimums;
-	private List<Integer> localMaximums;
+	private List<Integer> minimums;
+	private List<Integer> maximums;
 	private List<Integer> minDepth;
 	private Mat originalM;
 
@@ -33,9 +33,10 @@ public class SegmentationData {
 	public SegmentationData(Mat m) {
 		originalM = m.clone();
 		calculateVerticalCrop();
-		this.calculateProjection();
-		this.calculateLocalMaximums();
-		this.calculateLocalMinimums();
+		calculateProjection();
+		legacyExtremums();
+//		this.calculateLocalMaximums();
+//		this.calculateLocalMinimums();
 		// this.calculateMinDepth();
 		// FIXME
 		// need to add boundary checks on minimums and maximums calculation
@@ -125,9 +126,20 @@ public class SegmentationData {
 				projX[col] += 255 - (int) originalM.get(row, col)[0];
 	}
 
-	public List<Integer> getLocalMinimums() {
+	public List<Integer> getMinimums() {
 
-		return localMinimums;
+		return minimums;
+	}
+	
+	private void legacyExtremums() {
+		minimums = new ArrayList<Integer>();
+		maximums = new ArrayList<Integer>();
+
+		
+		for (int x = 1; x < originalM.cols()-1; x++) {
+			if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) maximums.add(x);
+			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) minimums.add(x);
+		}
 	}
 
 	/**
@@ -136,11 +148,11 @@ public class SegmentationData {
 	public void calculateLocalMinimums() {
 
 		int projX_Length = projX.length;
-		localMinimums = new ArrayList<Integer>();
+		minimums = new ArrayList<Integer>();
 
 		// check first point
 		if (projX[1] < projX[2])
-			localMinimums.add(1);
+			minimums.add(1);
 
 		// Look inside omitting edge points
 		int IsPlato = 0;
@@ -148,7 +160,7 @@ public class SegmentationData {
 		for (int x = 2; x < (projX_Length - 2); x++) {
 			if ((IsPlato == 0) && (projX[x + 1] > projX[x])
 					&& (projX[x - 1] > projX[x])) {
-				localMinimums.add(x);
+				minimums.add(x);
 
 			}
 			if ((IsPlato == 0) && (projX[x + 1] == projX[x])
@@ -158,22 +170,22 @@ public class SegmentationData {
 			}
 			if ((IsPlato == 1) && (projX[x + 1] > projX[x])) {
 				IsPlato = 0;
-				localMinimums.add(x); // (int)((x + XStart) / 2);
+				minimums.add(x); // (int)((x + XStart) / 2);
 
 			}
 
 		}
 		// check last point
 		if (projX[projX_Length - 2] > projX[projX_Length - 1]) {
-			localMinimums.add(projX_Length - 2);
+			minimums.add(projX_Length - 2);
 
 		}
 
 	}
 
-	public List<Integer> getLocalMaximums() {
+	public List<Integer> getMaximums() {
 
-		return localMaximums;
+		return maximums;
 	}
 
 	/**
@@ -183,11 +195,11 @@ public class SegmentationData {
 	public void calculateLocalMaximums() {
 
 		int projX_Length = projX.length;
-		localMaximums = new ArrayList<Integer>();
+		maximums = new ArrayList<Integer>();
 
 		// first point is always zero
 		{
-			localMaximums.add(0);
+			maximums.add(0);
 
 		}
 		// Look inside omitting edge points
@@ -196,7 +208,7 @@ public class SegmentationData {
 		for (int x = 1; x < (projX_Length - 2); x++) {
 			if ((IsPlato == 0) && (projX[x + 1] < projX[x])
 					&& (projX[x - 1] < projX[x]) && (x != 1)) {
-				localMaximums.add(x);
+				maximums.add(x);
 
 			}
 			if ((IsPlato == 0) && (projX[x + 1] == projX[x])
@@ -206,13 +218,13 @@ public class SegmentationData {
 			}
 			if ((IsPlato == 1) && (projX[x + 1] < projX[x])) {
 				IsPlato = 0;
-				localMaximums.add(x); // (int)((x + XStart) / 2);
+				maximums.add(x); // (int)((x + XStart) / 2);
 				// CountMax++;
 			}
 		}
 		// last point is always (Length - 1)
 		{
-			localMaximums.add(projX_Length - 1);
+			maximums.add(projX_Length - 1);
 
 		}
 
@@ -228,13 +240,13 @@ public class SegmentationData {
 
 		// fills localMaximums with a last value so that it is one element
 		// larger than localMinimums
-		while (localMaximums.size() <= localMinimums.size())
-			localMaximums.add(localMaximums.get(localMaximums.size() - 1));
+		while (maximums.size() <= minimums.size())
+			maximums.add(maximums.get(maximums.size() - 1));
 
-		for (int x = 0; x < localMinimums.size(); x++)
-			minDepth.add(projX[localMaximums.get(x)]
-					+ projX[localMaximums.get(x + 1)] - 2
-					* projX[localMinimums.get(x)]);
+		for (int x = 0; x < minimums.size(); x++)
+			minDepth.add(projX[maximums.get(x)]
+					+ projX[maximums.get(x + 1)] - 2
+					* projX[minimums.get(x)]);
 
 	}
 

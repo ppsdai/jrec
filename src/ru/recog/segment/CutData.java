@@ -5,28 +5,58 @@ import java.util.List;
 
 public class CutData {
 	
-	private int[] indices;
+	private List<Integer> cutPoints;
 	
-	public CutData(int... cutIndex) {
-		this.indices = cutIndex;
-	}
-	
-	public int[] getIndices() {
-		return indices;
-	}
-	
-	public int[] getPoints(List<Integer> minimums) {
-		int[] points = new int[indices.length];
-		for (int i = 0; i < points.length; i++)
-			points[i] = minimums.get(indices[i]);
-		return points;
-	}
-	
-	public List<Integer> getPointsList(List<Integer> minimums) {
-		List<Integer> points = new ArrayList<Integer>();
+	public CutData(SegmentationData data, int... indices) {
+		cutPoints = new ArrayList<Integer>();
 		for (int i = 0; i < indices.length; i++)
-			points.add(minimums.get(indices[i]));
+			cutPoints.add(data.getMinimums().get(indices[i]));
+	}
+	
+	public CutData(List<Integer> cutPoints) {
+		this.cutPoints = cutPoints;
+	}
+	
+	
+	public int[] getPoints(SegmentationData data) {
+		int[] points = new int[cutPoints.size()];
+		for (int i = 0; i < points.length; i++)
+			points[i] = cutPoints.get(i);
 		return points;
+	}
+	
+	public List<Integer> getCutPoints() {
+		return cutPoints;
+	}
+	
+	public double calcEnergy(SegmentationData data) {
+		
+		double total = 0;
+		for (int i = 0; i < cutPoints.size()-1; i ++) {
+			int x1 = cutPoints.get(i);
+			int x2 = cutPoints.get(i+1);
+			
+			double avg = 0.5*(double)(data.getProjection()[x1]+data.getProjection()[x2]);
+			double sum = 0;
+			for (int x  = x1; x<=x2; x++)
+				sum+=(data.getProjection()[x]-avg);
+			total+= sum/ (x2-x1);
+			
+		}
+		
+		return total;
+	}
+	
+	public double[] buildLength() {
+		//FIXME think about cases when there are more than 7 cut pointa
+		if (cutPoints.size() < 7) throw new IllegalStateException("Cannot form Markov chain from CutData with size "+cutPoints.size());
+		int length = cutPoints.get(6) - cutPoints.get(0);
+		double avLength = (double)length/6;
+		double[] ls = new double[6];
+		for (int i = 0; i < 6; i++)
+			ls[i] = (double)(cutPoints.get(i+1)-cutPoints.get(i))/avLength;
+		return ls;
+		
 	}
 
 }

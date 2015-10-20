@@ -1,13 +1,13 @@
 package ru.recog.imgproc;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.Contours;
 import ru.recog.ImageUtils;
+import ru.recog.segment.CutData;
 import ru.recog.segment.SegmentationData;
 
 public class SegmentationResult {
@@ -23,6 +23,30 @@ public class SegmentationResult {
 	
 	private SegmentationData data;
 	
+	private List<CutData> possibleCuts;
+	
+	@Deprecated
+	public SegmentationResult() {}
+	
+	public SegmentationResult(SegmentationData data, List<CutData> possibleCuts) {
+		this.data = data;
+		this.possibleCuts = possibleCuts;
+	}
+	
+	public SegmentationResult(SegmentationData data, CutData cut) {
+		this(data, Collections.singletonList(cut));
+	}
+	
+	public List<CutData> getPossibleCuts() {
+		return possibleCuts;
+	}
+
+
+	public void setPossibleCuts(List<CutData> possibleCuts) {
+		this.possibleCuts = possibleCuts;
+	}
+
+
 	public SegmentationData getData() {
 		return data;
 	}
@@ -147,10 +171,12 @@ public class SegmentationResult {
 		this.rightPoint = rightPoint;
 	}
 	public List<Integer> getCutPoints() {
-		return cutPoints;
+		return possibleCuts.get(0).getCutPoints();
 	}
+	@Deprecated
 	public void setCutPoints(List<Integer> cutPoints) {
-		this.cutPoints = cutPoints;
+		setPossibleCuts(Collections.singletonList(new CutData(cutPoints)));
+//		this.cutPoints = cutPoints;
 	}
 	public int getLengthEstimate() {
 		return lengthEstimate;

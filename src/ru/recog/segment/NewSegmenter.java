@@ -390,7 +390,7 @@ public class NewSegmenter {
 		  System.out.println("LengthEstimate recalculated: " + segResult.getLengthEstimate());
 		}
 		
-		segResult.setCutPoints(divPoints);
+//		segResult.setCutPoints(divPoints); // FIXME BROKEN
 		return segResult;
 		
 	}

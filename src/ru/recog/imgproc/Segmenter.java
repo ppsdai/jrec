@@ -9,9 +9,10 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.ImageUtils;
 import ru.recog.LabelFrame;
-import ru.recog.feature.*;
-import ru.recog.nn.NNAnalysis;
+import ru.recog.feature.MultipleFeatureExtractor;
+import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.nn.NNWrapper;
+import ru.recog.segment.CutData;
 
 public class Segmenter {
 	
@@ -288,7 +289,7 @@ public class Segmenter {
 				}
 			}
 			
-			segResult.setCutPoints(divPoints);
+			segResult.setPossibleCuts(Collections.singletonList(new CutData(divPoints)));
 			
 			return segResult;
 			
@@ -385,7 +386,8 @@ public class Segmenter {
 			}
 		}
 		
-		segResult.setCutPoints(uniteClosePoints(divPoints));
+//		segResult.setCutPoints(uniteClosePoints(divPoints));
+		segResult.setPossibleCuts(Collections.singletonList( new CutData(uniteClosePoints(divPoints)) ) );
 		
 		return segResult;
 		

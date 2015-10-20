@@ -271,6 +271,7 @@ public class SegmentationLog {
 		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
 		int total = 0;
 		int wrong = 0;
+		LegacySegmentation ls = new LegacySegmentation();
 		for (SegmentationLogEntry entry : entries) {
 			if (!entry.getResult().equals("SUCCESS")) continue;
 			total++;
@@ -285,7 +286,8 @@ public class SegmentationLog {
 //			SegmentationResult sr = Segmenter.shapesegment(m);
 //			SegmentationResult sr = SBSegmenter.segment(m);
 //			SegmentationResult sr = Segmenter.segment(m);
-			SegmentationResult sr = MarkovSegmentation.multisegment(m).get(0);
+			SegmentationResult sr = MarkovSegmentation.multisegment(m);
+//			SegmentationResult sr = ls.segment(m);
 		
 			List<Integer> cutPoints = new ArrayList<Integer>();
 
@@ -378,6 +380,7 @@ public class SegmentationLog {
 	
 
 	public static void main(String[] args) throws Exception {
+//		testAll();
 	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 		//testShit("C:\\dev\\frames\\processed050", "C:\\dev\\frames\\segmented050\\seglog050.txt");
 		//testShit("C:\\dev\\frames\\processed049", "C:\\dev\\frames\\segmented049\\seglog049.txt");
