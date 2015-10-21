@@ -4,11 +4,11 @@ import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import ru.recog.LabelFrame;
-import ru.recog.Utils;
+import ru.recog.*;
 
 public class MarkovSegmentation implements Segmentation {
 	
@@ -25,42 +25,13 @@ public class MarkovSegmentation implements Segmentation {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		
-		String picFolder = args[0];
-		String seglogFilename = args[1];
-		LabelFrame lf = new LabelFrame(picFolder);
-		
-		
-		MarkovLD mld = MarkovLD.getDefaultMLD();
-//		Arrays.fill(SD, new Distrib());
-		
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-		
-		double[] l1 = new double[] {1,1,1,1,1,1};
-		System.out.println(mld.probability(l1));
-		
-			
-		for (File f : Utils.getOrderedList("/Users/pps/dev/newnumbers")) {
-			Mat pm = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//			SegmentationResult res = MarkovSegmentation.segment(pm, SD);
-//			List<? extends SegmentationResult> asrList = MarkovSegmentation.multisegment(pm);
-//			lf.addImage(ImageUtils.drawSegLines(pm, asrList.get(0)), f.getName(),3);
-			
-		}
-		
-//		Mat pm = Imgcodecs.imread("/Users/pps/dev/SFAULT_0/frame1173201.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-////		List<AdvancedSegmentationResult> segments = multisegment(pm, SD);
-//		for (AdvancedSegmentationResult result : multisegment(pm, SD)) {
-//			
-//			lf.addImage(ImageUtils.drawSegLines(pm, result), 
-//					Double.toString(result.energy)+" p="+Double.toString(result.probability)
-//					+" e*p="+result.probability*result.energy, 3);
-//		}
-		//		SegmentationResult res = MarkovSegmentation.segment(pm, SD);
-//		lf.addImage(ImageUtils.drawSegLines(pm, res), "yo",3);
-		
-		lf.pack();
+		Mat m = Imgcodecs.imread("/Users/pps/dev/SFAULT_0/frame1173201.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		SegmentationResult result = SegmentationFactory.getMarkovSegmentation().segment(m);
+		LabelFrame lf = ImageUtils.showAllSegmentations(result, 3);
 		lf.setVisible(true);
+		
 	}
 
 	

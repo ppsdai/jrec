@@ -13,6 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.CompoundImageProcessor;
 import ru.recog.imgproc.ImageProcessor;
+import ru.recog.segment.CutData;
 import ru.recog.segment.SegmentationResult;
 
 public class ImageUtils {
@@ -52,14 +53,16 @@ public class ImageUtils {
 	
 	public static Mat drawSegLines(Mat m, SegmentationResult result) {
 		Mat cvt = bin2color(m);
-		List<Integer> points = result.getCutPoints();
-		for (int p : points)
-			if (points.indexOf(p)==0)
-				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), RED);
-			else if (points.indexOf(p)==points.size()-1)
-				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), BLUE);
-			else
-				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), GREEN);
+		
+//		List<Integer> points = result.getCutPoints();
+//		for (int p : points)
+//			if (points.indexOf(p)==0)
+//				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), RED);
+//			else if (points.indexOf(p)==points.size()-1)
+//				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), BLUE);
+//			else
+//				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), GREEN);
+		drawLines(cvt, result.getCutPoints());
 
 		
 		Imgproc.line(cvt, new Point(0,result.getData().getUpperBound()), new Point(cvt.cols()-1, result.getData().getUpperBound()),
@@ -69,11 +72,43 @@ public class ImageUtils {
 		return cvt;
 	}
 	
+	public static void drawLines(Mat m, CutData data) {
+		drawLines(m, data.getCutPoints());
+	}
+	
+	public static void drawLines(Mat m, List<Integer> points) {
+//		List<Integer> points = data.getCutPoints();
+		for (int p : points)
+			if (points.indexOf(p)==0)
+				Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), RED);
+			else if (points.indexOf(p)==points.size()-1)
+				Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), BLUE);
+			else
+				Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), GREEN);
+	}
+	
+	
+	
 	public static Mat drawSegRectangles(Mat m, SegmentationResult result) {
 		Mat cvt = bin2color(m);
 		for (Rect r : result.getRevisedRectangles())
 			Imgproc.rectangle(cvt, r.tl(), r.br(), GREEN);
 		return cvt;
+	}
+	
+	public static LabelFrame showAllSegmentations(SegmentationResult result, int scale) {
+		LabelFrame lf = new LabelFrame("ALL");
+		
+		Mat cvt = bin2color(result.getOriginalMat());
+		for (CutData cut : result.getPossibleCuts()) {
+			Mat m = cvt.clone();
+			drawLines(m, cut);
+			lf.addImage(m, Double.toString(cut.calcEnergy(result.getData())), scale);
+		}
+		
+		lf.pack();
+		return lf;
+
 	}
 	
 	
