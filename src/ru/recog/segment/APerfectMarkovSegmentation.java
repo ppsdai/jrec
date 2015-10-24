@@ -17,6 +17,8 @@ public class APerfectMarkovSegmentation implements Segmentation {
 	private static APerfectMarkovSegmentation defaultMS = null;
 	
 	public static final double MINIMUM_PROBABILITY = 1e-8;
+	public static final double MINIMUM_ENERGY = 1e-1;
+	public static final double PROBABILITY_RATIO = 1000;
 	
 	public APerfectMarkovSegmentation() {
 		mld = MarkovLD.getDefaultMLD();
@@ -30,7 +32,7 @@ public class APerfectMarkovSegmentation implements Segmentation {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	
 		//String str = "C:\\dev\\frames\\VNew\\detected1411\\V1411N33t50680.png"; 
-		String str = "C:\\dev\\PlatesSegmentation\\10.bmp";
+		String str = "C:\\dev\\PlatesSegmentation\\13.bmp";
 		Mat m = Imgcodecs.imread(str, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		
 		// take only sensible probabilities, above a minimum threshold
@@ -42,30 +44,38 @@ public class APerfectMarkovSegmentation implements Segmentation {
 		
 		// take the ones that different max 10 times from max probability
 		double maxKey = sortedProbabilityCorrespondence.lastKey();
-		SortedMap<Double, Integer> sortedPC_Top = sortedProbabilityCorrespondence.subMap(maxKey/10, maxKey);
+		SortedMap<Double, Integer> sortedPC_Top = 
+				sortedProbabilityCorrespondence.subMap(maxKey/PROBABILITY_RATIO, maxKey);
+		SortedMap<Double, Integer> sortedEnergyCorrespondence = new TreeMap<Double, Integer>();
 		
-//		for (double key : sortedPC_Top.keySet()) {
-//			// probability, energy, etc
-//			//double p = cut.calcEnergyRatio(result.getData());
-//			//double p = MarkovLD.getDefaultMLD().probability(cut.buildLength());
-//			double p = cut.calcEnergy(result.getData());
-//			if (!(sortedCorrespondence.containsKey(p)))  
-//				        sortedCorrespondence.put(p, number);
-//			else {
-//				double minValue = MINIMUM_PROBABILITY;			
-//				double closestKey = returnClosestKey(p, sortedCorrespondence, minValue);
-//				sortedCorrespondence.put(closestKey, number);				
-//			}	  
-//
-//		}
-		
+		for (double key : sortedPC_Top.keySet()) {
+			// probability, energy, etc
+			//double p = cut.calcEnergyRatio(result.getData());
+			//double p = MarkovLD.getDefaultMLD().probability(cut.buildLength());
+			
+			int index = sortedPC_Top.get(key);
+			CutData cut = result.getPossibleCuts().get(index);
+			double e = cut.calcEnergy(result.getData());
+
+			if (!(sortedEnergyCorrespondence.containsKey(e)))  
+				sortedEnergyCorrespondence.put(e, index);
+			else {
+				double minValue = MINIMUM_ENERGY;			
+				double closestKey = returnClosestKey(e, sortedEnergyCorrespondence, minValue);
+				sortedEnergyCorrespondence.put(closestKey, index);				
+			}	  
+
+		}
+	
 		
 		//LabelFrame lf = showSortedSegmentations(result, sortedProbabilityCorrespondence, 3);
-		LabelFrame lf = showSortedSegmentations(result, sortedPC_Top, 3);
+		//LabelFrame lf_P = showSortedSegmentations(result, sortedPC_Top, 3);
+		LabelFrame lf_E = showSortedSegmentations(result, sortedEnergyCorrespondence, 3);
 		
-		//LabelFrame lf = showAllSegmentations(result, 3);
-		lf.setVisible(true);
-		
+		//LabelFrame lf_ALL = showAllSegmentations(result, 3);
+		////lf_P.setVisible(true);
+		lf_E.setVisible(true);
+	    //lf_ALL.setVisible(true);
 	}
 
 	
@@ -83,6 +93,8 @@ public class APerfectMarkovSegmentation implements Segmentation {
 		
 		Map<CutData, Double> cutMap = new HashMap<CutData,Double>();
 		
+		
+		System.out.println(data.getMinimums());
 		//building table of all cuts with probability above zero
 		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
 			for (int i1 = 1; i1<=3; i1++)
@@ -103,7 +115,8 @@ public class APerfectMarkovSegmentation implements Segmentation {
 									startingPoint+i1+i2+i3+i4+i5+i6);
 							
 							
-							if (pointsAcceptable(cut.getCutPointsArray(), m)) {
+							if (pointsAcceptable(cut.getCutPointsArray(), m)) 
+							{
 								double p = mld.probability(cut.buildLength());
 								if (p > MINIMUM_PROBABILITY)
 									cutMap.put(cut, p);
@@ -114,6 +127,7 @@ public class APerfectMarkovSegmentation implements Segmentation {
 		}
 		
 		// now using table of cuts we find which lines are more likely to be actual segmentation lines
+		/*
 		SortedMap<Integer, Double> lineMap = new TreeMap<Integer,Double>();
 		for (CutData cut : cutMap.keySet()) {
 			double energy = cut.calcEnergy(data);
@@ -123,7 +137,8 @@ public class APerfectMarkovSegmentation implements Segmentation {
 				double cval = lineMap.getOrDefault(i, 0.0);
 				lineMap.put(i, cval+val);
 			}
-				
+			
+		
 		}
 
 		// find top 7 lines and make sure they are in order
@@ -133,6 +148,8 @@ public class APerfectMarkovSegmentation implements Segmentation {
 		List<CutData> possibleCuts = new ArrayList<CutData>(cutMap.keySet());
 		possibleCuts.add(0, new CutData(cutPoints)); //TODO it's possible that this one is already in the table somewhere
 		
+		*/
+		List<CutData> possibleCuts = new ArrayList<CutData>(cutMap.keySet());
 		return new SegmentationResult(data, possibleCuts);
 
 	}
@@ -161,9 +178,9 @@ public class APerfectMarkovSegmentation implements Segmentation {
 	private static boolean pointsAcceptable(int[] points, Mat m) {
 //		return true;
 		int length = points[6] - points[0];
-		if (points[6] > (double) m.cols()*400/527 
-				|| length >= (double) m.cols()*400/527 
-				|| length <= m.cols()/2) 
+		if (points[6] > (double) (m.cols()*420)/527 
+				|| length >= (double) (m.cols()*420)/527 
+				|| length <= m.cols()/2.5) 
 			return false;
 		
 		return true;
