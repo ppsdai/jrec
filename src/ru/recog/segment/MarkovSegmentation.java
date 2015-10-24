@@ -1,6 +1,5 @@
 package ru.recog.segment;
 
-import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -8,7 +7,8 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import ru.recog.*;
+import ru.recog.ImageUtils;
+import ru.recog.LabelFrame;
 
 public class MarkovSegmentation implements Segmentation {
 	
@@ -26,8 +26,8 @@ public class MarkovSegmentation implements Segmentation {
 	
 	public static void main(String[] args) throws Exception {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-		Mat m = Imgcodecs.imread("/Users/pps/dev/SFAULT_0/frame1173201.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		// C:\dev\frames\VNew\detected1411\V1411N33t50680.png
+		Mat m = Imgcodecs.imread("C:\\dev\\frames\\VNew\\detected1411\\V1411N33t50680.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		SegmentationResult result = SegmentationFactory.getMarkovSegmentation().segment(m);
 		LabelFrame lf = ImageUtils.showAllSegmentations(result, 3);
 		lf.setVisible(true);
@@ -46,38 +46,6 @@ public class MarkovSegmentation implements Segmentation {
 		SegmentationData data = new SegmentationData(m);
 		
 		if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
-		
-//		Map<CutData, Double> cutMap = new HashMap<CutData,Double>();
-//		
-//		//building table of all cuts with probability above zero
-//		for (int startingPoint = 0; startingPoint < 6; startingPoint++) {
-//			for (int i1 = 1; i1<=3; i1++)
-//			 for (int i2 = 1; i2<=3; i2++)
-//	 		  for (int i3 = 1; i3<=3; i3++)
-//				for (int i4 = 1; i4<=3; i4++)
-//				 for (int i5 = 1; i5<=3; i5++)
-//					for (int i6 = 1; i6<=3; i6++) {
-//						if (startingPoint+i1+i2+i3+i4+i5+i6>=data.getMinimums().size()) continue;
-//						else {
-//							CutData cut = new CutData(data,
-//									startingPoint,
-//									startingPoint+i1,
-//									startingPoint+i1+i2,
-//									startingPoint+i1+i2+i3,
-//									startingPoint+i1+i2+i3+i4,
-//									startingPoint+i1+i2+i3+i4+i5,
-//									startingPoint+i1+i2+i3+i4+i5+i6);
-//							
-//							
-//							if (pointsAcceptable(cut.getCutPointsArray(), m)) {
-//								double p = mld.probability(cut.buildLength());
-//								if (p!=0)
-//									cutMap.put(cut, p);
-//							}
-//						}
-//					}
-//			
-//		}
 		
 		Map<CutData, Double> cutMap = buildCuts(data, mld);
 		

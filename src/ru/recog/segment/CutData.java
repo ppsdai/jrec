@@ -51,6 +51,32 @@ public class CutData {
 		return cutPoints.containsAll(cutList);
 	}
 	
+	public double calcEnergyRatio(SegmentationData data) {
+		
+		double sum1 = calcEnergySymbol(data, 0) + calcEnergySymbol(data, 4) + calcEnergySymbol(data, 5);
+		double sum2 = calcEnergySymbol(data, 1) + calcEnergySymbol(data, 2) + calcEnergySymbol(data, 3);
+	
+		return sum2/sum1;
+	}
+	
+	public double calcEnergySymbol(SegmentationData data, int i) {
+		
+		if (i>=cutPoints.size()-1) i = cutPoints.size()-2; 
+
+		    int x1 = cutPoints.get(i);
+			int x2 = cutPoints.get(i+1);
+			
+			double avg = 0.5*(double)(data.getProjection()[x1]+data.getProjection()[x2]);
+			double sum = 0;
+			for (int x  = x1; x<=x2; x++)
+				sum+=(data.getProjection()[x]-avg);
+			
+			sum = sum / (x2-x1);
+			
+		
+		return sum;
+	}
+	
 	public double[] buildLength() {
 		//FIXME think about cases when there are more than 7 cut pointa
 		if (cutPoints.size() < 7) throw new IllegalStateException("Cannot form Markov chain from CutData with size "+cutPoints.size());
