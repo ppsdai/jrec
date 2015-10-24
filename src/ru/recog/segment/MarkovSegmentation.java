@@ -26,8 +26,8 @@ public class MarkovSegmentation implements Segmentation {
 	
 	public static void main(String[] args) throws Exception {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-		Mat m = Imgcodecs.imread("/Users/pps/dev/SFAULT_0/frame1173201.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		// C:\dev\frames\VNew\detected1411\V1411N33t50680.png
+		Mat m = Imgcodecs.imread("C:\\dev\\frames\\VNew\\detected1411\\V1411N33t50680.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		SegmentationResult result = SegmentationFactory.getMarkovSegmentation().segment(m);
 		LabelFrame lf = ImageUtils.showAllSegmentations(result, 3);
 		lf.setVisible(true);
