@@ -12,6 +12,8 @@ import org.opencv.imgproc.Imgproc;
 import ru.recog.Utils;
 import ru.recog.feature.*;
 import ru.recog.imgproc.*;
+import ru.recog.segment.*;
+import ru.recog.segment.SegmentationLog.SegmentationLogEntry;
 
 public class NNTrainingBuilder {
 	
@@ -54,9 +56,11 @@ public class NNTrainingBuilder {
 //		processCharFolders("/Users/pps/segmented/NN", "/Users/pps/dev/NNTrain/newshit");
 		
 //		processFolders(args[0],args[1]);
-		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
+//		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
 		
-		trainBuilder.buildTrainingAndTestingSet("/Users/pps/segmented/NN", "TGS.txt", "/Users/pps/segmented/NN");
+//		trainBuilder.buildTrainingAndTestingSet("/Users/pps/segmented/NN", "TGS.txt", "/Users/pps/segmented/NN");
+		
+		buildSegmentTraining("/Users/pps/dev/energy", "nrg", "/Users/pps/dev/test/frames", "/Users/pps/dev/seglog");
 		
 	}
 	
@@ -279,6 +283,62 @@ public class NNTrainingBuilder {
 		
 	}
 	
+	public static void buildSegmentTraining(String trainFilesDestination, String suffix, String picRoot, String seglogFolder) 
+		throws Exception {
+		List<String> csvTestList = new ArrayList<String>();
+		List<String> csvTestFileList = new ArrayList<String>();
+		List<String> csvTrainList = new ArrayList<String>();
+
+		String seglogFilename = SegmentationLog.properPath(seglogFolder, "seglog047.txt");
+		File picDir = new File(picRoot, "processed047");
+		for (SegmentationLogEntry sle : SegmentationLog
+				.readSegmentationLog(seglogFilename)) {
+			if ("SUCCESS".equals(sle.getResult()))
+				csvTrainList.addAll(createCSVTrainSampleFromSLE(picDir,
+						seglogFilename, sle));
+		}
+
+		seglogFilename = SegmentationLog.properPath(seglogFolder,
+				"seglog050.txt");
+		picDir = new File(picRoot, "processed050");
+		for (SegmentationLogEntry sle : SegmentationLog
+				.readSegmentationLog(seglogFilename)) {
+			if ("SUCCESS".equals(sle.getResult()))
+
+				csvTrainList.addAll(createCSVTrainSampleFromSLE(picDir,
+						seglogFilename, sle));
+		}
+
+		Collections.shuffle(csvTrainList);
+
+		seglogFilename = SegmentationLog.properPath(seglogFolder,
+				"seglog049.txt");
+		picDir = new File(picRoot, "processed049");
+		for (SegmentationLogEntry sle : SegmentationLog
+				.readSegmentationLog(seglogFilename)) {
+			if ("SUCCESS".equals(sle.getResult())) {
+
+				csvTestList.addAll(createCSVTrainSampleFromSLE(picDir,
+						seglogFilename, sle));
+				csvTestFileList.add(SegmentationLog.properPath(
+						picDir.getAbsolutePath(), sle.getFilename()));
+			}
+		}
+		
+		
+		System.out.println("Training: "+csvTrainList.size()+" Testing: "+csvTestList.size());
+		String trainFilename = "train".concat(suffix);
+		String testFilename = "test".concat(suffix);
+		String testFilesFilename = "testFiles".concat(suffix);
+
+		String infoFilename = "info".concat(suffix);
+		
+		stringsToFile(trainFilesDestination, trainFilename, csvTrainList);
+		stringsToFile(trainFilesDestination, testFilename, csvTestList);
+		stringsToFile(trainFilesDestination, testFilesFilename, csvTestFileList);
+		
+	}
+	
 	public static void stringsToFile(String destPath, String filename, List<String> strings) throws IOException {
 		PrintWriter pw = new PrintWriter(new FileWriter(new File(destPath,filename)));
 		for (String s : strings) 
@@ -307,6 +367,36 @@ public class NNTrainingBuilder {
 			sb.append(r).append(",");
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
+	}
+	
+	public static List<String> createCSVTrainSampleFromSLE(File picDir, String seglogFilename, SegmentationLogEntry sle) {
+		
+			
+		String name = sle.getFilename().substring(
+				sle.getFilename().lastIndexOf("\\") + 1);
+
+		Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name),
+				Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		
+//		Mat img = Imgcodecs.imread(sle.getFilename(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		SegmentationData data = new SegmentationData(m);
+		if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
+		
+		Map<CutData, Double> cutMap = MarkovSegmentation.buildCuts(data, MarkovLD.getDefaultMLD());
+		
+		List<Integer> sleCuts = sle.getCuts();
+		double maxEnergy = 0;
+		for (CutData c: cutMap.keySet()) if (c.calcEnergy(data)>maxEnergy) maxEnergy = c.calcEnergy(data);
+		
+		List<String> samples = new ArrayList<String>();
+		for (CutData cut : cutMap.keySet()) {
+			double p = cutMap.get(cut);
+			double e = cut.calcEnergy(data)/maxEnergy;
+			String result = cut.isEqual(sleCuts)? "1" : "0";
+			samples.add(String.valueOf(p).concat(",").concat(String.valueOf(e)).concat(",").concat(result));
+		}
+		return samples;
+
 	}
 	
 

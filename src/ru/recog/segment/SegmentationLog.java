@@ -39,6 +39,17 @@ public class SegmentationLog {
 		public List<Rect> getRectangles() {
 			return rectangles;
 		}
+		
+		public List<Integer> getCuts() {
+			List<Integer> cuts = new ArrayList<Integer>();
+			for (Rect r : rectangles) cuts.add(r.x);
+			if (rectangles.size() > 0) {
+				Rect r = rectangles.get(rectangles.size()-1);
+				cuts.add(r.x+r.width);
+			}
+			
+			return cuts;
+		}
 
 		public String getResult() {
 			return result;
@@ -231,6 +242,62 @@ public class SegmentationLog {
 
 	}
 	
+	public static void testIsEqual(String picFolder, String seglogFilename) throws Exception {
+		LabelFrame lf = new LabelFrame(picFolder);
+		
+		
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
+		int total = 0;
+		int wrong = 0;
+		for (SegmentationLogEntry entry : entries) {
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			total++;
+			
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+
+			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			SegmentationResult sr = MarkovSegmentation.multisegment(m);
+		
+			List<Integer> cutPoints = new ArrayList<Integer>();
+
+			cutPoints.add(0);
+			cutPoints.addAll(sr.getCutPoints());
+			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+			if (!isValid) {
+				
+				for (CutData cut : sr.getPossibleCuts()) {
+					Mat pm = m.clone();
+					ImageUtils.drawLines(pm, cut);
+					lf.addImage(pm, "equal? "+cut.isEqual(entry.getCuts())+" sle:"+entry.getCuts()+" cut:"+cut.getCutPoints(), 3);
+				}
+
+//				double contrast = -1;
+//				double energy = -1;
+
+//				if (!sr.getCutPoints().isEmpty()) {
+//				Mat cutMat = m.submat(sr.getData().getUpperBound(), sr.getData().getLowerBound(),
+//						sr.getCutPoints().get(0), sr.getCutPoints().get(sr.getCutPoints().size()-1));
+//				 contrast = ImageUtils.contrastRMS(cutMat);
+//				 energy = sr.getPossibleCuts().get(0).calcEnergy(sr.getData());
+//				}
+//				lf.addImage(ImageUtils.drawSegLines(m, sr), "c="+contrast+" e="+energy+" e/c="+energy/contrast, 3);
+//				
+//				Mat c = ImageUtils.bin2color(m);
+//				for (Rect r : entry.getRectangles())
+//					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+//				lf.addImage(c, entry.toString(), 3);
+				wrong++;
+			}
+		}
+		System.out.println("Total: "+total+" wrong: "+wrong);
+		lf.pack();
+		lf.setVisible(true);
+	}
+	
 	public static void testShit(String picFolder, String seglogFilename) throws Exception {
 		
 		
@@ -295,7 +362,18 @@ public class SegmentationLog {
 //				lf.addImage(c6, "bin 0.6", 3);
 				
 //				isValidSegmentation(entry.getRectangles(), cutPoints);
-				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
+				int top = sr.getData().getUpperBound();
+				int bottom = sr.getData().getLowerBound();
+				double contrast = -1;
+				double energy = -1;
+
+				if (!sr.getCutPoints().isEmpty()) {
+				Mat cutMat = m.submat(sr.getData().getUpperBound(), sr.getData().getLowerBound(),
+						sr.getCutPoints().get(0), sr.getCutPoints().get(sr.getCutPoints().size()-1));
+				 contrast = ImageUtils.contrastRMS(cutMat);
+				 energy = sr.getPossibleCuts().get(0).calcEnergy(sr.getData());
+				}
+				lf.addImage(ImageUtils.drawSegLines(m, sr), "c="+contrast+" e="+energy+" e/c="+energy/contrast, 3);
 				
 				Mat c = ImageUtils.bin2color(m);
 				for (Rect r : entry.getRectangles())
@@ -311,8 +389,10 @@ public class SegmentationLog {
 	
 
 	public static void main(String[] args) throws Exception {
-		testAll(args[0], args[1]);
+//		testAll(args[0], args[1]);
 //	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+
 		
 	}
 
@@ -330,7 +410,7 @@ public class SegmentationLog {
 		return temp;
 	}
 	
-	private static String properPath(String parent, String child) {
+	public static String properPath(String parent, String child) {
 		return new File(parent, child).getAbsolutePath();
 	}
 	

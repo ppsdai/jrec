@@ -47,6 +47,10 @@ public class CutData {
 		return total;
 	}
 	
+	public boolean isEqual(List<Integer> cutList) {
+		return cutPoints.containsAll(cutList);
+	}
+	
 	public double[] buildLength() {
 		//FIXME think about cases when there are more than 7 cut pointa
 		if (cutPoints.size() < 7) throw new IllegalStateException("Cannot form Markov chain from CutData with size "+cutPoints.size());
