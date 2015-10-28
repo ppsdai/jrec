@@ -51,6 +51,20 @@ public class CutData {
 		return cutPoints.containsAll(cutList);
 	}
 	
+	public boolean leftEqual(CutData cut) {
+		List<Integer> left = cut.getCutPoints();
+		for (int i = 1; i < left.size(); i++)
+			if (!left.get(i).equals(cutPoints.get(i-1))) return false;
+		return true;
+	}
+	
+	public boolean rightEqual(CutData cut) {
+		List<Integer> right = cut.getCutPoints();
+		for (int i = 1; i < cutPoints.size(); i++)
+			if (!right.get(i-1).equals(cutPoints.get(i))) return false;
+		return true;
+	}
+	
 	public double calcEnergyRatio(SegmentationData data) {
 		
 		double sum1 = calcEnergySymbol(data, 0) + calcEnergySymbol(data, 4) + calcEnergySymbol(data, 5);
@@ -89,4 +103,8 @@ public class CutData {
 		
 	}
 
+	@Override
+	public String toString() {
+		return cutPoints.toString();
+	}
 }

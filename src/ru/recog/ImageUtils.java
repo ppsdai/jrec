@@ -72,6 +72,27 @@ public class ImageUtils {
 		return cvt;
 	}
 	
+	public static Mat drawSegLines(Mat m, CutData cut) {
+		Mat cvt = bin2color(m);
+		
+//		List<Integer> points = result.getCutPoints();
+//		for (int p : points)
+//			if (points.indexOf(p)==0)
+//				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), RED);
+//			else if (points.indexOf(p)==points.size()-1)
+//				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), BLUE);
+//			else
+//				Imgproc.line(cvt, new Point(p, 0), new Point(p, cvt.rows()-1), GREEN);
+		drawLines(cvt, cut.getCutPoints());
+
+		
+//		Imgproc.line(cvt, new Point(0,result.getData().getUpperBound()), new Point(cvt.cols()-1, result.getData().getUpperBound()),
+//				new Scalar(0,255,0));
+//		Imgproc.line(cvt, new Point(0,result.getData().getLowerBound()), new Point(cvt.cols()-1, result.getData().getLowerBound()),
+//				new Scalar(0,255,0));
+		return cvt;
+	}
+	
 	public static void drawLines(Mat m, CutData data) {
 		drawLines(m, data.getCutPoints());
 	}

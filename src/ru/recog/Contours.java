@@ -40,60 +40,69 @@ public class Contours {
 		SBSegmenter sbs = new SBSegmenter();
 		for (File f : files) {
 			count++;
-			if (count > 50) break;
+			if (count > 100) break;
 			
 			Mat m = Imgcodecs.imread(f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//			sbs.sobelsegment(m);
+			SegmentationResult sr = SegmentationFactory.getMarkovSegmentation().segment(m);
+			SegmentationResult lsr = SegmentationFactory.getLegacySegmentation().segment(m);
+			lf.addImage(ImageUtils.drawSegLines(m, lsr), "legacy", 3);
 			
-//			Mat b6 = ImageUtils.localbin(m, 0.6);
-//			List<BinShape> shapes = ShapeBasedSegmenter.getAllShapes(b6); //FinalShapes(b6);
-//			Mat c6 = ImageUtils.bin2color(b6);
-//			for (BinShape shape : shapes) {
-//				Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
-//			}
-//			lf.addImage(c6, f.getName(), 3);
+			for (int i = 0; i < sr.getPossibleCuts().size() && i < 15; i++)
+//			for (CutData cut : sr.getPossibleCuts())
+//				lf.addImage(ImageUtils.drawSegLines(m, cut), cut.toString(), 3);
+				lf.addImage(ImageUtils.drawSegLines(m, sr.getPossibleCuts().get(i)),"i="+i,3);
 			
-			
-//			Mat b4 = ImageUtils.localbin(m, 0.4);
-////			Mat b4 = SBSegmenter.BIN_OTSU.processImage(m);
+////			sbs.sobelsegment(m);
 //			
-//			shapes = ShapeBasedSegmenter.getFinalShapes(b4);
-//			Mat c4 = ImageUtils.bin2color(b4);
-//			for (BinShape shape : shapes) {
-//				Imgproc.rectangle(c4, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
-//			}
-//			lf.addImage(c4, f.getName(), 3);
-			
-			SegmentationResult sr0 = SegmentationFactory.getLegacySegmentation().segment(m);
-			lf.addImage(ImageUtils.drawSegLines(m, sr0), "orig", 3);
-			
-    		SegmentationResult sr1 = sbs.sobelsegment(m);
-//			SegmentationResult sr1 = SBSegmenter.segment(m, SBSegmenter.BIN_OTSU);
-
-			lf.addImage(ImageUtils.drawSegLines(m, sr1), "shm", 3);
-			
-			Mat sobelx = new Mat(m.size(), m. type());
-			Imgproc.Sobel(m.clone(), sobelx, CvType.CV_32F, 1, 0);
-			Mat mx = new Mat();
-			sobelx.convertTo(mx, CvType.CV_8U);
-			lf.addImage(mx, "x",3);
-			
-			
-			Mat sobely = new Mat(m.size(), m. type());
-			Imgproc.Sobel(m.clone(), sobely, CvType.CV_32F, 0, 1);
-			Mat my = new Mat();
-			sobely.convertTo(my, CvType.CV_8U);
-			lf.addImage(my, "y",3);
-			
-			Mat sobelxy = new Mat(m.size(), m. type());
-			Imgproc.Sobel(m.clone(), sobelxy, CvType.CV_32F, 1, 2);
-			Mat mxy = new Mat();
-			sobely.convertTo(mxy, CvType.CV_8U);
-			lf.addImage(mxy, "1x2y",3);
-			
+////			Mat b6 = ImageUtils.localbin(m, 0.6);
+////			List<BinShape> shapes = ShapeBasedSegmenter.getAllShapes(b6); //FinalShapes(b6);
+////			Mat c6 = ImageUtils.bin2color(b6);
+////			for (BinShape shape : shapes) {
+////				Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+////			}
+////			lf.addImage(c6, f.getName(), 3);
+//			
+//			
+////			Mat b4 = ImageUtils.localbin(m, 0.4);
+//////			Mat b4 = SBSegmenter.BIN_OTSU.processImage(m);
+////			
+////			shapes = ShapeBasedSegmenter.getFinalShapes(b4);
+////			Mat c4 = ImageUtils.bin2color(b4);
+////			for (BinShape shape : shapes) {
+////				Imgproc.rectangle(c4, shape.getULPoint(), shape.getLRPoint(), new Scalar(0,255,0));
+////			}
+////			lf.addImage(c4, f.getName(), 3);
+//			
+//			SegmentationResult sr0 = SegmentationFactory.getLegacySegmentation().segment(m);
+//			lf.addImage(ImageUtils.drawSegLines(m, sr0), "orig", 3);
+//			
+//    		SegmentationResult sr1 = sbs.sobelsegment(m);
+////			SegmentationResult sr1 = SBSegmenter.segment(m, SBSegmenter.BIN_OTSU);
+//
+//			lf.addImage(ImageUtils.drawSegLines(m, sr1), "shm", 3);
+//			
+//			Mat sobelx = new Mat(m.size(), m. type());
+//			Imgproc.Sobel(m.clone(), sobelx, CvType.CV_32F, 1, 0);
+//			Mat mx = new Mat();
+//			sobelx.convertTo(mx, CvType.CV_8U);
+//			lf.addImage(mx, "x",3);
+//			
+//			
 //			Mat sobely = new Mat(m.size(), m. type());
 //			Imgproc.Sobel(m.clone(), sobely, CvType.CV_32F, 0, 1);
-//			lf.addImage(sobely, "y",3);
+//			Mat my = new Mat();
+//			sobely.convertTo(my, CvType.CV_8U);
+//			lf.addImage(my, "y",3);
+//			
+//			Mat sobelxy = new Mat(m.size(), m. type());
+//			Imgproc.Sobel(m.clone(), sobelxy, CvType.CV_32F, 1, 2);
+//			Mat mxy = new Mat();
+//			sobely.convertTo(mxy, CvType.CV_8U);
+//			lf.addImage(mxy, "1x2y",3);
+//			
+////			Mat sobely = new Mat(m.size(), m. type());
+////			Imgproc.Sobel(m.clone(), sobely, CvType.CV_32F, 0, 1);
+////			lf.addImage(sobely, "y",3);
 		}
 		
 	}

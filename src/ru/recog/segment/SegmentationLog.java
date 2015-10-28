@@ -49,6 +49,7 @@ public class SegmentationLog {
 			}
 			
 			return cuts;
+			
 		}
 
 		public String getResult() {
@@ -76,11 +77,62 @@ public class SegmentationLog {
 		
 	}
 	
+	public static List<Integer> rect2List(List<Rect> rects) {
+		List<Integer> list = new ArrayList<Integer>();
+		for (Rect r : rects) {
+			list.add(r.x);
+			if (rects.indexOf(r) == rects.size()-1) list.add(r.x+r.width);
+		}
+		return list;
+	}
+	
+	private static int exactSegmentation(List<Integer> proper, List<Integer> tested) {
+		int pIndex = tested.indexOf(proper.get(0));
+		if (pIndex < 0 || pIndex+proper.size() > tested.size()) return -1;
+		for (int i = 1; i < proper.size(); i++)
+			if (!proper.get(i).equals(tested.get(pIndex+i))) return -1;
+		
+		return pIndex;
+	}
+	
+	public static boolean weakBorderEquals(List<Integer> proper, List<Integer> tested) {
+		int pIndex = exactSegmentation(proper.subList(1, proper.size()-1), tested);
+//		System.out.println("i="+pIndex+" prop "+proper+" total "+tested);
+		if (pIndex < 1 || pIndex+proper.size()-1 > tested.size()) return false;
+		int left = tested.get(pIndex-1); int properLeft = proper.get(0);
+		int right = tested.get(pIndex+proper.size()-1-1); int properRight = proper.get(proper.size()-1);
+		double AL = getAverageLength(proper);
+		double ld = Math.abs(left-properLeft)/AL;
+		double rd = Math.abs(right-properRight)/AL;
+
+		
+//		System.out.println("left "+left+" pL "+properLeft);
+//		System.out.println("right "+right+" pL "+properRight);
+//		System.out.println("AL "+AL+" LD "+ld+ " RD "+rd);
+		return ld<=0.4 && rd<=0.4;
+		
+
+//		double AL = getAverageLength(proper);
+		
+//		return (double)Math.abs(left - properLeft)/AL <= 0.4 && (double)Math.abs(right - properRight)/ AL <= 0.4;
+	}
+	
+	public static boolean weakBorderTest(SegmentationLogEntry sle, List<Integer> tested) {
+		return weakBorderEquals(rect2List(sle.getRectangles()), tested);
+	}
+	
+	public static boolean exactSegmentation(SegmentationLogEntry sle, List<Integer> tested) {
+		return exactSegmentation(rect2List(sle.getRectangles()), tested) > -1;
+	}
 	
 	public static boolean isValidSegmentation(List<Rect> symbolsList, List<Integer> cutPointsList){
 		if ( isSegmentation(symbolsList, cutPointsList) == -1) return false;
 		return true;	
 		
+	}
+	
+	public static double getAverageLength(List<Integer> cuts) {
+		return ((double) (cuts.get(cuts.size()-1) - cuts.get(0)))/(cuts.size()-1);
 	}
 	
 	
@@ -183,19 +235,28 @@ public class SegmentationLog {
 	
 	public static void testAll(String picRoot, String seglogRoot) throws Exception {
 		
-		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt") );
-		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
-		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+//		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+//				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt") );
+//		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+//				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+//		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+//				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+//		
+//		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+//				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
+//		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+//				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+//		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+//				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
 		
-		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+		testMultipleCuts(SegmentationFactory.getMarkovSegmentation(), 
 				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
-		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+		testMultipleCuts(SegmentationFactory.getMarkovSegmentation(), 
 				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
-		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+		testMultipleCuts(SegmentationFactory.getMarkovSegmentation(), 
 				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+
+		
 	}
 	
 	
@@ -220,12 +281,17 @@ public class SegmentationLog {
 					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			SegmentationResult sr = segmenter.segment(m);
 		
-			List<Integer> cutPoints = new ArrayList<Integer>();
+//			List<Integer> cutPoints = new ArrayList<Integer>();
 
-			cutPoints.add(0);
-			cutPoints.addAll(sr.getCutPoints());
-			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+//			cutPoints.add(0);
+//			cutPoints.addAll(sr.getCutPoints());
+//			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+//			boolean isValid = exactSegmentation(entry, sr.getCutPoints());
+			boolean isValid = weakBorderTest(entry, sr.getCutPoints());
 			if (!isValid) {
+//				System.out.println(entry);
+//				System.out.println("INV: "+sr.getCutPoints());
+//				System.out.println("R: "+rect2List(entry.getRectangles()));
 
 				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
 				
@@ -240,6 +306,78 @@ public class SegmentationLog {
 		lf.pack();
 		lf.setVisible(true);
 
+	}
+	
+	public static void testMultipleCuts(Segmentation segmenter, String picFolder, String seglogFilename) 
+			throws Exception {
+		LabelFrame lf = new LabelFrame(picFolder);
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		
+		final int NCuts = 3;
+		
+		System.out.println("Checking "+seglogFilename+" with "+segmenter);
+		
+		int total = 0;
+		int wrong = 0;
+		for (SegmentationLogEntry entry : readSegmentationLog(seglogFilename)) {
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			total++;
+			
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+
+			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			SegmentationResult sr = segmenter.segment(m);
+			
+			List<Boolean> b = new ArrayList<Boolean>();
+			for (int i = 0; i < sr.getPossibleCuts().size() && i < NCuts; i++)
+				b.add(weakBorderTest(entry, sr.getPossibleCuts().get(i).getCutPoints()));
+				
+
+			boolean valid =  b.contains(true);
+
+		
+//			boolean isValid = weakBorderTest(entry, sr.getCutPoints());
+			if (!valid) {
+//				System.out.println(entry);
+//				System.out.println("INV: "+sr.getCutPoints());
+//				System.out.println("R: "+rect2List(entry.getRectangles()));
+
+				for (int i = 0; i < sr.getPossibleCuts().size(); i++)
+					lf.addImage(ImageUtils.drawSegLines(m, sr.getPossibleCuts().get(i)), 
+							String.valueOf(i), 3);
+				
+				
+				Mat c = ImageUtils.bin2color(m);
+				for (Rect r : entry.getRectangles())
+					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+				lf.addImage(c, entry.toString(), 3);
+				
+				wrong++;
+			}
+		}
+		System.out.println("Total: "+total+" wrong: "+wrong);
+		lf.pack();
+		lf.setVisible(true);
+
+	}
+	
+	public static boolean  testOneImage(Segmentation segmenter, List<Integer> properLines, Mat m) {
+		SegmentationResult sr = segmenter.segment(m);
+		System.out.println("After segm: "+sr.getCutPoints());
+		LabelFrame lf = new LabelFrame("GG");
+		Mat proper = m.clone();
+		ImageUtils.drawLines(proper, properLines);
+		lf.addImage(proper, "proper", 3);
+		Mat seg = m.clone();
+		ImageUtils.drawLines(seg, sr.getCutPoints());
+		lf.addImage(seg, "seg", 3);
+		lf.pack();
+		lf.setVisible(true);
+		return weakBorderEquals(properLines, sr.getCutPoints());
+		
 	}
 	
 	public static void testIsEqual(String picFolder, String seglogFilename) throws Exception {
@@ -260,7 +398,7 @@ public class SegmentationLog {
 
 			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
 					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			SegmentationResult sr = MarkovSegmentation.multisegment(m);
+			SegmentationResult sr = SegmentationFactory.getMarkovSegmentation().segment(m);
 		
 			List<Integer> cutPoints = new ArrayList<Integer>();
 
@@ -325,54 +463,35 @@ public class SegmentationLog {
 //			SegmentationResult sr = Segmenter.shapesegment(m);
 //			SegmentationResult sr = SBSegmenter.segment(m);
 //			SegmentationResult sr = Segmenter.segment(m);
-			SegmentationResult sr = MarkovSegmentation.multisegment(m);
+			SegmentationResult sr = SegmentationFactory.getMarkovSegmentation().segment(m);
 //			SegmentationResult sr = ls.segment(m);
 		
 			List<Integer> cutPoints = new ArrayList<Integer>();
 
-			cutPoints.add(0);
-			cutPoints.addAll(sr.getCutPoints());
-			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
-			if (!isValid) {
-//				System.out.println("Problem with: "+name);
-//				System.out.println(" cutPoints " + cutPoints);
-				Mat b6 = ImageUtils.localbin(m, 0.6);
-//				List<BinShape> shapes = ShapeBasedSegmenter.getFinalShapes(b6, ShapeFilter.WEAK);
-				double lengthEstimate =  0.66 * (sr.getData().getLowerBound() - sr.getData().getUpperBound());
-				ShapeFilter one = new ShapeFilter(ShapeFilter.WEAK);
-				one.setWidthMin(3);
-				one.setWidthMax((int)Math.round(lengthEstimate*1.2));
+//			cutPoints.add(0);
+//			cutPoints.addAll(sr.getCutPoints());
+//			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
+//			boolean b0 = isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(0).getCutPoints());
+//			boolean b1 = isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(1).getCutPoints());
+//			boolean b2 = isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(2).getCutPoints());
+			
+			List<Boolean> b = new ArrayList<Boolean>();
+			for (int i = 0; i < sr.getPossibleCuts().size(); i++)
+				b.add(isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(i).getCutPoints()));
 				
-				ShapeFilter two = new ShapeFilter(ShapeFilter.WEAK);
-				two.setWidthMin(one.getWidthMax()+1);
-				two.setWidthMax((int)Math.round(lengthEstimate*2.4));
-				
-				ShapeFilter three = new ShapeFilter(ShapeFilter.WEAK);
-				three.setWidthMin(two.getWidthMax()+1);
-				three.setWidthMax((int)Math.round(lengthEstimate*3.3));
 
-				
-//				Mat c6 = ImageUtils.bin2color(b6.submat(sr.getUpperBound(), sr.getLowerBound()+1, 0, b6.cols()));
-//				for (BinShape shape : sr.shapes) {
-//					Scalar color = one.accept(shape)? new Scalar(0,255,0) :
-//						two.accept(shape)? new Scalar(255,0,0) : 
-//						three.accept(shape)? new Scalar(0,0,255) : new Scalar(125,125,125);
-//					Imgproc.rectangle(c6, shape.getULPoint(), shape.getLRPoint(), color);
-//				}
-//				lf.addImage(c6, "bin 0.6", 3);
-				
-//				isValidSegmentation(entry.getRectangles(), cutPoints);
-				int top = sr.getData().getUpperBound();
-				int bottom = sr.getData().getLowerBound();
+			boolean valid = b.size()>2? b.subList(0, 2).contains(true) : b.contains(true);
+
+			if (!valid) {
 				double contrast = -1;
 				double energy = -1;
 
-				if (!sr.getCutPoints().isEmpty()) {
-				Mat cutMat = m.submat(sr.getData().getUpperBound(), sr.getData().getLowerBound(),
-						sr.getCutPoints().get(0), sr.getCutPoints().get(sr.getCutPoints().size()-1));
-				 contrast = ImageUtils.contrastRMS(cutMat);
-				 energy = sr.getPossibleCuts().get(0).calcEnergy(sr.getData());
-				}
+//				if (!sr.getCutPoints().isEmpty()) {
+//				Mat cutMat = m.submat(sr.getData().getUpperBound(), sr.getData().getLowerBound(),
+//						sr.getCutPoints().get(0), sr.getCutPoints().get(sr.getCutPoints().size()-1));
+//				 contrast = ImageUtils.contrastRMS(cutMat);
+//				 energy = sr.getPossibleCuts().get(0).calcEnergy(sr.getData());
+//				}
 				lf.addImage(ImageUtils.drawSegLines(m, sr), "c="+contrast+" e="+energy+" e/c="+energy/contrast, 3);
 				
 				Mat c = ImageUtils.bin2color(m);
@@ -389,9 +508,17 @@ public class SegmentationLog {
 	
 
 	public static void main(String[] args) throws Exception {
-//		testAll(args[0], args[1]);
+//		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+//		
+//		Mat m = Imgcodecs.imread("/Users/pps/dev/test/frames/processed050/V50N7t5040.png",
+//				Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//		boolean t =testOneImage(SegmentationFactory.getLegacySegmentation(), 
+////				Arrays.asList(new Integer[]{0,20,34,45,57,70,84}), m);
+//				Arrays.asList(new Integer[]{8,18,30,40,48,59,70}), m);
+//		System.out.println(t);
+		testAll(args[0], args[1]);
 //	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+//	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 
 		
 	}

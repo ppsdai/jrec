@@ -385,13 +385,13 @@ public class NNTrainingBuilder {
 		Map<CutData, Double> cutMap = MarkovSegmentation.buildCuts(data, MarkovLD.getDefaultMLD());
 		
 		List<Integer> sleCuts = sle.getCuts();
-		double maxEnergy = 0;
-		for (CutData c: cutMap.keySet()) if (c.calcEnergy(data)>maxEnergy) maxEnergy = c.calcEnergy(data);
+//		double maxEnergy = 0;
+//		for (CutData c: cutMap.keySet()) if (c.calcEnergy(data)>maxEnergy) maxEnergy = c.calcEnergy(data);
 		
 		List<String> samples = new ArrayList<String>();
 		for (CutData cut : cutMap.keySet()) {
 			double p = cutMap.get(cut);
-			double e = cut.calcEnergy(data)/maxEnergy;
+			double e = cut.calcEnergy(data);
 			String result = cut.isEqual(sleCuts)? "1" : "0";
 			samples.add(String.valueOf(p).concat(",").concat(String.valueOf(e)).concat(",").concat(result));
 		}

@@ -138,11 +138,7 @@ public class LegacySegmentation implements Segmentation {
 			}
 		}
 		
-//		SegmentationResult segResult = new SegmentationResult();
-//		segResult.setData(data);
-//		
-//		segResult.setCutPoints(divPoints);
-		
+		if (!divPoints.contains(0)) divPoints.add(0, 0);
 		return new SegmentationResult(data, new CutData(divPoints));
 		
 	}
