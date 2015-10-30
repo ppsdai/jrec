@@ -8,8 +8,11 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.*;
+import ru.recog.feature.MultipleFeatureExtractor;
+import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.imgproc.ShapeFilter;
 import ru.recog.nn.NNAnalysis;
+import ru.recog.nn.NNWrapper;
 import ru.recog.ui.FrameProcessor;
 
 public class SegmentationLog {
@@ -439,6 +442,8 @@ public class SegmentationLog {
 	public static void testShit(String picFolder, String seglogFilename) throws Exception {
 		
 		
+		
+		
 		LabelFrame lf = new LabelFrame(picFolder);
 		
 		
@@ -506,6 +511,48 @@ public class SegmentationLog {
 		lf.setVisible(true);
 	}
 	
+	
+	public static void testMoreShit(String picFolder, String seglogFilename) throws Exception {
+		
+		
+		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
+				new MultipleFeatureExtractor(
+			new OverlapGradientGridFeatureExtractor()));
+		
+		LabelFrame lf = new LabelFrame(picFolder);
+		
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
+		LegacySegmentation ls = new LegacySegmentation();
+		int count = 0;
+		for (SegmentationLogEntry entry : entries) {
+			count++;
+//			if (count > 100) break;
+			if (!entry.getResult().equals("SUCCESS")) continue;
+			
+			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+
+			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m);
+			SegmentationResult legacy = SegmentationFactory.getLegacySegmentation().segment(m);
+
+			
+		
+
+			lf.addImage(ImageUtils.drawSegLines(m, legacy), entry.getResult(), 3);
+			for (CutData cut : markov.getPossibleCuts(3)) 
+				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
+			
+
+		}
+		
+		lf.pack();
+		lf.setVisible(true);
+	}
+	
 
 	public static void main(String[] args) throws Exception {
 //		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -516,12 +563,47 @@ public class SegmentationLog {
 ////				Arrays.asList(new Integer[]{0,20,34,45,57,70,84}), m);
 //				Arrays.asList(new Integer[]{8,18,30,40,48,59,70}), m);
 //		System.out.println(t);
-		testAll(args[0], args[1]);
-//	    testShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+	
+		
+//		testAll(args[0], args[1]);
+	    testMoreShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 //	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 
 		
 	}
+	
+	public static void runOCR(String picRoot, String segRoot) throws Exception {
+	
+//		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
+//				new MultipleFeatureExtractor(
+//			new OverlapGradientGridFeatureExtractor()));
+//		
+//		File picDir = new File(picFolder);
+//		if (!picDir.exists() || !picDir.isDirectory())
+//			throw new IllegalArgumentException("Not a folder: "+picFolder);
+//		
+//		
+//		int total = 0;
+//		int wrong = 0;
+//		for (SegmentationLogEntry entry : readSegmentationLog("seglog047.txt")) {
+//			if (!entry.getResult().equals("SUCCESS")) continue;
+//			total++;
+//			
+//			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+//
+//			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+//					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//
+//		
+//		for (SegmentationLogEntry entry : readSegmentationLog(properPath(segRoot, "processed047"))) {
+//			
+//			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
+//					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//			
+//		}
+		
+	}
+	
 
 
     /**  

@@ -135,6 +135,16 @@ public class NNWrapper {
 		return sb.toString();
 	}
 	
+	public String getBracketedLPString(List<Mat> pieces) {
+		StringBuilder sb = new StringBuilder();
+		
+		for (Mat piece : pieces) 
+			sb.append("[").append(nnOutputToSymbol(getNNOutputArray(piece.clone()))).append("]");
+			
+		
+		return sb.toString();
+	}
+	
 //	public List<Double> getNNOutput(Mat m) {
 //		return Arrays.asList(getNNOutput(m));
 //	}

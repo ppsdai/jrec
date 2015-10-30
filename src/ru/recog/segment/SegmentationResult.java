@@ -25,6 +25,10 @@ public class SegmentationResult {
 	public List<CutData> getPossibleCuts() {
 		return possibleCuts;
 	}
+	
+	public List<CutData> getPossibleCuts(int numberOfCuts) {
+		return possibleCuts.subList(0, numberOfCuts);
+	}
 
 	void setPossibleCuts(List<CutData> possibleCuts) {
 		this.possibleCuts = possibleCuts;
