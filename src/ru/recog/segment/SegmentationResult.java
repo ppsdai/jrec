@@ -27,7 +27,7 @@ public class SegmentationResult {
 	}
 	
 	public List<CutData> getPossibleCuts(int numberOfCuts) {
-		return possibleCuts.subList(0, numberOfCuts);
+		return possibleCuts.subList(0, Math.min(possibleCuts.size(),numberOfCuts));
 	}
 
 	void setPossibleCuts(List<CutData> possibleCuts) {
@@ -83,13 +83,37 @@ public class SegmentationResult {
 		Mat bin = SegmentationFactory.getDefaultBinarization().processImage(data.getOriginalMat());
 				
 		List<Integer> cutPoints = cut.getCutPoints();
-		int x0 = 0; int x1 = 0;
+//		int x0 = 0; int x1 = 0;
+//		
+//		
+//		for (int i = 0; i <= cutPoints.size(); i++) {
+//			if (i == cutPoints.size()) x1 = bin.cols()-1;
+//			else x1 = cutPoints.get(i);
+//
+//			Mat piece = bin.colRange(x0, x1+1);
+//			List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+//			Imgproc.findContours(piece.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+//			
+//			int topBorder = data.getUpperBound();
+//			int bottomBorder = data.getLowerBound();
+//			for (MatOfPoint mop : contours) {
+//				Rect r = ImageUtils.getContourRect(mop);
+//				if (r.width < 25 && r.height < 30) {
+//					if (r.y < data.getUpperBound() && (r.y+r.height) > data.getUpperBound() && r.y < topBorder)
+//						topBorder = r.y;
+//					if (r.y < data.getLowerBound() && (r.y+r.height) > data.getLowerBound() && r.y+r.height > bottomBorder)
+//						bottomBorder = r.y+r.height;
+//				}
+//			}
+//			
+//			rectangles.add(new Rect(new Point(x0,topBorder), new Point(x1,bottomBorder)));
+//			
+//			x0 = x1;
+//		}
 		
-		
-		for (int i = 0; i <= cutPoints.size(); i++) {
-			if (i == cutPoints.size()) x1 = bin.cols()-1;
-			else x1 = cutPoints.get(i);
-
+		for (int i = 0; i < cutPoints.size() - 1; i++) {
+			int x0 = cutPoints.get(i);
+			int x1 = cutPoints.get(i+1);
 			Mat piece = bin.colRange(x0, x1+1);
 			List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 			Imgproc.findContours(piece.clone(), contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
@@ -97,6 +121,7 @@ public class SegmentationResult {
 			int topBorder = data.getUpperBound();
 			int bottomBorder = data.getLowerBound();
 			for (MatOfPoint mop : contours) {
+				//FIXME there should be more reasonable approach to filtering resulting shape rectangles
 				Rect r = ImageUtils.getContourRect(mop);
 				if (r.width < 25 && r.height < 30) {
 					if (r.y < data.getUpperBound() && (r.y+r.height) > data.getUpperBound() && r.y < topBorder)
@@ -107,8 +132,6 @@ public class SegmentationResult {
 			}
 			
 			rectangles.add(new Rect(new Point(x0,topBorder), new Point(x1,bottomBorder)));
-			
-			x0 = x1;
 		}
 		
 		return rectangles;
