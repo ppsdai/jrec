@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.opencv.core.Mat;
 
-public class AxisLeastInertiaFeatureExtractor extends FeatureExtractor {
+public class AxisLeastInertiaFeatureExtractor extends FeatureExtractor<Mat> {
 
 	@Override
 	public List<Double> extract(Mat m) {

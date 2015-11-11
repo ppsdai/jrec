@@ -7,42 +7,42 @@ import javax.xml.bind.annotation.*;
 import org.opencv.core.Mat;
 
 @XmlRootElement (name = "MultipleFEX")
-public class MultipleFeatureExtractor extends FeatureExtractor {
+public class MultipleFeatureExtractor<T> extends FeatureExtractor<T> {
 	
-	List<FeatureExtractor> featureList = new ArrayList<FeatureExtractor>();
+	List<FeatureExtractor<T>> featureList = new ArrayList<>();
 
 	
 	public MultipleFeatureExtractor() {}
 	
-	public MultipleFeatureExtractor(List<FeatureExtractor> list) {
+	public MultipleFeatureExtractor(List<FeatureExtractor<T>> list) {
 		featureList = list;
 	}
 	
-	public MultipleFeatureExtractor(FeatureExtractor... extractors) {
+	public MultipleFeatureExtractor(FeatureExtractor<T>... extractors) {
 		this(Arrays.asList(extractors));
 //		featureList = list;
 	}
 
 	@Override
-	public List<Double> extract(Mat m) {
+	public List<Double> extract(T t) {
 		List<Double> vals = new ArrayList<Double>();
-		for (FeatureExtractor fe : featureList) 
-			vals.addAll(fe.extract(m));
+		for (FeatureExtractor<T> fe : featureList) 
+			vals.addAll(fe.extract(t));
 		return vals;
 	}
 	
 	@XmlElementRef
-	public List<FeatureExtractor> getFeatureExtractors() {
+	public List<FeatureExtractor<T>> getFeatureExtractors() {
 		return featureList;
 	}
 	
-	public void addExtractor(FeatureExtractor fe) {
+	public void addExtractor(FeatureExtractor<T> fe) {
 		featureList.add(fe);
 	}
 	
 	public int getDimension() {
 		int dim = 0;
-		for (FeatureExtractor fe : featureList) 
+		for (FeatureExtractor<T> fe : featureList) 
 			dim = dim + fe.getDimension();
 		return dim;
 	}

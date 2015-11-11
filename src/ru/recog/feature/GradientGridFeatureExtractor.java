@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.opencv.core.Mat;
 
-public abstract class GradientGridFeatureExtractor extends FeatureExtractor {
+public abstract class GradientGridFeatureExtractor extends FeatureExtractor<Mat> {
 	
 	@XmlElement
 	protected int width;

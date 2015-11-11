@@ -20,7 +20,7 @@ public class NNTrainingBuilder {
 //	public static int DIGITS = 15;
 	
 	private List<Character> characterSet; // = new ArrayList<String>();
-	private MultipleFeatureExtractor mfx;
+	private MultipleFeatureExtractor<Mat> mfx;
 	
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 	

@@ -8,7 +8,7 @@ import org.opencv.core.Mat;
 
 import ru.recog.ImageUtils;
 
-public class SymmetryFeatureExtractor extends FeatureExtractor {
+public class SymmetryFeatureExtractor extends FeatureExtractor<Mat> {
 	
 	public SymmetryFeatureExtractor() {
 		setDimension(2);

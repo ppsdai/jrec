@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.opencv.core.Mat;
 
-public class EdgeIntersectionFeatureExtractor extends FeatureExtractor {
+public class EdgeIntersectionFeatureExtractor extends FeatureExtractor<Mat> {
 	
 	private int horizontalPts, verticalPts;
 	

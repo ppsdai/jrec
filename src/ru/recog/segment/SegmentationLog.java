@@ -238,19 +238,19 @@ public class SegmentationLog {
 	
 	public static void testAll(String picRoot, String seglogRoot) throws Exception {
 		
-//		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-//				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt") );
-//		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-//				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
-//		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-//				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
-//		
-//		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
-//				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
-//		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
-//				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
-//		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
-//				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt") );
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+		
+		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
+		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
+				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
 		
 		testMultipleCuts(SegmentationFactory.getMarkovSegmentation(), 
 				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
@@ -553,6 +553,46 @@ public class SegmentationLog {
 		lf.setVisible(true);
 	}
 	
+	public static void testGoodShit(String picFolder) throws Exception {
+		
+		
+		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
+				new MultipleFeatureExtractor(
+			new OverlapGradientGridFeatureExtractor()));
+		
+		LabelFrame lf = new LabelFrame(picFolder);
+		
+		File picDir = new File(picFolder);
+		if (!picDir.exists() || !picDir.isDirectory())
+			throw new IllegalArgumentException("Not a folder: "+picFolder);
+		int count = 0;
+		
+		for (File f : Utils.getOrderedList(picFolder)) {
+			count++;
+//			if (count > 100) break;
+//			if (!entry.getResult().equals("SUCCESS")) continue;
+			
+//			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
+
+			Mat m = Imgcodecs.imread(f.getAbsolutePath(), 
+					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m);
+			SegmentationResult legacy = SegmentationFactory.getLegacySegmentation().segment(m);
+
+			
+		
+
+			lf.addImage(ImageUtils.drawSegLines(m, legacy), nn.getLPString(legacy.getRevisedSegments()), 3);
+			for (CutData cut : markov.getPossibleCuts(3)) 
+				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
+			
+
+		}
+		
+		lf.pack();
+		lf.setVisible(true);
+	}
+	
 
 	public static void main(String[] args) throws Exception {
 //		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -566,7 +606,9 @@ public class SegmentationLog {
 	
 		
 //		testAll(args[0], args[1]);
-	    testMoreShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+//	    testMoreShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
+	    testGoodShit("/Users/pps/dev/aggr");
+	    
 //	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 
 		

@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.opencv.core.Mat;
 
-public abstract class FeatureExtractor {
+public abstract class FeatureExtractor<T> {
 	
 	private int dimension;
 	
-	public abstract List<Double> extract(Mat m);
+	public abstract List<Double> extract(T data);
 
 	public int getDimension() {
 		return dimension;

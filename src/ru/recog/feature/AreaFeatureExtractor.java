@@ -11,7 +11,7 @@ import ru.recog.ImageUtils;
 
 
 @XmlRootElement(name = "AreaFEX")
-public class AreaFeatureExtractor extends FeatureExtractor {
+public class AreaFeatureExtractor extends FeatureExtractor<Mat> {
 
 	
 	public AreaFeatureExtractor() {

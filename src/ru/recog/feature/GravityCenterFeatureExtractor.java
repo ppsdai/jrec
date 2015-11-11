@@ -5,7 +5,7 @@ import java.util.*;
 
 import org.opencv.core.Mat;
 
-public class GravityCenterFeatureExtractor extends FeatureExtractor {
+public class GravityCenterFeatureExtractor extends FeatureExtractor<Mat> {
 
 	
 	public GravityCenterFeatureExtractor() {

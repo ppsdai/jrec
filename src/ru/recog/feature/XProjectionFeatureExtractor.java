@@ -6,7 +6,7 @@ import java.util.List;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
-public class XProjectionFeatureExtractor extends FeatureExtractor {
+public class XProjectionFeatureExtractor extends FeatureExtractor<Mat> {
 	
 	public XProjectionFeatureExtractor() {
 		//FIXME	dimension depends on picture size

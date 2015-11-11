@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.opencv.core.*;
 
-public class GravityGridFeatureExtractor extends FeatureExtractor {
+public class GravityGridFeatureExtractor extends FeatureExtractor<Mat> {
 
 	private double x0 = -1, y0 = -1;
 	private int lastX = -1, lastY = -1;

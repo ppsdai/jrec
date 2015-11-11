@@ -11,7 +11,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.ImageUtils;
 
-public class EllipseFeatureExtractor extends FeatureExtractor {
+public class EllipseFeatureExtractor extends FeatureExtractor<Mat> {
 
 	public EllipseFeatureExtractor() {
 		setDimension(5);	

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.opencv.core.Mat;
 
-public class BinaryPixelFeatureExtractor extends FeatureExtractor {
+public class BinaryPixelFeatureExtractor extends FeatureExtractor<Mat> {
 	
 	private int width;
 	private int height;
