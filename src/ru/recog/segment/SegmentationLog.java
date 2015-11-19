@@ -527,30 +527,59 @@ public class SegmentationLog {
 		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
 		LegacySegmentation ls = new LegacySegmentation();
 		int count = 0;
+		int total = 0;
+		int wrong = 0;
 		for (SegmentationLogEntry entry : entries) {
 			count++;
-//			if (count > 100) break;
+			if (count > 200) break;
 			if (!entry.getResult().equals("SUCCESS")) continue;
 			
 			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
 
 			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
 					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m);
-			SegmentationResult legacy = SegmentationFactory.getLegacySegmentation().segment(m);
+//			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m);
+//			SegmentationResult legacy = SegmentationFactory.getLegacySegmentation().segment(m);
 
 			
 		
 
-			lf.addImage(ImageUtils.drawSegLines(m, legacy), entry.getResult(), 3);
-			for (CutData cut : markov.getPossibleCuts(3)) 
-				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
+			
+			List<Mat> pieces = new ArrayList<>();
+			for (Rect r : entry.getRectangles())
+				pieces.add(m.submat(r.y, r.y+r.height+1,r.x,r.x+r.width+1));
+			
+			String s = nn.getLPString(pieces);
+			for (int i = 0; i < s.length(); i++) {
+				total++;
+				if ('*' == s.charAt(i)) wrong++;
+			}
+			
+			lf.addImage(m, nn.getLPString(pieces)+" MAIN", 4);
+			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m,0.1);
+			CutData cut = Piece.findBestCut(markov, nn);
+			List<Mat> mpieces = markov.getRevisedSegments(cut);
+			List<Double> probs = nn.probList(mpieces);
+			double prob = 1;
+			for (double d : probs) prob=prob*d;
+			lf.addImage(ImageUtils.drawSegRectangles(m, markov, cut),nn.getLPString(mpieces)+" "+prob+" "+probs, 3);
+//			for (CutData cut : markov.getPossibleCuts()) {
+//				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
+//			}
+
+			
+//			for (Mat piece : pieces)
+//				lf.addImage(piece, nn.getNNOutput(piece).toString(), 3);
+//			for (CutData cut : markov.getPossibleCuts(3)) 
+//				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
 			
 
 		}
 		
 		lf.pack();
 		lf.setVisible(true);
+		
+		System.out.println("Total: "+total+" wrong "+wrong+" % "+(double)wrong/total);
 	}
 	
 	public static void testGoodShit(String picFolder) throws Exception {
@@ -606,8 +635,8 @@ public class SegmentationLog {
 	
 		
 //		testAll(args[0], args[1]);
-//	    testMoreShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-	    testGoodShit("/Users/pps/dev/aggr");
+	    testMoreShit("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
+//	    testGoodShit("/Users/pps/dev/aggr");
 	    
 //	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
 

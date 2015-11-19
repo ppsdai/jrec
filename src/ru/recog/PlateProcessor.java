@@ -47,7 +47,9 @@ public class PlateProcessor extends LabelFrame {
 		List<String> pn = new ArrayList<String>();
 		for (Mat m : plate.getPlateImages()) {
 			SegmentationResult sr = SegmentationFactory.getLegacySegmentation().segment(m); //Segmenter.segment(m);
-			SegmentationResult sr1 = SegmentationFactory.getShapeSegmentation().segment(m); //Segmenter.shapesegment(m);
+//			SegmentationResult sr1 = SegmentationFactory.getShapeSegmentation().segment(m); //Segmenter.shapesegment(m);
+			SegmentationResult sr1 = SegmentationFactory.getMarkovSegmentation().segment(m); //Segmenter.shapesegment(m);
+
 			String possible = nn.getLPString(sr.getRevisedSegments());
 			possibleNumbers.add(possible);
 			pn.add(nn.getLPString(sr1.getRevisedSegments()));

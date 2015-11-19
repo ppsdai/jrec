@@ -18,6 +18,7 @@ public class MultipleFeatureExtractor<T> extends FeatureExtractor<T> {
 		featureList = list;
 	}
 	
+	@SafeVarargs
 	public MultipleFeatureExtractor(FeatureExtractor<T>... extractors) {
 		this(Arrays.asList(extractors));
 //		featureList = list;
@@ -57,7 +58,7 @@ public class MultipleFeatureExtractor<T> extends FeatureExtractor<T> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("MultipleFeatures(");
 		sb.append(getDimension()).append(")[");
-		for (FeatureExtractor fe : featureList) 
+		for (FeatureExtractor<T> fe : featureList) 
 			sb.append(fe.toString()).append(", ");
 		
 		sb.deleteCharAt(sb.length()-1);

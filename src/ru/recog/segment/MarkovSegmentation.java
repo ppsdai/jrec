@@ -18,6 +18,8 @@ public class MarkovSegmentation implements Segmentation {
 	
 	private static final double NOREGIONRATIO = 0.8;
 	
+	private static final double ALL_POSSIBLE = 0.1;
+	
 	public MarkovSegmentation() {
 		mld = MarkovLD.getDefaultMLD();
 	}
@@ -130,7 +132,16 @@ public class MarkovSegmentation implements Segmentation {
 	}
 	
 	public SegmentationResult segment(Mat m, double...paramaters) {
-		return segment(m);
+		SegmentationData data = new SegmentationData(m);
+		
+		if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
+
+		if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
+		
+		Map<CutData, Double> cutMap = buildCuts(data, mld);
+		
+		return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
+		
 	}
 	
 	private static List<Integer> findBestLines(Map<CutData,Double> cutMap, SegmentationData data) {

@@ -42,7 +42,7 @@ public class LPR {
 //		System.out.println(lpr.processPlates(plates));
 		Detector d = new Detector();
 		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
-				new MultipleFeatureExtractor(new OverlapGradientGridFeatureExtractor()));
+				new MultipleFeatureExtractor<Mat>(new OverlapGradientGridFeatureExtractor()));
 		Aggregator ag = new Aggregator(d);
 		PlateProcessor pp = new PlateProcessor(nn);
 		ag.setPlateProcessor(pp);
@@ -52,7 +52,7 @@ public class LPR {
 		pp.setVisible(true);
 		
 		BlockingQueue<Mat> queue = new LinkedBlockingQueue<Mat>();
-		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video-046.avi", queue);
+		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video-047.avi", queue);
 //		FrameProducer producer = new FrameProducer("/Users/pps/dev/vid/video_ador7_92_20150807_09-30.avi", queue);
 
 		Thread t1 = new Thread(producer);

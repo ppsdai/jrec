@@ -117,6 +117,13 @@ public class ImageUtils {
 		return cvt;
 	}
 	
+	public static Mat drawSegRectangles(Mat m, SegmentationResult result, CutData cut) {
+		Mat cvt = bin2color(m);
+		for (Rect r : result.getRevisedRectangles(cut))
+			Imgproc.rectangle(cvt, r.tl(), r.br(), GREEN);
+		return cvt;
+	}
+	
 	public static LabelFrame showAllSegmentations(SegmentationResult result, int scale) {
 		LabelFrame lf = new LabelFrame("ALL");
 		

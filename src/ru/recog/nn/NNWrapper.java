@@ -1,6 +1,7 @@
 package ru.recog.nn;
 
 import java.util.*;
+import java.util.stream.*;
 
 import org.neuroph.core.Layer;
 import org.neuroph.core.NeuralNetwork;
@@ -107,6 +108,25 @@ public class NNWrapper {
 		else sb.append("*");
 		
 		return sb.toString();
+	}
+	
+	public static double probability(double[] nnoutput) {
+		double sum = 0;
+		double max = -1.0;
+		for (double d : nnoutput) {
+			sum+=d;
+			if (d > max) max = d;
+		}
+		
+		if (sum > 1) return max/sum;
+		else return max;
+	}
+	
+	public List<Double> probList(List<Mat> pieces) {
+		List<Double> probs = new ArrayList<>();
+		for (Mat piece : pieces)
+			probs.add(NNWrapper.probability(getNNOutputArray(piece)));
+		return probs;
 	}
 	
 	public static String nnOutputToSymbols(double[] nnoutput, double epsilon) {
