@@ -264,7 +264,7 @@ public class NNAnalysis {
 				
 				int desIndex = readIndexFromOutput(desiredString);
 				
-				String sss = getChar(desIndex)+" - "+output.get(desIndex);
+				String sss = getChar(desIndex)+" - "+(desIndex<0?"NA" : output.get(desIndex));
 				
 //				List<Double> nnout = nn.getNNOutput(Imgcodecs.imread(imgFileName, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE));
 				
@@ -318,11 +318,13 @@ public class NNAnalysis {
 	}
 	
 	public static char getChar(int index) {
-		return Utils.FULL_CHARACTERS_SET.get(index);
+		return index<0? '@' : Utils.FULL_CHARACTERS_SET.get(index);
 	}
 	
 	public static char getChar(String output) {
-		return Utils.FULL_CHARACTERS_SET.get(readIndexFromOutput(output));
+		int index = readIndexFromOutput(output);
+		
+		return index < 0? '@' : Utils.FULL_CHARACTERS_SET.get(readIndexFromOutput(output));
 	}
 	
 	public static String convertNNOutputToString(double[] nnoutput) {
