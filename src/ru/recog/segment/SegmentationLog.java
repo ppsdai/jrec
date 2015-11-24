@@ -21,6 +21,7 @@ public class SegmentationLog {
 		private String filename;
 		private List<Rect> rectangles;
 		private String result;
+		private String plate;
 		
 		public SegmentationLogEntry(String line) {
 			int colonIndex = line.indexOf(";");
@@ -30,7 +31,9 @@ public class SegmentationLog {
 				rectangles = Collections.emptyList();
 			} else {
 				result = "SUCCESS";
+				int nextColonIndex = line.indexOf(";",colonIndex+1);
 				String rectString = line.substring(line.indexOf(";",colonIndex+1)+1);
+				plate = line.substring(colonIndex+1, nextColonIndex);
 				rectangles = string2rect(rectString);
 			}
 		}
@@ -53,6 +56,10 @@ public class SegmentationLog {
 			
 			return cuts;
 			
+		}
+		
+		public String getPlate() {
+			return plate;
 		}
 
 		public String getResult() {
@@ -556,6 +563,7 @@ public class SegmentationLog {
 			}
 			
 			lf.addImage(m, nn.getLPString(pieces)+" MAIN", 4);
+			
 			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m,0.1);
 			CutData cut = Piece.findBestCut(markov, nn);
 			List<Mat> mpieces = markov.getRevisedSegments(cut);
@@ -563,6 +571,8 @@ public class SegmentationLog {
 			double prob = 1;
 			for (double d : probs) prob=prob*d;
 			lf.addImage(ImageUtils.drawSegRectangles(m, markov, cut),nn.getLPString(mpieces)+" "+prob+" "+probs, 3);
+			
+			
 //			for (CutData cut : markov.getPossibleCuts()) {
 //				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
 //			}
@@ -624,6 +634,12 @@ public class SegmentationLog {
 	
 
 	public static void main(String[] args) throws Exception {
+		
+//		List<SegmentationLogEntry> list = readSegmentationLog("/Users/pps/dev/seglog/seglog047.txt");
+//		System.out.println(list);
+//		for (SegmentationLogEntry entry : list)
+//			if ("SUCCESS".equals(entry.getResult()))
+//				System.out.println(entry.getPlate());
 //		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 //		
 //		Mat m = Imgcodecs.imread("/Users/pps/dev/test/frames/processed050/V50N7t5040.png",
