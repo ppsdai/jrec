@@ -44,7 +44,7 @@ public class NNTrainingBuilder {
 //		mfx.addExtractor(new SymmetryFeatureExtractor());
 //		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
 		
-		mfx = new MultipleFeatureExtractor();
+		mfx = new MultipleFeatureExtractor<Mat>();
 		mfx.addExtractor(new TileGradientFeatureExtractor());
 		
 	}
@@ -200,39 +200,15 @@ public class NNTrainingBuilder {
 			}
 		};
 		
-//		final FilenameFilter testingFilenameFileter = new FilenameFilter() {
-//			public boolean accept(File dir, String name) {
-//				if (!ff.accept(dir, name)) return false;
-//				int index = name.indexOf("(");
-//				if (index == -1) index = name.indexOf(".");
-//				int number;
-//				try {
-//					 number = Integer.valueOf(name.substring(0, index).trim());
-//				} catch (NumberFormatException nfe) {
-//					nfe.printStackTrace(System.out);
-//					return false;
-//				}
-//				return (number >= 0 && number<=100);
-//			}
-//		};
-//		FilenameFilter trainingFilenameFilter = new FilenameFilter() {
-//			public boolean accept(File dir, String name) {
-//				return ff.accept(dir, name) && !testingFilenameFileter.accept(dir,name);
-//			}
-//		};
-		
-		
-		for (int characterIndex = 0; characterIndex<characterSet.size(); characterIndex++) {
+//		for (int characterIndex = 0; characterIndex<characterSet.size(); characterIndex++) {
+		for (int characterIndex = -1; characterIndex<characterSet.size(); characterIndex++) {
+
 			
-			
-			File digitDir = new File(sourceDir, 
+				
+			File digitDir = characterIndex < 0? new File(sourceDir, "@") :
+					new File(sourceDir, 
 //					String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(characterSet.get(characterIndex))));
 					String.valueOf(characterSet.get(characterIndex)));
-
-
-			
-			//		for (char c : characterSet) {
-//			File digitDir = new File(sourceDir, String.valueOf(c))
 			
 			//find all the files in char directory
 			List<String> allFiles = new ArrayList<String>(Arrays.asList(digitDir.list())); // list of all images
@@ -276,7 +252,7 @@ public class NNTrainingBuilder {
 		List<String> description = new ArrayList<String>();
 		description.add("Characters: "+characterSet);
 		description.add("Total Features: "+mfx.getDimension()+" Outputs: "+characterSet.size());
-		for (FeatureExtractor fex : mfx.getFeatureExtractors())
+		for (FeatureExtractor<Mat> fex : mfx.getFeatureExtractors())
 			description.add(fex.toString());
 		
 		stringsToFile(trainFilesDestination, infoFilename, description);
@@ -346,10 +322,10 @@ public class NNTrainingBuilder {
 		pw.close();
 	}
 	
-	private static String charFolder(Character c) {
-		return String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(c));
-
-	}
+//	private static String charFolder(Character c) {
+//		return String.valueOf(Utils.FULL_CHARACTERS_SET.indexOf(c));
+//
+//	}
 	
 	
 	public String createCSVTrainSampleFromImage(String filename, int characterIndex) {
@@ -362,7 +338,7 @@ public class NNTrainingBuilder {
 		
 		String[] responses = new String[characterSet.size()];
 		Arrays.fill(responses, "0");
-		responses[characterIndex]="1";
+		if (characterIndex >=0) responses[characterIndex]="1";
 		for (String r : responses)
 			sb.append(r).append(",");
 		sb.deleteCharAt(sb.length()-1);
