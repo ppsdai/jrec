@@ -45,7 +45,7 @@ public class NNTrainingBuilder {
 //		mfx.addExtractor(new EdgeIntersectionFeatureExtractor(3, 3));
 		
 		mfx = new MultipleFeatureExtractor<Mat>();
-		mfx.addExtractor(new TileGradientFeatureExtractor());
+		mfx.addExtractor(new OverlapGradientGridFeatureExtractor());
 		
 	}
 	
@@ -56,11 +56,11 @@ public class NNTrainingBuilder {
 //		processCharFolders("/Users/pps/segmented/NN", "/Users/pps/dev/NNTrain/newshit");
 		
 //		processFolders(args[0],args[1]);
-//		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
+		NNTrainingBuilder trainBuilder = new NNTrainingBuilder(Utils.FULL_CHARACTERS_SET);
 		
-//		trainBuilder.buildTrainingAndTestingSet("/Users/pps/segmented/NN", "TGS.txt", "/Users/pps/segmented/NN");
+		trainBuilder.buildTrainingAndTestingSet("C:\\dev\\frames\\AllSegmented\\NN", "713.txt", "C:\\dev\\frames\\AllSegmented\\NN");
 		
-		buildSegmentTraining("/Users/pps/dev/energy", "nrg", "/Users/pps/dev/test/frames", "/Users/pps/dev/seglog");
+//		buildSegmentTraining("/Users/pps/dev/energy", "nrg", "/Users/pps/dev/test/frames", "/Users/pps/dev/seglog");
 		
 	}
 	

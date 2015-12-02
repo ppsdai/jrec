@@ -2,7 +2,9 @@ package ru.recog.segment;
 
 import java.util.*;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 /**
  *  
@@ -18,13 +20,14 @@ import org.opencv.core.Mat;
 public class SegData {
 
 	private int[] projX;
+	private double[] sobelXprojY;
 	private List<Integer> localMinimums; 
 	private List<Integer> localMaximums;
 	private List<Integer> minDepth;
 	private Mat originalM;
 	private List<List<Integer>> cutPointsList;
 	
-	private int upperBound, lowerBound;
+	private int upperBound, lowerBound; //upper is smaller, as axis Y points downward
 	
 	
     /**  
@@ -58,6 +61,12 @@ public class SegData {
 	    return projX;
 	}
 	
+	public double[] getSobelXProjection() {
+		
+	    return sobelXprojY;
+	}
+	
+	
     /**  
     method calculates a projection *
     of gray scale array */
@@ -70,7 +79,52 @@ public class SegData {
 				projX[col] += 255 - (int) originalM.get(row, col)[0];
 	}
 	
+    /**  
+    method calculates a projection *
+    of SobleX onto axisY *
+    of gray scale array */
+	public void calculateSobelXProjectonY() {
+
+		Mat sobelx = new Mat(originalM.size(), originalM.type());
+		Imgproc.Sobel(originalM.clone(), sobelx, CvType.CV_32F, 1, 0);
+		
+		sobelXprojY = new double[sobelx.rows()];
+		Arrays.fill(sobelXprojY, 0);
+		for (int row = 0; row < sobelx.rows(); row++)
+			for (int col = 0; col < sobelx.cols(); col++)
+				sobelXprojY[row] = sobelXprojY[row] + Math.abs(sobelx.get(row, col)[0]);
+	}
 	
+	  /**  
+    method calculates a position of *
+    left and right boundary of max Area in SobelX projection on axis Y*
+    given the height of symbols */
+	public void calculateUpperAndLowerBoundary( int symbolHeight) {
+		
+		// check if height of the input array is bigger than symbol height
+		int arrLength = sobelXprojY.length;
+		if (arrLength < symbolHeight) return;
+		
+		// calculate the summ starting from x=0
+		double sumTemp = 0;
+		for ( int i=0; i < symbolHeight; i++ )
+			sumTemp += sobelXprojY[i];
+		
+		// calculate summ for other positions and take the max
+		double maxSum = sumTemp;
+		int xEnd = symbolHeight - 1;
+		for ( int i=symbolHeight; i < arrLength; i++ ){
+			sumTemp = sumTemp  + sobelXprojY[i] - sobelXprojY[i - symbolHeight];
+			if (sumTemp > maxSum){
+				maxSum = sumTemp;
+				xEnd = i;
+			}
+		}
+		
+		// set new Y-borders
+		setUpperBound(xEnd - symbolHeight);
+		setLowerBound(xEnd);
+	}
 	
 	public List<Integer> getLocalMinimums() {
 			

@@ -20,12 +20,12 @@ public class Piece {
 	
 	
 	public static void main(String[] args) {
-		List<File> files = Utils.getOrderedList("/Users/pps/dev/aggr");
+		List<File> files = Utils.getOrderedList("C:\\dev\\frames\\VNew\\detected1411");
 		LabelFrame lf = new LabelFrame("pieces");
 		lf.setSize(800,600);
 		lf.setVisible(true);
 		
-		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
+		NNWrapper nn = new NNWrapper("C:\\dev\\frames\\AllSegmented\\NN\\NNet6x12_2883521.nnet",
 				new MultipleFeatureExtractor<Mat>(
 			new OverlapGradientGridFeatureExtractor()));
 		
