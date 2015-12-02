@@ -16,6 +16,7 @@ public class MultipleFeatureExtractor<T> extends FeatureExtractor<T> {
 	
 	public MultipleFeatureExtractor(List<FeatureExtractor<T>> list) {
 		featureList = list;
+		setDimension(getDimension());
 	}
 	
 	@SafeVarargs

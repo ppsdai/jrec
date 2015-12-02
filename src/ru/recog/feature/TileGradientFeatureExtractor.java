@@ -12,8 +12,7 @@ import org.opencv.core.Mat;
 public class TileGradientFeatureExtractor extends GradientGridFeatureExtractor {
 	
 	public TileGradientFeatureExtractor() {
-		width = 8;
-		height = 14;
+		super(8,14);
 		setDimension(4*7*4);
 	}
 

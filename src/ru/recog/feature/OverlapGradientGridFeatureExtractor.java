@@ -14,11 +14,15 @@ import ru.recog.LabelFrame;
 public class OverlapGradientGridFeatureExtractor extends GradientGridFeatureExtractor {
 	
 	public OverlapGradientGridFeatureExtractor() {
-		width = 4;
-		height = 7;
+		this(4, 7);
+	}
+	
+	public OverlapGradientGridFeatureExtractor(int width, int height) {
+		super(width, height);
 		setDimension((width-1)*(height-1)*4);
 	}
-
+	
+	
 	@Override
 	public List<Double> extract(Mat m) {
 		grid = fillGrid(m);

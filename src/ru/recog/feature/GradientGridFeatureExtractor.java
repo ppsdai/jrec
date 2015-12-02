@@ -11,6 +11,12 @@ public abstract class GradientGridFeatureExtractor extends FeatureExtractor<Mat>
 	@XmlElement
 	protected int height;
 	protected double[][] grid;
+	
+	
+	public GradientGridFeatureExtractor(int width, int height) {
+		this.width = width;
+		this.height = height;
+	}
 
 	
 	protected double[] gradientAtPoint(int i, int j) {
