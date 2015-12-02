@@ -31,37 +31,37 @@ public class NNAnalysis {
 
 	public static void main(String[] args)  throws Exception {
 		
+//		
+//		double d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0;
+//		int avglength = 0;
+//		
+//		List<String> rects = readSeglog("/Users/pps/dev/seglog/seglog.txt");
+//		for (String s : rects) {
+//			System.out.println(SegmentationLog.string2rect(s));
+//			List<Rect> rrs = SegmentationLog.string2rect(s); 
+//			int length = rrs.get(5).x+rrs.get(5).width-rrs.get(0).x;
+//			avglength+=length;
+//			d1 = d1 + (double)(rrs.get(1).x-rrs.get(0).x)/length;
+//			d2 = d2 + (double)(rrs.get(2).x-rrs.get(0).x)/length;
+//			d3 = d3 + (double)(rrs.get(3).x-rrs.get(0).x)/length;
+//			d4 = d4 + (double)(rrs.get(4).x-rrs.get(0).x)/length;
+//			d5 = d5 + (double)(rrs.get(5).x-rrs.get(0).x)/length;
+//		}
+//		
+//		System.out.println("avg length: "+(double)avglength/rects.size());
+//		System.out.println("d1: "+(double)d1/rects.size());
+//		System.out.println("d2: "+(double)d2/rects.size());
+//		System.out.println("d3: "+(double)d3/rects.size());
+//		System.out.println("d4: "+(double)d4/rects.size());
+//		System.out.println("d5: "+(double)d5/rects.size());
+//
+//
+//
+
+
+
 		
-		double d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0;
-		int avglength = 0;
-		
-		List<String> rects = readSeglog("/Users/pps/dev/seglog/seglog.txt");
-		for (String s : rects) {
-			System.out.println(SegmentationLog.string2rect(s));
-			List<Rect> rrs = SegmentationLog.string2rect(s); 
-			int length = rrs.get(5).x+rrs.get(5).width-rrs.get(0).x;
-			avglength+=length;
-			d1 = d1 + (double)(rrs.get(1).x-rrs.get(0).x)/length;
-			d2 = d2 + (double)(rrs.get(2).x-rrs.get(0).x)/length;
-			d3 = d3 + (double)(rrs.get(3).x-rrs.get(0).x)/length;
-			d4 = d4 + (double)(rrs.get(4).x-rrs.get(0).x)/length;
-			d5 = d5 + (double)(rrs.get(5).x-rrs.get(0).x)/length;
-		}
-		
-		System.out.println("avg length: "+(double)avglength/rects.size());
-		System.out.println("d1: "+(double)d1/rects.size());
-		System.out.println("d2: "+(double)d2/rects.size());
-		System.out.println("d3: "+(double)d3/rects.size());
-		System.out.println("d4: "+(double)d4/rects.size());
-		System.out.println("d5: "+(double)d5/rects.size());
-
-
-
-
-
-
-		
-//		readErrorFile("/Users/pps/AllSegmented/NN/50kerror72.txt", "testFilesTGS.txt");
+		readErrorFile("C:\\dev\\frames\\AllSegmented\\NN\\LongTest2883521.txt", "testFiles713.txt");
 
 		
 //		checkCharFolder("/Users/pps/dev/NNTrain/NNet724021.nnet", "/Users/pps/symbols/3");
@@ -219,7 +219,7 @@ public class NNAnalysis {
 		System.out.println("Read lines: "+errorList.size());
 		
 
-				new NNWrapper("c:\\dev\\frames\\AllSegmented\\NN\\BSS724021.nnet",
+				new NNWrapper("c:\\dev\\frames\\AllSegmented\\NN\\NNet6x12GrOv.nnet",
 						new MultipleFeatureExtractor(new OverlapGradientGridFeatureExtractor()));
 		
 		
@@ -248,7 +248,7 @@ public class NNAnalysis {
 			List<Double> desired = parseToDouble(desiredString);
 			List<Double> error = parseToDouble(errorString);
 			
-			if (checkErrors2(error, 0.05) != null) {
+			if (checkErrors2(error, 0.05) != null && '@'!=getChar(desiredString)) {
 				
 				
 				errorCount++;
