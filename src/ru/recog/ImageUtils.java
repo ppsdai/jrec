@@ -117,6 +117,13 @@ public class ImageUtils {
 		return cvt;
 	}
 	
+	public static Mat drawSegRectangles(Mat m, List<Rect> rectangles ) {
+		Mat cvt = bin2color(m);
+		for (Rect r : rectangles)
+			Imgproc.rectangle(cvt, r.tl(), r.br(), GREEN);
+		return cvt;
+	}
+	
 	public static Mat drawSegRectangles(Mat m, SegmentationResult result, CutData cut) {
 		Mat cvt = bin2color(m);
 		for (Rect r : result.getRevisedRectangles(cut))
