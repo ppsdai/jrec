@@ -22,6 +22,14 @@
 	<property name="classes.dir" value="${build.dir}/classes"/>
 	<property name="jar.dir"     value="${build.dir}/jar"/>
 	<property name="script.dir"     value="${basedir}/scripts"/>
+	<property name="repo.dir" value="${basedir}/../repo"/>
+	<property name="etc.dir" value="${basedir}/etc"/>
+
+		
+	<path id="repopath">
+		<pathelement location="${repo.dir}"/>
+	</path>
+		
 	
 	<path id="scriptclasspath">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -54,8 +62,22 @@
 		      message="java -cp ${toString:scriptclasspath} -Djava.library.path=${ocvLibDir} ru.recog.DetectUtil ${prop.script.suffix}"/>
 	</target>
 	
+	<target name="cleanSetup">
+		<delete file="${etc.dir}${file.separator}repository.loc"/>
+	</target>
+	
+	<target name="setup" depends="cleanSetup">
+		<echo
+			file="${etc.dir}${file.separator}repository.loc"
+			message="${toString:repopath}"/>
+		<echo
+			message="Repository location: ${toString:repopath}"/>
+	</target>
+		
 	<target name="scripts" depends="scriptConvert, scriptDetect"/>
 	
+		
+		
 	<target name="all" depends="compile,scripts"/>
 	
 <!--
