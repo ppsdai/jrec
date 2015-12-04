@@ -32,11 +32,13 @@ public class Network {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		for (String key : System.getenv().keySet())
+			System.out.println(key+"="+System.getenv(key));
 //		XStream xs = new XStream(new StaxDriver());
-		MultipleFeatureExtractor<?> mfx = new MultipleFeatureExtractor<>(new OverlapGradientGridFeatureExtractor(7,13));
-		Network n = new Network("NN2882521.nnet", mfx);
+//		MultipleFeatureExtractor<?> mfx = new MultipleFeatureExtractor<>(new OverlapGradientGridFeatureExtractor(7,13));
+//		Network n = new Network("NN2882521.nnet", mfx);
 //		XML.toXML(n, new FileOutputStream(new File("/Users/pps/dev/111new.xml")));
-		XML.toXML(n, new FileWriter(new File(Repository.networksFolderFile, "NN2882521.xml")));
+//		XML.toXML(n, new FileWriter(new File(Repository.networksFolderFile, "NN2882521.xml")));
 //		xs.toXML(n, new FileOutputStream(new File("/Users/pps/dev/111new2.xml")));
 
 		

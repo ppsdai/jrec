@@ -1,7 +1,6 @@
 package ru.recog.repo;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.io.*;
 import java.util.*;
 
 import org.opencv.core.Core;
@@ -33,12 +32,16 @@ public class Repository {
 	
 	
 	private static void initialize() {
-		File userFile = new File(System.getProperty("user.dir"));
-		if (!checkDirFile(userFile))
-			throw new IllegalStateException("Could not find a user.dir property");
-		repoFile = new File(userFile.getParentFile(), REPONAME);
+		File repoFile = null;
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.class.getResourceAsStream("/repository.loc")));
+			repoFile = new File(br.readLine());
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not read repository location: "+e);
+		}
+
 		if (!checkDirFile(repoFile))
-			throw new IllegalStateException("Could not find repo directory inside user.dir="+userFile.getAbsolutePath());
+			throw new IllegalStateException("Could not find repo directory");
 		videoFolderFile = new File(repoFile, VIDEOFOLDER);
 		if (!checkDirFile(videoFolderFile))
 			throw new IllegalStateException("Could not find video directory inside repository= "+repoFile.getAbsolutePath());
@@ -51,9 +54,6 @@ public class Repository {
 		networksFolderFile = new File(nnFolderFile, "networks");
 		if (!checkDirFile(networksFolderFile))
 			throw new IllegalStateException("Could not find NN/networks directory inside repository= "+repoFile.getAbsolutePath());
-
-//
-
 	}
 	
 	public static String getPath() {
@@ -111,18 +111,18 @@ public class Repository {
 			System.out.println(key+"="+System.getenv(key));
 
 		
-		System.out.println(System.getProperties());
-		
-		System.out.println("repo: "+repoFile.getAbsolutePath());
-		System.out.println("video: "+videoFolderFile.getAbsolutePath());
-		System.out.println("frames: "+frameFolderFile.getAbsolutePath());
-
-		for (String s : getVideoList())
-			System.out.println(s);
-		
-		for (File f : getNetworkFiles())
-			System.out.println(f.getName());
-		
+//		System.out.println(System.getProperties());
+//		
+//		System.out.println("repo: "+repoFile.getAbsolutePath());
+//		System.out.println("video: "+videoFolderFile.getAbsolutePath());
+//		System.out.println("frames: "+frameFolderFile.getAbsolutePath());
+//
+//		for (String s : getVideoList())
+//			System.out.println(s);
+//		
+//		for (File f : getNetworkFiles())
+//			System.out.println(f.getName());
+//		
 //		System.out.println(Core.getBuildInformation());
 	}
 	
