@@ -16,7 +16,8 @@ public class RepositoryTest {
 	
 	
 	public static void testNetworksIntegrity() {
-		
+		Assert.assertFalse(Repository.getNetworkFiles().isEmpty(), "Networks folder is empty at "
+					+Repository.networksFolderFile.getAbsolutePath());
 		for ( File ns : Repository.getNetworkFiles())
 			Assert.assertTrue(testNN(ns));
 	}
