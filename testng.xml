@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+ 
+<suite name="All" verbose="1" >
+  <test name="Total"   >
+    <packages>
+      <package name="ru.recog.repo"/>
+   </packages>
+ </test>
+</suite>

@@ -5,26 +5,30 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.neuroph.core.NeuralNetwork;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import ru.recog.XML;
 import ru.recog.nn.NNWrapper;
 
+@Test
 public class RepositoryTest {
 	
 	
 	public static void testNetworksIntegrity() {
 		
 		for ( File ns : Repository.getNetworkFiles())
-			testNN(ns);
+			Assert.assertTrue(testNN(ns));
 	}
 	
-	public static void testNN(File nnFile) {
+	private static boolean testNN(File nnFile) {
 		Network n = (Network) XML.fromXML(nnFile);
 		NNWrapper nnw = n.getWrapper();
 		NeuralNetwork<?> nn = nnw.getNN();
-		System.out.println(NNWrapper.description(nn));
-		System.out.println(n.getFeatureExtractor());
-		System.out.println("Input neurons # = FEX dimension is "+(nn.getInputsCount()==n.getFeatureExtractor().getDimension()));
+//		System.out.println(NNWrapper.description(nn));
+//		System.out.println(n.getFeatureExtractor());
+		return nn.getInputsCount()==n.getFeatureExtractor().getDimension();
+//		System.out.println("Input neurons # = FEX dimension is "+(nn.getInputsCount()==n.getFeatureExtractor().getDimension()));
 	}
 	
 	public static void testVideoList() {
@@ -63,13 +67,8 @@ public class RepositoryTest {
 				"video_ador7_92_20150807_09-30.avi",
 				"video_ador7_92_20150811_16-01.avi"
 		});
-		System.out.println("ALL videos from canonical list are in repo: "+Repository.getVideoList().containsAll(canonicalList));
+		Assert.assertEquals(Repository.getVideoList().containsAll(canonicalList), true);
+//		System.out.println("ALL videos from canonical list are in repo: "+Repository.getVideoList().containsAll(canonicalList));
 	}
 	
-	
-	public static void main(String[] args) {
-		testVideoList();
-		testNetworksIntegrity();
-	}
-
 }
