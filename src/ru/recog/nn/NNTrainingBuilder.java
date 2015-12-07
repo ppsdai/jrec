@@ -13,7 +13,6 @@ import ru.recog.Utils;
 import ru.recog.feature.*;
 import ru.recog.imgproc.*;
 import ru.recog.segment.*;
-import ru.recog.segment.SegmentationLog.SegmentationLogEntry;
 
 public class NNTrainingBuilder {
 	

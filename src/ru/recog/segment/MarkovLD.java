@@ -6,8 +6,6 @@ import java.util.*;
 
 import org.opencv.core.Rect;
 
-import ru.recog.segment.SegmentationLog.SegmentationLogEntry;
-
 public class MarkovLD {
 	
 	private Distribution[] distributions;
@@ -103,7 +101,7 @@ public class MarkovLD {
 		return p;
 	}
 	
-	public static double[] countProbs(SegmentationLog.SegmentationLogEntry sle) {
+	public static double[] countProbs(SegmentationLogEntry sle) {
 		Rect r1 = sle.getRectangles().get(0);
 		Rect r2 = sle.getRectangles().get(5);
 		double length = r2.br().x-r1.x;
