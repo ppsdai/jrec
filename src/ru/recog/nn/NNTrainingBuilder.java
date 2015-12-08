@@ -264,7 +264,7 @@ public class NNTrainingBuilder {
 		List<String> csvTestFileList = new ArrayList<String>();
 		List<String> csvTrainList = new ArrayList<String>();
 
-		String seglogFilename = SegmentationLog.properPath(seglogFolder, "seglog047.txt");
+		String seglogFilename = Utils.fullPath(seglogFolder, "seglog047.txt");
 		File picDir = new File(picRoot, "processed047");
 		for (SegmentationLogEntry sle : SegmentationLog
 				.readSegmentationLog(seglogFilename)) {
@@ -273,8 +273,7 @@ public class NNTrainingBuilder {
 						seglogFilename, sle));
 		}
 
-		seglogFilename = SegmentationLog.properPath(seglogFolder,
-				"seglog050.txt");
+		seglogFilename = Utils.fullPath(seglogFolder, "seglog050.txt");
 		picDir = new File(picRoot, "processed050");
 		for (SegmentationLogEntry sle : SegmentationLog
 				.readSegmentationLog(seglogFilename)) {
@@ -286,7 +285,7 @@ public class NNTrainingBuilder {
 
 		Collections.shuffle(csvTrainList);
 
-		seglogFilename = SegmentationLog.properPath(seglogFolder,
+		seglogFilename = Utils.fullPath(seglogFolder,
 				"seglog049.txt");
 		picDir = new File(picRoot, "processed049");
 		for (SegmentationLogEntry sle : SegmentationLog
@@ -295,7 +294,7 @@ public class NNTrainingBuilder {
 
 				csvTestList.addAll(createCSVTrainSampleFromSLE(picDir,
 						seglogFilename, sle));
-				csvTestFileList.add(SegmentationLog.properPath(
+				csvTestFileList.add(Utils.fullPath(
 						picDir.getAbsolutePath(), sle.getFilename()));
 			}
 		}

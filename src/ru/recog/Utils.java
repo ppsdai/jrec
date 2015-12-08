@@ -80,6 +80,10 @@ public class Utils {
 				.concat(name);
 	}
 	
+	public static String fullPath(String parent, String name) {
+		return fullPath(new File(parent), name);
+	}
+	
 	
 	public static List<File> getOrderedList(String dir) {
 		File cardir = new File(dir); 

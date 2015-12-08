@@ -6,13 +6,12 @@ import java.util.*;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import ru.recog.*;
-import ru.recog.feature.MultipleFeatureExtractor;
-import ru.recog.feature.OverlapGradientGridFeatureExtractor;
 import ru.recog.nn.NNAnalysis;
-import ru.recog.nn.NNWrapper;
 import ru.recog.ui.FrameProcessor;
 
 public class SegmentationLog {
@@ -173,15 +172,25 @@ public class SegmentationLog {
 		
 	}
 	
-	@Test
+	@DataProvider(name = "testAll")
+	public Object[][] getRoots() {
+		return new Object[][] {
+				{"/Users/pps/dev/test/frames", "/Users/pps/dev/seglog"}
+		};
+	}
+	
+//	@Parameters({"/Users/pps/dev/test/frames", "/Users/pps/dev/seglog"})
+	@Test(dataProvider = "testAll")
 	public static void testAll(String picRoot, String seglogRoot) throws Exception {
 		
+		System.out.println(picRoot);
+		System.out.println(seglogRoot);
 		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt") );
+				Utils.fullPath(picRoot,"processed047"), Utils.fullPath(seglogRoot, "seglog047.txt"), false);
 		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-				properPath(picRoot,"processed049"), properPath(seglogRoot, "seglog049.txt"));
+				Utils.fullPath(picRoot,"processed049"), Utils.fullPath(seglogRoot, "seglog049.txt"), false);
 		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
-				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
+				Utils.fullPath(picRoot,"processed050"), Utils.fullPath(seglogRoot, "seglog050.txt"), false);
 		
 //		testSegmenter(SegmentationFactory.getMarkovSegmentation(), 
 //				properPath(picRoot,"processed047"), properPath(seglogRoot, "seglog047.txt"));
@@ -201,9 +210,14 @@ public class SegmentationLog {
 	}
 	
 	
-	public static void testSegmenter(Segmentation segmenter, String picFolder, String seglogFilename) 
+	public static void testSegmenter(Segmentation segmenter, String picFolder, String seglogFilename, boolean showErrors) 
 			throws Exception {
-		LabelFrame lf = new LabelFrame(picFolder);
+		LabelFrame lf = null;
+		if (showErrors) {
+			lf = new LabelFrame(picFolder);
+			lf.pack();
+			lf.setVisible(true);
+		}
 		File picDir = new File(picFolder);
 		if (!picDir.exists() || !picDir.isDirectory())
 			throw new IllegalArgumentException("Not a folder: "+picFolder);
@@ -222,30 +236,21 @@ public class SegmentationLog {
 					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 			SegmentationResult sr = segmenter.segment(m);
 		
-//			List<Integer> cutPoints = new ArrayList<Integer>();
-
-//			cutPoints.add(0);
-//			cutPoints.addAll(sr.getCutPoints());
-//			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
-//			boolean isValid = exactSegmentation(entry, sr.getCutPoints());
 			boolean isValid = weakBorderTest(entry, sr.getCutPoints());
 			if (!isValid) {
-//				System.out.println(entry);
-//				System.out.println("INV: "+sr.getCutPoints());
-//				System.out.println("R: "+rect2List(entry.getRectangles()));
-
-				lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
-				
-				Mat c = ImageUtils.bin2color(m);
-				for (Rect r : entry.getRectangles())
-					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
-				lf.addImage(c, entry.toString(), 3);
+				if (showErrors) {
+					lf.addImage(ImageUtils.drawSegLines(m, sr), "segmentation", 3);
+					
+					Mat c = ImageUtils.bin2color(m);
+					for (Rect r : entry.getRectangles())
+						Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
+					lf.addImage(c, entry.toString(), 3);
+				}
 				wrong++;
 			}
 		}
+		Assert.assertEquals(wrong, 0, "Expected 0 mistakes, but got "+wrong+" out of "+total);
 		System.out.println("Total: "+total+" wrong: "+wrong);
-		lf.pack();
-		lf.setVisible(true);
 
 	}
 	
@@ -377,229 +382,21 @@ public class SegmentationLog {
 		lf.setVisible(true);
 	}
 	
-	public static void testShit(String picFolder, String seglogFilename) throws Exception {
+	@Test
+	public void testWeakBorders() {
+		List<Integer> proper = Arrays.asList(new Integer[] {5, 10, 15, 20, 25});
+		List<Integer> test1 = Arrays.asList(new Integer[] {5, 10, 15, 20, 25});
+		Assert.assertTrue(weakBorderEquals(proper, test1), "Identical lists are not found equal");
 		
+		List<Integer> test2 = Arrays.asList(new Integer[] {3, 10, 15, 20, 27});
+		Assert.assertTrue(weakBorderEquals(proper, test2), "Similar lists are not found equal");
 		
+		List<Integer> test3 = Arrays.asList(new Integer[] {6, 10, 15, 20, 23});
+		Assert.assertTrue(weakBorderEquals(proper, test3), "Similar lists are not found equal");
 		
-		
-		LabelFrame lf = new LabelFrame(picFolder);
-		
-		
-		File picDir = new File(picFolder);
-		if (!picDir.exists() || !picDir.isDirectory())
-			throw new IllegalArgumentException("Not a folder: "+picFolder);
-		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
-		int total = 0;
-		int wrong = 0;
-		LegacySegmentation ls = new LegacySegmentation();
-		for (SegmentationLogEntry entry : entries) {
-			if (!entry.getResult().equals("SUCCESS")) continue;
-			total++;
-			
-//			System.out.println(entry);
-			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
-//			System.out.println(name);
+		List<Integer> test4 = Arrays.asList(new Integer[] {1, 10, 15, 20, 23});
+		Assert.assertTrue(!weakBorderEquals(proper, test4), "Different lists are found equal");
 
-			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
-					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//			System.out.println(m.size());
-//			SegmentationResult sr = Segmenter.shapesegment(m);
-//			SegmentationResult sr = SBSegmenter.segment(m);
-//			SegmentationResult sr = Segmenter.segment(m);
-			SegmentationResult sr = SegmentationFactory.getMarkovSegmentation().segment(m);
-//			SegmentationResult sr = ls.segment(m);
-		
-			List<Integer> cutPoints = new ArrayList<Integer>();
-
-//			cutPoints.add(0);
-//			cutPoints.addAll(sr.getCutPoints());
-//			boolean isValid = isValidSegmentation(entry.getRectangles(), cutPoints);
-//			boolean b0 = isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(0).getCutPoints());
-//			boolean b1 = isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(1).getCutPoints());
-//			boolean b2 = isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(2).getCutPoints());
-			
-			List<Boolean> b = new ArrayList<Boolean>();
-			for (int i = 0; i < sr.getPossibleCuts().size(); i++)
-				b.add(isValidSegmentation(entry.getRectangles(), sr.getPossibleCuts().get(i).getCutPoints()));
-				
-
-			boolean valid = b.size()>2? b.subList(0, 2).contains(true) : b.contains(true);
-
-			if (!valid) {
-				double contrast = -1;
-				double energy = -1;
-
-//				if (!sr.getCutPoints().isEmpty()) {
-//				Mat cutMat = m.submat(sr.getData().getUpperBound(), sr.getData().getLowerBound(),
-//						sr.getCutPoints().get(0), sr.getCutPoints().get(sr.getCutPoints().size()-1));
-//				 contrast = ImageUtils.contrastRMS(cutMat);
-//				 energy = sr.getPossibleCuts().get(0).calcEnergy(sr.getData());
-//				}
-				lf.addImage(ImageUtils.drawSegLines(m, sr), "c="+contrast+" e="+energy+" e/c="+energy/contrast, 3);
-				
-				Mat c = ImageUtils.bin2color(m);
-				for (Rect r : entry.getRectangles())
-					Imgproc.rectangle(c, r.tl(), r.br(), new Scalar(0,255,0));
-				lf.addImage(c, entry.toString(), 3);
-				wrong++;
-			}
-		}
-		System.out.println("Total: "+total+" wrong: "+wrong);
-		lf.pack();
-		lf.setVisible(true);
-	}
-	
-	
-	public static void testMoreShit(String picFolder, String seglogFilename) throws Exception {
-		
-		
-//		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
-		NNWrapper nn = new NNWrapper("/Users/pps/dev/724021plusJ_New.nnet",
-				new MultipleFeatureExtractor(
-			new OverlapGradientGridFeatureExtractor()));
-		
-		LabelFrame lf = new LabelFrame(picFolder);
-		
-		File picDir = new File(picFolder);
-		if (!picDir.exists() || !picDir.isDirectory())
-			throw new IllegalArgumentException("Not a folder: "+picFolder);
-		List<SegmentationLogEntry> entries = readSegmentationLog(seglogFilename);
-		LegacySegmentation ls = new LegacySegmentation();
-		int count = 0;
-		int total = 0;
-		int wrong = 0;
-		for (SegmentationLogEntry entry : entries) {
-			count++;
-//			if (count > 200) break;
-			if (!entry.getResult().equals("SUCCESS")) continue;
-			
-			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
-
-			Mat m = Imgcodecs.imread(Utils.fullPath(picDir, name), 
-					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m);
-//			SegmentationResult legacy = SegmentationFactory.getLegacySegmentation().segment(m);
-
-			
-		
-
-			total++;
-			
-			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m,0.1);
-			CutData cut = Piece.findBestCut(markov, nn);
-			List<Mat> mpieces = markov.getRevisedSegments(cut);
-			List<Double> probs = nn.probList(mpieces);
-			double prob = 1;
-			for (double d : probs) prob=prob*d;
-			String recog = nn.getLPString(mpieces);
-//			if (!s.equalsIgnoreCase(s2)) {
-			if (!weakBorderTest(entry, cut.getCutPoints())) {
-				if (entry.getPlate()!=null && !entry.getPlate().equals(recog)) {
-					wrong++;
-//					System.out.println("entry: "+entry.getPlate()+" recog: "+recog+" equals: "+entry.getPlate().equals(recog));
-					lf.addImage(ImageUtils.drawSegRectangles(m, entry.getRectangles()), entry.getPlate()+" MAIN "+entry.getPlate().equalsIgnoreCase(recog), 4);
-					lf.addImage(ImageUtils.drawSegRectangles(m, markov, cut),recog+" "+prob+" "+probs, 4);
-				}
-			}
-			
-			
-//			for (CutData cut : markov.getPossibleCuts()) {
-//				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
-//			}
-
-			
-//			for (Mat piece : pieces)
-//				lf.addImage(piece, nn.getNNOutput(piece).toString(), 3);
-//			for (CutData cut : markov.getPossibleCuts(3)) 
-//				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
-			
-
-		}
-		
-		lf.pack();
-		lf.setVisible(true);
-		
-		System.out.println("Total: "+total+" wrong "+wrong+" % "+(double)wrong/total);
-	}
-	
-	public static void testGoodShit(String picFolder) throws Exception {
-		
-		
-		NNWrapper nn = new NNWrapper("/Users/pps/AllSegmented/NN/BSS724021.nnet",
-				new MultipleFeatureExtractor(
-			new OverlapGradientGridFeatureExtractor()));
-		
-		LabelFrame lf = new LabelFrame(picFolder);
-		
-		File picDir = new File(picFolder);
-		if (!picDir.exists() || !picDir.isDirectory())
-			throw new IllegalArgumentException("Not a folder: "+picFolder);
-		int count = 0;
-		
-		for (File f : Utils.getOrderedList(picFolder)) {
-			count++;
-//			if (count > 100) break;
-//			if (!entry.getResult().equals("SUCCESS")) continue;
-			
-//			String name = entry.getFilename().substring(entry.getFilename().lastIndexOf("\\")+1);
-
-			Mat m = Imgcodecs.imread(f.getAbsolutePath(), 
-					Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			SegmentationResult markov = SegmentationFactory.getMarkovSegmentation().segment(m);
-			SegmentationResult legacy = SegmentationFactory.getLegacySegmentation().segment(m);
-
-			
-		
-
-			lf.addImage(ImageUtils.drawSegLines(m, legacy), nn.getLPString(legacy.getRevisedSegments()), 3);
-			for (CutData cut : markov.getPossibleCuts(3)) 
-				lf.addImage(ImageUtils.drawSegLines(m, cut), nn.getLPString(markov.getRevisedSegments(cut)), 3);
-			
-
-		}
-		
-		lf.pack();
-		lf.setVisible(true);
-	}
-	
-
-	public static void main(String[] args) throws Exception {
-		
-//		List<SegmentationLogEntry> list = readSegmentationLog("/Users/pps/dev/seglog/seglog047.txt");
-//		System.out.println(list);
-//		for (SegmentationLogEntry entry : list)
-//			if ("SUCCESS".equals(entry.getResult()))
-//				System.out.println(entry.getPlate());
-//		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-//		
-//		Mat m = Imgcodecs.imread("/Users/pps/dev/test/frames/processed050/V50N7t5040.png",
-//				Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-//		boolean t =testOneImage(SegmentationFactory.getLegacySegmentation(), 
-////				Arrays.asList(new Integer[]{0,20,34,45,57,70,84}), m);
-//				Arrays.asList(new Integer[]{8,18,30,40,48,59,70}), m);
-//		System.out.println(t);
-	
-		
-//		testAll(args[0], args[1]);
-//	    testMoreShit("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
-		
-		long t0 = System.nanoTime();
-	    testMoreShit("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-	    testMoreShit("/Users/pps/dev/test/frames/processed049", "/Users/pps/dev/seglog/seglog049.txt");
-	    testMoreShit("/Users/pps/dev/test/frames/processed050", "/Users/pps/dev/seglog/seglog050.txt");
-	    long t1 = System.nanoTime();
-	    
-	    System.out.println("TMS time: "+(t1-t0)/1000000000);
-//	    testGoodShit("/Users/pps/dev/aggr");
-	    
-//	    testIsEqual("/Users/pps/dev/test/frames/processed047", "/Users/pps/dev/seglog/seglog047.txt");
-
-		
-	}
-	
-	
-	public static String properPath(String parent, String child) {
-		return new File(parent, child).getAbsolutePath();
 	}
 	
 }
