@@ -68,7 +68,26 @@ public class RepositoryTest {
 				"video_ador7_92_20150807_09-30.avi",
 				"video_ador7_92_20150811_16-01.avi"
 		});
-		Assert.assertEquals(Repository.getVideoList().containsAll(canonicalList), true);
+		
+		List<String> canonicalRussianList = Arrays.asList(new String[] {
+				"video-000.avi",
+				"video-041.avi",
+				"video-046.avi",
+				"video-047.avi",
+				"video-049.avi",
+				"video-050.avi",
+				"video-051.avi",
+				"video-052.avi",
+				"video-1.25-16.23-020615-1.avi",
+				"video-1.41-16.23-020615-1.avi",
+				"video_ador7_66_20150812_11-35.avi",
+				"video_ador7_92_20150807_09-30.avi",
+				"video_ador7_92_20150811_16-01.avi",
+		});
+		
+		for (String vid : canonicalRussianList) 
+			Assert.assertTrue(Repository.getVideoList().contains(vid), "Video '"+vid+"' is not in repository");
+//		Assert.assertEquals(Repository.getVideoList().containsAll(canonicalList), true);
 //		System.out.println("ALL videos from canonical list are in repo: "+Repository.getVideoList().containsAll(canonicalList));
 	}
 	

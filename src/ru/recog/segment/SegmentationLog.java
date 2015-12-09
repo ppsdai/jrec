@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import ru.recog.*;
 import ru.recog.nn.NNAnalysis;
+import ru.recog.repo.SegLogEntry;
 import ru.recog.ui.FrameProcessor;
 
 public class SegmentationLog {
@@ -57,6 +58,10 @@ public class SegmentationLog {
 	}
 	
 	public static boolean weakBorderTest(SegmentationLogEntry sle, List<Integer> tested) {
+		return weakBorderEquals(rect2List(sle.getRectangles()), tested);
+	}
+	
+	public static boolean weakBorderTest(SegLogEntry sle, List<Integer> tested) {
 		return weakBorderEquals(rect2List(sle.getRectangles()), tested);
 	}
 	
@@ -207,6 +212,11 @@ public class SegmentationLog {
 //				properPath(picRoot,"processed050"), properPath(seglogRoot, "seglog050.txt"));
 
 		
+	}
+	
+	public static void main(String[] args) throws Exception {
+		testSegmenter(SegmentationFactory.getLegacySegmentation(), 
+				Utils.fullPath("/Users/pps/dev/test/frames","processed051"), Utils.fullPath("/Users/pps/dev/seglog", "seglog051.txt"), true);
 	}
 	
 	

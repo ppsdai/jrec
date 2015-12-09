@@ -5,6 +5,8 @@ import java.util.*;
 
 import org.opencv.core.Core;
 
+import ru.recog.XML;
+
 public class Repository {
 	
 	
@@ -21,6 +23,8 @@ public class Repository {
 	private static File frameFolderFile = null;
 	private static File nnFolderFile = null;
 	static File networksFolderFile = null;
+	static File platesFolderFile = null;
+	static File seglogFolderFile = null;
 
 
 	
@@ -32,7 +36,6 @@ public class Repository {
 	
 	
 	private static void initialize() {
-		File repoFile = null;
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.class.getResourceAsStream("/repository.loc")));
 			repoFile = new File(br.readLine());
@@ -54,6 +57,12 @@ public class Repository {
 		networksFolderFile = new File(nnFolderFile, "networks");
 		if (!checkDirFile(networksFolderFile))
 			throw new IllegalStateException("Could not find NN/networks directory inside repository= "+repoFile.getAbsolutePath());
+		platesFolderFile = new File(repoFile, "plates");
+		if (!checkDirFile(platesFolderFile))
+			throw new IllegalStateException("Could not find plates directory inside repository= "+repoFile.getAbsolutePath());
+		seglogFolderFile = new File(repoFile, "log");
+		if (!checkDirFile(seglogFolderFile))
+			throw new IllegalStateException("Could not find log directory inside repository= "+repoFile.getAbsolutePath());
 	}
 	
 	public static String getPath() {
@@ -101,6 +110,27 @@ public class Repository {
 		return new File(networksFolderFile, id);
 	}
 	
+	public static String[] getPlatesFolderList() {
+		return platesFolderFile.list(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return new File(dir, name).isDirectory();
+			}
+		});
+	}
+	
+	public static File getPlateFolderFile(String id) {
+		return new File(platesFolderFile, id);
+	}
+	
+	public static String[] getSeglogList() {
+		return seglogFolderFile.list();
+	}
+	
+	public static SegLog getSegLog(String id) {
+		return (SegLog)XML.fromXML(new File(seglogFolderFile, id));
+	}
+	
 	
 	public static void main(String args[] ) {
 		Properties p = System.getProperties();
@@ -124,6 +154,8 @@ public class Repository {
 //			System.out.println(f.getName());
 //		
 //		System.out.println(Core.getBuildInformation());
+		
+		System.out.println(Arrays.asList(getPlatesFolderList()));
 	}
 	
 	private static boolean checkDirFile(File dir) {
