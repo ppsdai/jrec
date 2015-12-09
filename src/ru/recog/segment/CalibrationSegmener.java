@@ -9,14 +9,109 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import ru.recog.ImageUtils;
-import ru.recog.LabelFrame;
+import ru.recog.*;
 
 public class CalibrationSegmener {
 
 	
 	 public static void main(String[] args) throws Exception {
 		 System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
+		 
+		 // testProperties();
+		 // differentRotations();
+		 
+		 LabelFrame lf = new LabelFrame("Images", true);
+		 
+		 File folder = new File("C:\\dev\\frames\\VNew\\detected1411"); //1411"); //Try");
+		 File[] allFilesInFolder = folder.listFiles();
+		 
+		 CalibrationLine calLine1 = (CalibrationLine) XML.fromXML(new File("c:\\dev\\CalLine1.xml"));
+		 CalibrationLine calLine2 = (CalibrationLine) XML.fromXML(new File("c:\\dev\\CalLine2.xml"));
+
+		 for(File f : allFilesInFolder) {
+
+			 //System.out.println(f.getName());
+			 int indexX = f.getName().lastIndexOf('X');
+			 int indexY = f.getName().lastIndexOf('Y');
+			 int indexP = f.getName().lastIndexOf('.');
+			 
+			 double X = Double.parseDouble(f.getName().substring(indexX+1, indexY));
+			 double Y = Double.parseDouble(f.getName().substring(indexY+1, indexP));
+				 
+			 //System.out.println(X+" "+Y);
+			 CalibrationPoint testPoint = new CalibrationPoint(X, Y, 0, 0, 0);
+			 CalibrationPoint foundPoint1 =calLine1.findMinDistancePoint( testPoint);
+			 CalibrationPoint foundPoint2 =calLine2.findMinDistancePoint( testPoint);
+			 
+			 // check which point is closer and assign to output
+			 double dist1 = calLine1.findDistance(testPoint, foundPoint1);
+			 double dist2 = calLine2.findDistance(testPoint, foundPoint2); 
+			 CalibrationPoint pointOutput = foundPoint1;
+			 if (dist2<dist1) pointOutput = foundPoint2;
+			 
+			 Mat m = Imgcodecs.imread( f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			 lf.addImage(m, f.getName() , 4);
+			 
+			 Mat mRot = rotation(m , pointOutput.getAlfa());
+			 //Mat mRot1 = rotation(m , foundPoint1.getAlfa());
+			 //Mat mRot2 = rotation(m , foundPoint2.getAlfa());
+			 
+			 // add lines on rotated image
+			 {
+				int median = mRot.rows() / 2;
+				SegData trySegment = new SegData(mRot, median - 7, median + 7 );
+				trySegment.calculateSobelXProjectonY();
+				trySegment.calculateUpperAndLowerBoundary( (int) Math.round(pointOutput.getHeight()) );	
+				// add line bounds
+				Imgproc.line(mRot, new Point(0, trySegment.getUpperBound()), 
+						         new Point(mRot.cols()-1, trySegment.getUpperBound()), new Scalar(0,255,0));
+				Imgproc.line(mRot, new Point(0, trySegment.getLowerBound()), 
+				                 new Point(mRot.cols()-1, trySegment.getLowerBound()), new Scalar(0,255,0));			
+				
+				lf.addImage(mRot, "H= " + Double.toString(pointOutput.getHeight())
+				                  +" "  + Double.toString(pointOutput.getAlfa()), 4);
+			 }
+			
+//			 lf.addImage(mRot, Double.toString(pointOutput.getAlfa()) , 4);
+			 
+//			 lf.addImage(mRot1, Double.toString(foundPoint1.getAlfa()) , 4);
+//			 lf.addImage(mRot2, Double.toString(foundPoint2.getAlfa()) , 4);
+			 
+		 }
+	
+		lf.pack();
+		lf.setVisible(true);
+	 }	 
+	 
+	 /**  
+     different rotations */
+	 public static void differentRotations() throws Exception {
+		
+		 LabelFrame lf = new LabelFrame("Different Rotations", true);
+		 Mat m = Imgcodecs.imread( "C:\\dev\\PlatesSegmentation\\Calibrate\\V1411N1t19880X443Y664.png" 
+				                  , Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+		 lf.addImage(m, "Original", 4);
+		 for (int i=-7; i<=7; i++ ) {
+			 Mat rot = rotation( m, i);
+			 lf.addImage(rot, Integer.toString(i) , 4);
+		 }
+		 
+		lf.pack();
+		lf.setVisible(true);
+		
+		Mat img = rotation( m, -1);
+		Imgcodecs.imwrite("C:\\dev\\PlatesSegmentation\\Calibrate\\RotM1_V1411N1t19880X443Y664.png", img);
+
+	 }
+	 
+	 
+	 
+     /**  
+     load files with some *
+     properties and do some tests */
+	 public static void testProperties() throws Exception {
+		  		
+			
 	/*  Properties pros = new Properties();
 	  pros.setProperty("1.bmp", "5");
 	  pros.setProperty("2.bmp", "6");

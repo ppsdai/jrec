@@ -13,8 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ru.recog.imgproc.CompoundImageProcessor;
 import ru.recog.imgproc.ImageProcessor;
-import ru.recog.segment.CutData;
-import ru.recog.segment.SegmentationResult;
+import ru.recog.segment.*;
 
 public class ImageUtils {
 	
@@ -139,6 +138,25 @@ public class ImageUtils {
 			Mat m = cvt.clone();
 			drawLines(m, cut);
 			lf.addImage(m, Double.toString(cut.calcEnergy(result.getData())), scale);
+		}
+		
+		lf.pack();
+		return lf;
+
+	}
+	
+	public static LabelFrame showAllProbSegmentations(SegmentationResult result, int scale) {
+		LabelFrame lf = new LabelFrame("ALL");
+		
+		Mat cvt = bin2color(result.getOriginalMat());
+		for (CutData cut : result.getPossibleCuts()) {
+			Mat m = cvt.clone();
+			drawLines(m, cut);
+			Imgproc.line(m, new Point(0, result.getData().getUpperBound()), 
+					new Point(m.cols()-1, result.getData().getUpperBound()), BLUE);
+			Imgproc.line(m, new Point(0, result.getData().getLowerBound()), 
+					new Point(m.cols()-1, result.getData().getLowerBound()), RED);
+			lf.addImage(m, Double.toString(MarkovLD.getDefaultMLD().probability(cut.buildLength())), scale);
 		}
 		
 		lf.pack();

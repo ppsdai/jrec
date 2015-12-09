@@ -9,6 +9,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import ru.recog.ImageUtils;
 import ru.recog.LabelFrame;
+import ru.recog.feature.MultipleFeatureExtractor;
+import ru.recog.feature.OverlapGradientGridFeatureExtractor;
+import ru.recog.nn.NNWrapper;
 
 public class MarkovSegmentation implements Segmentation {
 	
@@ -30,15 +33,7 @@ public class MarkovSegmentation implements Segmentation {
 		if (defaultMS == null) defaultMS = new MarkovSegmentation();
 	}
 	
-	public static void main(String[] args) throws Exception {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		// C:\dev\frames\VNew\detected1411\V1411N33t50680.png
-		Mat m = Imgcodecs.imread("/Users/pps/dev/test/frames/processed047/V47N1t920.png", Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-		SegmentationResult result = SegmentationFactory.getMarkovSegmentation().segment(m);
-		LabelFrame lf = ImageUtils.showAllSegmentations(result, 3);
-		lf.setVisible(true);
-		
-	}
+
 
 	public SegmentationResult segment(Mat m) {
 		
@@ -137,12 +132,21 @@ public class MarkovSegmentation implements Segmentation {
 		
 		if (USE_WIDTH == parameters[0]) {
 			double width = parameters[1];
-			SegmentationData data = new SegmentationData(m);
+			int ub = (int) Math.round(parameters[2]);
+			int lb = (int) Math.round(parameters[3]);
+			
+			SegmentationData data = new SegmentationData(m, ub, lb);
 			data.setWidth(width);
 			if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
 			if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
-			Map<CutData, Double> cutMap = buildCuts(data, mld);
-			return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
+			final Map<CutData, Double> cutMap = buildCuts(data, mld);
+			TreeMap<CutData, Double> sorted = new TreeMap<>(new Comparator<CutData>() {
+				public int compare(CutData o1, CutData o2) {
+					return Double.compare(cutMap.get(o2), cutMap.get(o1));
+				};
+			});
+			for (CutData c : cutMap.keySet()) sorted.put(c, cutMap.get(c));
+			return new SegmentationResult(data, new ArrayList<CutData>(sorted.keySet()));
 		} else {
 			SegmentationData data = new SegmentationData(m);
 			
@@ -220,12 +224,9 @@ public class MarkovSegmentation implements Segmentation {
 	
 	public static boolean pointsAcceptedWithWidth(int[] points, Mat m, double width) {
 		int length = points[6] - points[0];
-		if (points[6] > (double) m.cols()*NOREGIONRATIO 
-				|| length >= (double) m.cols()*NOREGIONRATIO 
-				|| length <= m.cols()/2) 
-			return false;
-		
-		return true;
+
+		double diff = Math.abs(length - width*6);
+		return diff/length <= 0.1;
 	}
 	
 	public static Map<CutData, Double> buildCuts(SegmentationData data, MarkovLD mld) {
@@ -256,7 +257,8 @@ public class MarkovSegmentation implements Segmentation {
 									pointsAcceptable(cut.getCutPointsArray(), data.getOriginalMat());
 							
 							if (pointIsAcceptable) {
-								double p = mld.probability(cut.buildLength());
+								double p = mld.probability(data.getWidth() <0? cut.buildLength() 
+										: cut.buildLength(data.getWidth()));
 								if (p!=0)
 									cutMap.put(cut, p);
 							}

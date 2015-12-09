@@ -41,6 +41,25 @@ public class SegmentationData {
 		// need to add boundary checks on minimums and maximums calculation
 	}
 
+	/**
+	 * constructor takes matrix and upper and lower bounds as parameters
+	 */
+	public SegmentationData(Mat m, int ub, int lb) {
+		originalM = m.clone();
+		
+		upperBound = ub;
+		lowerBound = lb;
+		centerLine = (int) Math.floor((ub+lb)/2);
+		
+		calculateProjection();
+		legacyExtremums();
+//		this.calculateLocalMaximums();
+//		this.calculateLocalMinimums();
+		// this.calculateMinDepth();
+		// FIXME
+		// need to add boundary checks on minimums and maximums calculation
+	}
+	
 	void calculateVerticalCrop() {
 		Mat m = originalM;
 		int[] blackLength = new int[m.rows()];

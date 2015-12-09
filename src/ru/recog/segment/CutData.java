@@ -102,6 +102,16 @@ public class CutData {
 		return ls;
 		
 	}
+	
+	public double[] buildLength(double width) {
+		//FIXME think about cases when there are more than 7 cut pointa
+		if (cutPoints.size() < 7) throw new IllegalStateException("Cannot form Markov chain from CutData with size "+cutPoints.size());
+		double[] ls = new double[6];
+		for (int i = 0; i < 6; i++)
+			ls[i] = (double)(cutPoints.get(i+1)-cutPoints.get(i))/width;
+		return ls;
+		
+	}
 
 	@Override
 	public String toString() {
