@@ -20,6 +20,8 @@ public class MarkovSegmentation implements Segmentation {
 	
 	private static final double ALL_POSSIBLE = 0.1;
 	
+	public static final double USE_WIDTH = 1.11;
+	
 	public MarkovSegmentation() {
 		mld = MarkovLD.getDefaultMLD();
 	}
@@ -131,16 +133,27 @@ public class MarkovSegmentation implements Segmentation {
 		return true;
 	}
 	
-	public SegmentationResult segment(Mat m, double...paramaters) {
-		SegmentationData data = new SegmentationData(m);
+	public SegmentationResult segment(Mat m, double...parameters) {
 		
-		if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
-
-		if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
-		
-		Map<CutData, Double> cutMap = buildCuts(data, mld);
-		
-		return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
+		if (USE_WIDTH == parameters[0]) {
+			double width = parameters[1];
+			SegmentationData data = new SegmentationData(m);
+			data.setWidth(width);
+			if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
+			if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
+			Map<CutData, Double> cutMap = buildCuts(data, mld);
+			return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
+		} else {
+			SegmentationData data = new SegmentationData(m);
+			
+			if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
+	
+			if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
+			
+			Map<CutData, Double> cutMap = buildCuts(data, mld);
+			
+			return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
+		}
 		
 	}
 	
@@ -205,6 +218,16 @@ public class MarkovSegmentation implements Segmentation {
 		return true;
 	}
 	
+	public static boolean pointsAcceptedWithWidth(int[] points, Mat m, double width) {
+		int length = points[6] - points[0];
+		if (points[6] > (double) m.cols()*NOREGIONRATIO 
+				|| length >= (double) m.cols()*NOREGIONRATIO 
+				|| length <= m.cols()/2) 
+			return false;
+		
+		return true;
+	}
+	
 	public static Map<CutData, Double> buildCuts(SegmentationData data, MarkovLD mld) {
 		Map<CutData, Double> cutMap = new HashMap<CutData,Double>();
 		
@@ -228,7 +251,11 @@ public class MarkovSegmentation implements Segmentation {
 									startingPoint+i1+i2+i3+i4+i5+i6);
 							
 							
-							if (pointsAcceptable(cut.getCutPointsArray(), data.getOriginalMat())) {
+							boolean pointIsAcceptable = data.getWidth() > 0? 
+									pointsAcceptedWithWidth(cut.getCutPointsArray(), data.getOriginalMat(), data.getWidth()) :
+									pointsAcceptable(cut.getCutPointsArray(), data.getOriginalMat());
+							
+							if (pointIsAcceptable) {
 								double p = mld.probability(cut.buildLength());
 								if (p!=0)
 									cutMap.put(cut, p);

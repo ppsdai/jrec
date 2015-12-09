@@ -22,6 +22,7 @@ public class SegmentationData {
 	private List<Integer> maximums;
 	private List<Integer> minDepth;
 	private Mat originalM;
+	private double width = -1;
 
 	private int upperBound, lowerBound, centerLine;
 
@@ -278,6 +279,14 @@ public class SegmentationData {
 	
 	public Mat getOriginalMat() {
 		return originalM;
+	}
+	
+	public double getWidth() {
+		return width;
+	}
+
+	public void setWidth(double width) {
+		this.width = width;
 	}
 
 }
