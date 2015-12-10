@@ -3,21 +3,11 @@ package ru.recog.segment;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.imgcodecs.Imgcodecs;
-
-import ru.recog.ImageUtils;
-import ru.recog.LabelFrame;
-import ru.recog.feature.MultipleFeatureExtractor;
-import ru.recog.feature.OverlapGradientGridFeatureExtractor;
-import ru.recog.nn.NNWrapper;
 
 public class MarkovSegmentation implements Segmentation {
 	
 	private MarkovLD mld;
-	
-	private static MarkovSegmentation defaultMS = null;
 	
 	private static final double NOREGIONRATIO = 0.8;
 	
@@ -28,12 +18,6 @@ public class MarkovSegmentation implements Segmentation {
 	public MarkovSegmentation() {
 		mld = MarkovLD.getDefaultMLD();
 	}
-	
-	private static void buildDefaultMS() {
-		if (defaultMS == null) defaultMS = new MarkovSegmentation();
-	}
-	
-
 
 	public SegmentationResult segment(Mat m) {
 		
@@ -50,12 +34,10 @@ public class MarkovSegmentation implements Segmentation {
 		
 		List<CutData> all = new ArrayList<CutData>(cutMap.keySet());
 		List<CutData> used = new ArrayList<CutData>();
-		final SegmentationData fdata = data;
 		Comparator<CutData> c = new Comparator<CutData>() {
 			@Override
 			public int compare(CutData o1, CutData o2) {
 				return Double.compare(calcWithLineMap(o2, lineMap), calcWithLineMap(o1, lineMap));
-//				return Double.compare(o2.calcEnergy(fdata), o1.calcEnergy(fdata));
 			}
 		};
 		Collections.sort(all, c);
@@ -210,7 +192,7 @@ public class MarkovSegmentation implements Segmentation {
 		return lineMap;
 	}
 	
-	public static boolean pointsAcceptable(int[] points, Mat m) {
+	private static boolean pointsAcceptable(int[] points, Mat m) {
 //		return true;
 		int length = points[6] - points[0];
 		if (points[6] > (double) m.cols()*NOREGIONRATIO 
@@ -221,7 +203,7 @@ public class MarkovSegmentation implements Segmentation {
 		return true;
 	}
 	
-	public static boolean pointsAcceptedWithWidth(int[] points, Mat m, double width) {
+	private static boolean pointsAcceptedWithWidth(int[] points, Mat m, double width) {
 		int length = points[6] - points[0];
 
 		double diff = Math.abs(length - width*6);
@@ -250,17 +232,15 @@ public class MarkovSegmentation implements Segmentation {
 									startingPoint+i1+i2+i3+i4+i5,
 									startingPoint+i1+i2+i3+i4+i5+i6);
 							
+							double p = 0;
+							if (data.getWidth() > 0 &&  //we use width of symbol to aid calculations
+								pointsAcceptedWithWidth(cut.getCutPointsArray(), data.getOriginalMat(), data.getWidth()))
+									p = mld.probability(cut.buildLength(data.getWidth()));
+							else if (pointsAcceptable(cut.getCutPointsArray(),  data.getOriginalMat()))
+									p = mld.probability(cut.buildLength(data.getWidth()));
+							if (p!=0)
+								cutMap.put(cut, p);
 							
-							boolean pointIsAcceptable = data.getWidth() > 0? 
-									pointsAcceptedWithWidth(cut.getCutPointsArray(), data.getOriginalMat(), data.getWidth()) :
-									pointsAcceptable(cut.getCutPointsArray(), data.getOriginalMat());
-							
-							if (pointIsAcceptable) {
-								double p = mld.probability(data.getWidth() <0? cut.buildLength() 
-										: cut.buildLength(data.getWidth()));
-								if (p!=0)
-									cutMap.put(cut, p);
-							}
 						}
 					}
 		}
