@@ -131,34 +131,33 @@ public class MarkovSegmentation implements Segmentation {
 	public SegmentationResult segment(Mat m, double...parameters) {
 		
 		if (USE_WIDTH == parameters[0]) {
-			double width = parameters[1];
-			int ub = (int) Math.round(parameters[2]);
-			int lb = (int) Math.round(parameters[3]);
-			
-			SegmentationData data = new SegmentationData(m, ub, lb);
-			data.setWidth(width);
-			if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
-			if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
-			final Map<CutData, Double> cutMap = buildCuts(data, mld);
-			TreeMap<CutData, Double> sorted = new TreeMap<>(new Comparator<CutData>() {
-				public int compare(CutData o1, CutData o2) {
-					return Double.compare(cutMap.get(o2), cutMap.get(o1));
-				};
-			});
-			for (CutData c : cutMap.keySet()) sorted.put(c, cutMap.get(c));
-			return new SegmentationResult(data, new ArrayList<CutData>(sorted.keySet()));
+			if (parameters.length != 4)
+				throw new IllegalArgumentException("MS.segment was called with USE_WIDTH, but wrong number of parameters. Expected 4, but got: "
+								+Arrays.toString(parameters));
+			return segmentUseWidth(m, parameters[1], (int) Math.round(parameters[2]), (int) Math.round(parameters[3]));
 		} else {
 			SegmentationData data = new SegmentationData(m);
-			
-			if (!data.getMinimums().contains(0)) data.getMinimums().add(0, 0);
-	
-			if (!data.getMinimums().contains(m.cols()-1)) data.getMinimums().add(m.cols()-1);
+			data.addEdgesToMinimums();
 			
 			Map<CutData, Double> cutMap = buildCuts(data, mld);
 			
 			return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
 		}
 		
+	}
+	
+	private SegmentationResult segmentUseWidth(Mat m, double width, int ub, int lb) {
+		SegmentationData data = new SegmentationData(m, ub, lb);
+		data.addEdgesToMinimums();
+		data.setWidth(width);
+		final Map<CutData, Double> cutMap = buildCuts(data, mld);
+		TreeMap<CutData, Double> sorted = new TreeMap<>(new Comparator<CutData>() {
+			public int compare(CutData o1, CutData o2) {
+				return Double.compare(cutMap.get(o2), cutMap.get(o1));
+			};
+		});
+		for (CutData c : cutMap.keySet()) sorted.put(c, cutMap.get(c));
+		return new SegmentationResult(data, new ArrayList<CutData>(sorted.keySet()));
 	}
 	
 	private static List<Integer> findBestLines(Map<CutData,Double> cutMap, SegmentationData data) {

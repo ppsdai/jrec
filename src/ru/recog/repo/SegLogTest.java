@@ -82,7 +82,7 @@ public class SegLogTest {
 			lf.setVisible(true);
 		}
 		
-		Assert.assertEquals(wrong, 0, "Total: "+total);
+		Assert.assertEquals(wrong, 0, "Seglog for "+seglog.getPlatesLocation()+" Total: "+total);
 		System.out.println("Total: "+total+" wrong: "+wrong);
 
 	}

@@ -166,6 +166,13 @@ public class SegmentationData {
 			if (projX[x+1] < projX[x] && projX[x]>=projX[x-1]) maximums.add(x);
 			if (projX[x+1] > projX[x] && projX[x]<=projX[x-1]) minimums.add(x);
 		}
+		
+	}
+	
+	/** most of segmenters need this to work properly. However, it breaks LegacySegmenter. So segmenters that need this must call this one for now*/
+	void addEdgesToMinimums() {
+		if (!minimums.contains(0)) minimums.add(0, 0);
+		if (!minimums.contains(originalM.cols()-1)) minimums.add(originalM.cols()-1);
 	}
 
 	/**

@@ -27,6 +27,12 @@ public class SegmentationTests {
 		new SegmentationData(m, 0, 15);
 	}
 	
+	@Test(expectedExceptions=IllegalArgumentException.class, expectedExceptionsMessageRegExp="^MS.segment(.*)")
+	public void testMarkovUseWidthArgumentsException() {
+		Mat m = new Mat(10,10, CvType.CV_8UC1);
+		SegmentationFactory.getMarkovSegmentation().segment(m, MarkovSegmentation.USE_WIDTH, 1, 2, 3, 4);
+	}
+	
 	@Test
 	public void testWeakBorders() {
 		List<Integer> proper = Arrays.asList(new Integer[] {5, 10, 15, 20, 25});
@@ -42,5 +48,5 @@ public class SegmentationTests {
 		List<Integer> test4 = Arrays.asList(new Integer[] {1, 10, 15, 20, 23});
 		Assert.assertTrue(!SegmentationLog.weakBorderEquals(proper, test4), "Different lists are found equal");
 	}
-
+	
 }
