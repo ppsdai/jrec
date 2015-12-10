@@ -183,9 +183,7 @@ public class SegmentationLog {
 				{"/Users/pps/dev/test/frames", "/Users/pps/dev/seglog"}
 		};
 	}
-	
-//	@Parameters({"/Users/pps/dev/test/frames", "/Users/pps/dev/seglog"})
-	@Test(dataProvider = "testAll")
+
 	public static void testAll(String picRoot, String seglogRoot) throws Exception {
 		
 		System.out.println(picRoot);
@@ -390,23 +388,6 @@ public class SegmentationLog {
 		System.out.println("Total: "+total+" wrong: "+wrong);
 		lf.pack();
 		lf.setVisible(true);
-	}
-	
-	@Test
-	public void testWeakBorders() {
-		List<Integer> proper = Arrays.asList(new Integer[] {5, 10, 15, 20, 25});
-		List<Integer> test1 = Arrays.asList(new Integer[] {5, 10, 15, 20, 25});
-		Assert.assertTrue(weakBorderEquals(proper, test1), "Identical lists are not found equal");
-		
-		List<Integer> test2 = Arrays.asList(new Integer[] {3, 10, 15, 20, 27});
-		Assert.assertTrue(weakBorderEquals(proper, test2), "Similar lists are not found equal");
-		
-		List<Integer> test3 = Arrays.asList(new Integer[] {6, 10, 15, 20, 23});
-		Assert.assertTrue(weakBorderEquals(proper, test3), "Similar lists are not found equal");
-		
-		List<Integer> test4 = Arrays.asList(new Integer[] {1, 10, 15, 20, 23});
-		Assert.assertTrue(!weakBorderEquals(proper, test4), "Different lists are found equal");
-
 	}
 	
 }

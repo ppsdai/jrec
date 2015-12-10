@@ -44,13 +44,10 @@ public class SegmentationData {
 	/**
 	 * constructor takes matrix and upper and lower bounds as parameters
 	 */
-	public SegmentationData(Mat m, int ub, int lb) {
+	public SegmentationData(Mat m, int upperBound, int lowerBound) {
 		originalM = m.clone();
 		
-		upperBound = ub;
-		lowerBound = lb;
-		centerLine = (int) Math.floor((ub+lb)/2);
-		
+		setVerticalBounds(upperBound, lowerBound);
 		calculateProjection();
 		legacyExtremums();
 //		this.calculateLocalMaximums();
@@ -58,6 +55,17 @@ public class SegmentationData {
 		// this.calculateMinDepth();
 		// FIXME
 		// need to add boundary checks on minimums and maximums calculation
+	}
+	
+	private void setVerticalBounds(int ub, int lb) {
+		if (ub < 0) 
+			throw new IllegalArgumentException("Upperbound can not be negative: "+ub);
+		if (lb >= originalM.rows()) 
+			throw new IllegalArgumentException("Lower bound is bigger than image height. LB = "
+							+lb+" height = "+originalM.rows());
+		upperBound = ub;
+		lowerBound = lb;
+		centerLine = (int) Math.floor((ub+lb)/2);
 	}
 	
 	void calculateVerticalCrop() {
