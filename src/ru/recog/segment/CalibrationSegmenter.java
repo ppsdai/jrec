@@ -4,6 +4,8 @@ package ru.recog.segment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -75,18 +77,19 @@ public class CalibrationSegmenter {
 		 this.calculateSobelXProjectonY();
 		 this.calculateUpperAndLowerBoundary( (int) Math.round(pointOutput.getHeight()) );	
 		 
-		 
-		 return new SegmentationData(originalM, upperBound, lowerBound );
+		 SegmentationData sd = new SegmentationData(originalM, upperBound, lowerBound );
+		 sd.setWidth( pointOutput.getLength());
+		 return sd;
 	}
 	
 	
 	 public static void main(String[] args) throws Exception {
 		 System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
 		 
-		 // testProperties();
+		  testProperties();
 		 // differentRotations();
 		 //testRecognition();
-		 refactor();
+		 //refactor();
 		 
 	 }
 	 
@@ -273,14 +276,7 @@ public class CalibrationSegmenter {
 	 public static void testProperties() throws Exception {
 		  		
 			
-	/*  Properties pros = new Properties();
-	  pros.setProperty("1.bmp", "5");
-	  pros.setProperty("2.bmp", "6");
-	  pros.setProperty("3.bmp", "7");
-	  
-	  pros.store(new FileOutputStream("C:\\dev\\PlatesSegmentation\\props.properties"), "");*/
-	  
-		 
+	 
 	  LabelFrame lf = new LabelFrame("For Inspection", true);
 		 
 	  // load files list with their properties	 
@@ -291,63 +287,46 @@ public class CalibrationSegmenter {
 	  
 		File dir = new File("C:\\dev\\frames\\VNew\\FP");
 		
+		 String fnm1 = "c:\\dev\\CalLine1.xml";
+		 String fnm2 = "c:\\dev\\CalLine2.xml";
+	 
+		 CalibrationSegmenter calSeg = new CalibrationSegmenter(fnm1, fnm2);
+		
 		for ( String key: props.stringPropertyNames() ){
 			String leString =  props.getProperty(key);
 			//int startInt = Integer.parseInt( leString); // starting point Integer
 			int heInteger = Integer.parseInt( leString); // starting point Integer
 			
 			
-			String filename = new File(dir, key).getAbsolutePath();
+		
+			File f = new File(dir, key);
+			System.out.println( f.getAbsolutePath() + " " + heInteger );
+			
+			 Mat m = Imgcodecs.imread( f.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+			 lf.addImage(m, f.getName() , 3);		 
+			 
+			 
+			 SegmentationData sd = calSeg.calculateSegmentationData(f, m);
+			 
+			 
+	         Mat mRot = sd.getOriginalMat();
+			 // add line bounds
+			 Imgproc.line(mRot, new Point(0, sd.getUpperBound()), 
+						         new Point(mRot.cols()-1, sd.getUpperBound()), new Scalar(0,255,0));
+			 Imgproc.line(mRot, new Point(0, sd.getLowerBound()), 
+				                 new Point(mRot.cols()-1, sd.getLowerBound()), new Scalar(0,255,0));			
+						
 
-			System.out.println( filename + " " + heInteger );
-			
-			Mat m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-			Mat m1 = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-			Mat b = ImageUtils.localbin(m.clone(), 0.6);  //0.6
-			
-			
-			int median = m.rows() / 2;
-			SegData trySegment = new SegData(m, median - 7, median + 7 );
-			
-			// first method looking for starting point
-			int sPoint1 = trySegment.findStartPoint(0, 0.4);
-			int xCoord1 = trySegment.getLocalMinimums().get(sPoint1);
-			int xCoord2 = trySegment.getLocalMinimums().get(sPoint1 + 1);
-			Imgproc.line(m1, new Point(xCoord1, 0), new Point(xCoord1, m1.rows()-1), new Scalar(0,255,0));
-			Imgproc.line(m1, new Point(xCoord2, 0), new Point(xCoord2, m1.rows()-1), new Scalar(125,0,0));
-			//second looking for starting point
-			sPoint1 = trySegment.findStartPoint(1, 0.5);
-			xCoord1 = trySegment.getLocalMinimums().get(sPoint1);	
-			Imgproc.line(m1, new Point(xCoord1, 0), new Point(xCoord1, m1.rows()-1), new Scalar(0,0,125));
-			
-			// make sobel projectrion
-			trySegment.calculateSobelXProjectonY();
-			trySegment.calculateUpperAndLowerBoundary( heInteger);
-			// add line bounds
-			Imgproc.line(m1, new Point(0, trySegment.getUpperBound()), 
-					         new Point(m1.cols()-1, trySegment.getUpperBound()), new Scalar(0,255,0));
-			Imgproc.line(m1, new Point(0, trySegment.getLowerBound()), 
-			                 new Point(m1.cols()-1, trySegment.getLowerBound()), new Scalar(0,255,0));	
-			
-			lf.addImage(m1, key, 8);
-			
-			//rotated image
-			{
-				Mat rot = rotation( m, -5);
-				SegData trySegment2 = new SegData(rot, median - 7, median + 7 );
-				trySegment2.calculateSobelXProjectonY();
-				trySegment2.calculateUpperAndLowerBoundary( heInteger);	
-				// add line bounds
-				Imgproc.line(rot, new Point(0, trySegment2.getUpperBound()), 
-						         new Point(rot.cols()-1, trySegment2.getUpperBound()), new Scalar(0,255,0));
-				Imgproc.line(rot, new Point(0, trySegment2.getLowerBound()), 
-				                 new Point(rot.cols()-1, trySegment2.getLowerBound()), new Scalar(0,255,0));			
-				
-				lf.addImage(rot, "rotated by 2 degrees", 8);
-			}
-			
-			lf.addImage( makeSobelHistogram(m, trySegment, 8 ) ,"hist", 1);
-			
+			 //lf.addImage(mRot, "Processed" , 3);
+			 
+			 //CutData cd = Piece.findBestCut(result, nn);
+			 //lf.addImage(ImageUtils.drawSegLines(mRec, cd), "NN", 3);
+			 
+			 int wd = (int) Math.round(sd.getWidth());
+			 List<Integer> listOfCuts = Arrays.asList(new Integer[]
+			 {heInteger , heInteger+7, heInteger+7*2, heInteger+7*3, heInteger+7*4, heInteger+7*5, heInteger+7*6});
+			 CutData cd = new CutData(listOfCuts);
+			 lf.addImage(ImageUtils.drawSegLines(mRot, cd), "AddCuts", 3);
 			
 			
 		}
