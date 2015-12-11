@@ -33,6 +33,7 @@ public class CalibrationPoint{
 		this.alfa = alfa;
 	}
 	
+	
 	public double getX(){
 		return x;
 	}
