@@ -105,6 +105,7 @@ public class CutData {
 	
 	public double[] buildLength(double width) {
 		//FIXME think about cases when there are more than 7 cut pointa
+		if (width < 0) throw new IllegalArgumentException("Cannot use negative width for MArkov probability. Width = "+width);
 		if (cutPoints.size() < 7) throw new IllegalStateException("Cannot form Markov chain from CutData with size "+cutPoints.size());
 		double[] ls = new double[6];
 		for (int i = 0; i < 6; i++)

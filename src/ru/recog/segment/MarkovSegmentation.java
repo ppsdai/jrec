@@ -5,15 +5,21 @@ import java.util.Map.Entry;
 
 import org.opencv.core.Mat;
 
+import ru.recog.nn.NNWrapper;
+import ru.recog.repo.Network;
+
 public class MarkovSegmentation implements Segmentation {
 	
 	private MarkovLD mld;
 	
 	private static final double NOREGIONRATIO = 0.8;
 	
-	private static final double ALL_POSSIBLE = 0.1;
+	public static final double ALL_POSSIBLE = 0.1;
 	
 	public static final double USE_WIDTH = 1.11;
+	
+	public static final double USE_NN = 2.22;
+
 	
 	public MarkovSegmentation() {
 		mld = MarkovLD.getDefaultMLD();
@@ -117,14 +123,23 @@ public class MarkovSegmentation implements Segmentation {
 				throw new IllegalArgumentException("MS.segment was called with USE_WIDTH, but wrong number of parameters. Expected 4, but got: "
 								+Arrays.toString(parameters));
 			return segmentUseWidth(m, parameters[1], (int) Math.round(parameters[2]), (int) Math.round(parameters[3]));
-		} else {
+		} else if (ALL_POSSIBLE == parameters[0]) {
 			SegmentationData data = new SegmentationData(m);
 			data.addEdgesToMinimums();
 			
 			Map<CutData, Double> cutMap = buildCuts(data, mld);
 			
 			return new SegmentationResult(data, new ArrayList<CutData>(cutMap.keySet()));
-		}
+		} else if (USE_NN == parameters[0]) {
+			SegmentationData data = new SegmentationData(m);
+			data.addEdgesToMinimums();
+			
+			Map<CutData, Double> cutMap = buildCuts(data, mld);
+			CutData bestCut = findBestCut(new SegmentationResult(data, new ArrayList<>(cutMap.keySet())), Network.getDefaultWrapper());
+			return new SegmentationResult(data, bestCut);
+			
+			
+		} else return segment(m);
 		
 	}
 	
@@ -237,7 +252,7 @@ public class MarkovSegmentation implements Segmentation {
 								pointsAcceptedWithWidth(cut.getCutPointsArray(), data.getOriginalMat(), data.getWidth()))
 									p = mld.probability(cut.buildLength(data.getWidth()));
 							else if (pointsAcceptable(cut.getCutPointsArray(),  data.getOriginalMat()))
-									p = mld.probability(cut.buildLength(data.getWidth()));
+									p = mld.probability(cut.buildLength());
 							if (p!=0)
 								cutMap.put(cut, p);
 							
@@ -246,6 +261,22 @@ public class MarkovSegmentation implements Segmentation {
 		}
 		return cutMap;
 		
+	}
+	
+	public CutData findBestCut(SegmentationResult sr, NNWrapper nn) {
+		double topProb = 0;
+		CutData topCut = null;
+		for (CutData cut : sr.getPossibleCuts()) {
+			List<Mat> pieces = sr.getRevisedSegments(cut);
+			List<Double> probs = nn.probList(pieces);
+			double prob = 1;
+			for (double d : probs) prob=prob*d;
+			if (prob>topProb) {
+				topProb = prob;
+				topCut = cut;
+			}
+		}
+		return topCut;
 	}
 	
 	
