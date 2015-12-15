@@ -288,7 +288,20 @@ public class SBSegmenter implements Segmentation {
 	@Override
 	public SegmentationResult segment(Mat m,
 			double... parameters) {
-		// TODO Auto-generated method stub
+		// FIXME Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SegmentationResult segment(SegmentationData data) {
+		// FIXME Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SegmentationResult segment(SegmentationData data,
+			double... parameters) {
+		// FIXME Auto-generated method stub
 		return null;
 	}
 
