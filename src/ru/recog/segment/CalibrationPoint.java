@@ -46,12 +46,24 @@ public class CalibrationPoint{
 		return height;
 	}
 	
+	public void setHeight(double height){
+		this.height = height;
+	}
+	
 	public double getLength(){
 		return length;
 	}
 	
+	public void setLength( double length){
+		this.length = length;
+	}
+	
 	public double getAlfa(){
 		return alfa;
+	}
+	
+	public void setAlfa(double alfa){
+		this.alfa = alfa;
 	}
 	
 	@Override
