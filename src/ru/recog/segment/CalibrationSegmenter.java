@@ -2,14 +2,14 @@ package ru.recog.segment;
 
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.*;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import ru.recog.XML;
 
-public class CalibrationSegmenter {
+public class CalibrationSegmenter implements Segmentation {
 
 	
 	private CalibrationLine calLine1; 
@@ -58,10 +58,14 @@ public class CalibrationSegmenter {
 		 CalibrationPoint foundPoint2 = this.calLine2.findMinDistancePoint( testPoint);
 		 
 		 // check which point is closer and assign to output
-		 double dist1 = this.calLine1.findDistance(testPoint, foundPoint1);
-		 double dist2 = this.calLine2.findDistance(testPoint, foundPoint2); 
-		 CalibrationPoint pointOutput = foundPoint1;
-		 if (dist2<dist1) pointOutput = foundPoint2;
+//		 double dist1 = this.calLine1.findDistance(testPoint, foundPoint1);
+//		 double dist2 = this.calLine2.findDistance(testPoint, foundPoint2); 
+//		 CalibrationPoint pointOutput = foundPoint1;
+//		 if (dist2<dist1) pointOutput = foundPoint2;
+		 
+		 // calculate precise output
+		 CalibrationPoint pointOutput = preciseOutputPoint(testPoint, foundPoint1, foundPoint2);
+
 		 
 		 // rotate the matrix
 		 originalM = rotation(m , pointOutput.getAlfa());
@@ -75,46 +79,6 @@ public class CalibrationSegmenter {
 		 return sd;
 	}
 	
-
-	    /**  
-	    method for which this class was created *
-	    returns a final list for recognition    *
-	    plImg - plate Image should be grayScale */
-		public static Mat makeSobelHistogram(Mat m, SegData segs, int magnification){
-			
-
-			double[] projY = segs.getSobelXProjection();
-			
-			Mat hist = Mat.zeros(512, magnification*m.cols(), CvType.CV_8UC3); //512
-					
-			double minV, maxV;
-			maxV = projY[0]; minV = projY[0];
-			for (int col=0; col < projY.length ; col ++)
-			{
-				if (projY[col] > maxV) maxV = projY[col];
-				if (projY[col] < minV) minV = projY[col];
-			}
-			
-			// find Dx, Dy to be used for plotting
-			int dX;
-			double dY;
-			dX = (int) Math.floor(hist.cols() / m.cols());
-			dY = ((double) hist.rows()) / ( maxV - minV );
-			
-			// plot histogram
-			for (int i = 1; i < m.rows(); i++)
-			Imgproc.line( hist, new Point(dX*(i-1), hist.rows() - Math.round(dY*(projY[i-1] - minV))),
-			 new Point(dX*i, hist.rows() - Math.round(dY*(projY[i] - minV))), new Scalar(0, 255, 0) ); 
-			
-			// add lines for boundaries
-			Imgproc.line( hist, new Point(dX*( segs.getUpperBound() ), 0 ),
-					 new Point(dX*( segs.getUpperBound() ), hist.rows()), new Scalar(255, 0, 0) );
-			Imgproc.line( hist, new Point(dX*( segs.getLowerBound() ), 0 ),
-					 new Point(dX*( segs.getLowerBound() ), hist.rows()), new Scalar(255, 0, 0) );
-
-			
-			return hist;
-		}
 		
 	    /**  
 	    a stub on rotation */
@@ -172,6 +136,167 @@ public class CalibrationSegmenter {
 			// set new Y-borders
 			upperBound = (xEnd - symbolHeight + 1);
 			lowerBound = (xEnd);
+		}
+		
+		/**  
+	    makes an approximation between two points from different lines*
+	     */
+		
+		public CalibrationPoint preciseOutputPoint( CalibrationPoint testP,
+				                                           CalibrationPoint p1, CalibrationPoint p2){
+			 double dist1 = this.calLine1.findDistance(testP, p1);
+			 double dist2 = this.calLine2.findDistance(testP, p2); 
+			 CalibrationPoint pointOutput = p1;
+			 if (dist2<dist1) pointOutput = p2;
+				 
+			 
+			 double R0_x = p2.getX()    - p1.getX();   double R0_y = p2.getY()    - p1.getY();
+			 double r_x  = testP.getX() - p1.getX();   double r_y  = testP.getY() - p1.getY();
+			 double L = Math.sqrt( R0_x * R0_x + R0_y * R0_y );
+			 double axisX_Proj = ( R0_x * r_x + R0_y * r_y ) / L;
+			 
+			 double length = p1.getLength() + ( axisX_Proj / L ) * ( p2.getLength() - p1.getLength() ) ;
+			 double alfa = p1.getAlfa() + ( axisX_Proj / L ) * ( p2.getAlfa() - p1.getAlfa() ) ;
+			 double height = p1.getHeight() + ( axisX_Proj / L ) * ( p2.getHeight() - p1.getHeight() ) ;
+				
+			 pointOutput.setHeight(height);
+			 pointOutput.setAlfa(alfa);
+			 pointOutput.setLength(length);
+			 
+			 return pointOutput;
+		}
+		
+		  /**  
+	    method calculates segmentation *
+	    on the basis of legacySegmentation with known*
+	    starting point *
+	    parameter[0] = startingpoint */
+		@Override
+		public SegmentationResult segment(SegmentationData data, double... parameters) {
+			
+	    int startP = (int) Math.round(parameters[0]);
+
+		int[] mins = new int[data.getMinimums().size()];
+		int[] maxs = new int[data.getMaximums().size()];
+		for (int i = 0; i < data.getMinimums().size(); i++)
+			mins[i] = data.getMinimums().get(i);
+		for (int i = 0; i < data.getMaximums().size(); i++)
+			maxs[i] = data.getMaximums().get(i);
+
+		// Calculation of the minimums Depth = summ of difference up to the
+		// nearest local maximums
+
+		int[] minD = new int[mins.length];
+
+		int maxi = mins[0] < maxs[0] ? -1 : 0;
+
+		for (int i = 0; i < mins.length && maxi < maxs.length; i++, maxi++) {
+			// System.out.println(i+" "+maxi);
+			if (maxi == -1)
+				minD[i] = data.getProjection()[maxs[0]] + data.getProjection()[0] - 2 * data.getProjection()[mins[0]];
+			else if (maxi >= maxs.length - 1)
+				minD[i] = data.getProjection()[maxs[maxi]] + data.getProjection()[data.getProjection().length - 1]
+						- 2 * data.getProjection()[mins[i]];
+			else
+				minD[i] = data.getProjection()[maxs[maxi]] + data.getProjection()[maxs[maxi + 1]]
+						- 2 * data.getProjection()[mins[i]];
+
+		}
+
+		int pointStart = startP;
+
+		// going to beginning
+		List<Integer> divPoints = new ArrayList<Integer>();
+		int LengthEstimate;
+		int diff1, diff2;
+
+		LengthEstimate = (int) Math.floor(data.getWidth());
+
+
+		// looking for the closest point in minimums
+		int x = 0;
+
+		while (mins[x] < (pointStart )) x++;
+			
+		divPoints.add(pointStart);
+		//System.out.println(pointStart);
+		//System.out.println(mins[x]);
+		
+		// Going Forward
+		int lastMin = pointStart;
+		x--;
+		while (x < mins.length - 2) {
+			x++;
+			diff1 = Math.abs(mins[x] - lastMin) - LengthEstimate;
+			diff2 = Math.abs(mins[x + 1] - lastMin) - LengthEstimate;
+			
+			if (diff1 >= 0) {
+				divPoints.add(mins[x]);
+			    lastMin = mins[x];
+			    continue;
+			}
+			if ((diff1 <= 0) && (diff2 >= 0)) {
+
+				diff1 = Math.abs(diff1);
+				diff2 = Math.abs(diff2);
+
+				if (diff1 == diff2) // check the depth and choose the deepest
+				{
+					if (minD[x] > minD[x + 1])
+
+						diff2++;
+					else
+						diff1++;
+				}
+				if (diff1 < diff2) {
+
+					if (diff1 < 5) {
+					  divPoints.add(mins[x]);
+					  lastMin = mins[x];
+					}
+					else {
+					  divPoints.add(lastMin + LengthEstimate);
+					  lastMin = lastMin + LengthEstimate;
+					}
+					
+					//System.out.println(lastMin);
+
+				} else {
+					if (diff2 < 5) {
+					  divPoints.add(mins[x + 1]);
+					  lastMin = mins[x + 1];
+					}
+					else {
+					  divPoints.add(lastMin + LengthEstimate);
+					  lastMin = lastMin + LengthEstimate;
+						}
+					//System.out.println(lastMin);
+				}
+
+			}
+		}
+			
+			//if (!divPoints.contains(0)) divPoints.add(0, 0);
+			return new SegmentationResult(data, new CutData(divPoints));
+			
+		}
+		
+		@Override
+		public SegmentationResult segment(Mat m) {
+			
+			return segment(new SegmentationData(m));
+		}
+		
+		@Override
+		public SegmentationResult segment(Mat m,
+				double... parameters) {
+			return segment(m);
+		}
+		
+		@Override
+		public SegmentationResult segment(SegmentationData data) {
+		
+			return segment(data, 10);
 		}
 		
 }
