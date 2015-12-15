@@ -89,7 +89,7 @@ public class Piece {
 		double topProb = 0;
 		CutData topCut = null;
 		for (CutData cut : sr.getPossibleCuts()) {
-			List<Mat> pieces = sr.getRevisedSegments(cut);
+			List<Mat> pieces = sr.getSegments(cut);  //getRevisedSegments(cut);
 			List<Double> probs = nn.probList(pieces);
 			double prob = 1;
 			for (double d : probs) prob=prob*d;
