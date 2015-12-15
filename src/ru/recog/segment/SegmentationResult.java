@@ -148,6 +148,7 @@ public class SegmentationResult {
 	}
 	
 	public List<Integer> getCutPoints() {
+		if (possibleCuts.isEmpty()) return Collections.emptyList();
 		return possibleCuts.get(0).getCutPoints();
 	}
 
