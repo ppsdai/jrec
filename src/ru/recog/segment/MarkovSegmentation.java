@@ -296,4 +296,17 @@ public class MarkovSegmentation implements Segmentation {
 		return cutAverage/totalAverage;
 	}
 
+	@Override
+	public SegmentationResult segment(SegmentationData data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SegmentationResult segment(SegmentationData data,
+			double... parameters) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
