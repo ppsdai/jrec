@@ -69,7 +69,7 @@ public class AggregatePlates {
 	
 	private void addFrame(Mat image, long timestamp) {
 	    MatOfRect plateDetections = new MatOfRect();
-	    classifier.detectMultiScale(image, plateDetections,1.05,3,0, new Size(30,10), new Size(120,40));
+	    classifier.detectMultiScale(image, plateDetections,1.15,3,0, new Size(30,10), new Size(210,70)); //1.05
 
 	    frameCounter++;
 	    detectionCounter = detectionCounter + plateDetections.toList().size();
@@ -109,7 +109,10 @@ public class AggregatePlates {
 				if (p!=null) 
 					p.add(t, r, smallImage);
 				else 
+				{
 					openPlateList.add(new Plate(t, r, smallImage));
+					System.out.println(" NewPlate " + t + " ");
+				}
 			}
 			
 			for (Iterator<Plate> it = openPlateList.iterator(); it.hasNext();) {
@@ -153,7 +156,9 @@ public class AggregatePlates {
 			//System.out.println("Next Number " + finalPlateList.indexOf(pn) );
 			for (int xx = 0; xx < pn.getLength(); xx++ )
 			{
-    	        String newFN = prefix + "N"+plateList.indexOf(pn)+"t"+pn.getTimeOfRecord(xx)+".png";
+    	        String newFN = prefix + "N"+plateList.indexOf(pn)+"t"+pn.getTimeOfRecord(xx)
+    	        		              + "X" + pn.getPositionRect(xx).x
+    	        		              + "Y" + pn.getPositionRect(xx).y + ".png";
     	        //System.out.println(destName + newFN);
     	        Mat newM = pn.getPlateImage(xx);
 	            Imgcodecs.imwrite(new File(destF, newFN).getAbsolutePath(), newM);
@@ -207,16 +212,17 @@ public class AggregatePlates {
 	public static void main(String[] args) throws Exception {
 		
 		AggregatePlates ap = new AggregatePlates();
-		ap.loadFolder("C:\\dev\\frames\\VNew\\1411");
-		//ap.loadFolder("C:\\dev\\frames\\Try");
+		ap.loadFolder("C:\\dev\\frames\\VNew\\76635");
+		//ap.loadFolder("C:\\dev\\frames\\VNew\\Issue1411");
 		System.out.println("Total frames: "+ap.getFrames());
 		System.out.println(" Detected Numbers Count: " + ap.getDetections());
 		ap.process();
 		
 		System.out.println(ap.getPlates());
 		
-		savePlates("C:\\dev\\frames\\VNew\\detected1411", ap.getPlates(), "V1411");
-
+		savePlates("C:\\dev\\frames\\VNew\\detected76635", ap.getPlates(), "V76635");
+		//savePlates("C:\\dev\\frames\\VNew\\detIssue1411", ap.getPlates(), "V1411");
+		
 //		System.out.println(readFormattedFolder("/Users/pps/dev/aggr"));
 	}
 	
