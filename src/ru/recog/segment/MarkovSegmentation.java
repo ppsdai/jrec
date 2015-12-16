@@ -267,7 +267,7 @@ public class MarkovSegmentation implements Segmentation {
 		double topProb = 0;
 		CutData topCut = null;
 		for (CutData cut : sr.getPossibleCuts()) {
-			List<Mat> pieces = sr.getRevisedSegments(cut);
+			List<Mat> pieces = sr.getSegments(cut);
 			List<Double> probs = nn.probList(pieces);
 			double prob = 1;
 			for (double d : probs) prob=prob*d;
@@ -305,8 +305,15 @@ public class MarkovSegmentation implements Segmentation {
 	@Override
 	public SegmentationResult segment(SegmentationData data,
 			double... parameters) {
-		// TODO Auto-generated method stub
-		return null;
+		if (USE_NN == parameters[0]) {
+			data.addEdgesToMinimums();
+			
+			Map<CutData, Double> cutMap = buildCuts(data, mld);
+			CutData bestCut = findBestCut(new SegmentationResult(data, new ArrayList<>(cutMap.keySet())), Network.getDefaultWrapper());
+			CutData newCut = bestCut == null? new CutData(Collections.<Integer>emptyList()) 
+			: CalibrationSegmenter.addLinesToNN(bestCut, data);
+			return new SegmentationResult(data, newCut);
+		} else return null;
 	}
 
 }

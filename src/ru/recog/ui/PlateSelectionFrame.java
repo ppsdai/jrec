@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,10 @@ import java.util.List;
 import javax.swing.*;
 
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import ru.recog.segment.*;
 
 public class PlateSelectionFrame extends JFrame implements ActionListener {
 	
@@ -22,10 +27,31 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 	
 	private JScrollPane scrollPane;
 	private FrameProcessor loader;
+	private Segmentation segmenter;
+	private CalibrationSegmenter calib;
 	
+	public Segmentation getSegmentation() {
+		return segmenter;
+	}
+	
+	SegmentationResult doSegmentation(Mat m) {
+		return segmenter.segment(m, MarkovSegmentation.USE_NN);
+	}
+	
+	SegmentationResult doSegmentation(String filename) {
+		
+		SegmentationData data = calib.calculateSegmentationData(new File(filename), 
+				Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE));
+		System.out.println("adding "+filename);
+		
+		return segmenter.segment(data, MarkovSegmentation.USE_NN);
+	}
+
+
+
 	private SaveDialog saveDialog = null;
 	
-	public PlateSelectionFrame(String dir, String dest) {
+	public PlateSelectionFrame(String dir, String dest, String calib1, String calib2) {
 		
 		super();
 		this.setDefaultCloseOperation(HIDE_ON_CLOSE);
@@ -48,6 +74,9 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 		
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		
+		segmenter = SegmentationFactory.getMarkovSegmentation();
+		calib = new CalibrationSegmenter("/Users/pps/dev/CalLine1.xml", "/Users/pps/dev/CalLine2.xml");
+		
 		loader = new FrameProcessor(dir, dest);
 		addMorePlates(100);
 		
@@ -63,7 +92,7 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 	
 	public void addPlatePanel(String filename) {
 		try {
-			PlatePanel pp = new PlatePanel(filename);
+			PlatePanel pp = new PlatePanel(this, filename);
 			addPlatePanel(pp);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			segmentationFault(filename);
@@ -166,7 +195,11 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		
-		final PlateSelectionFrame frame = new PlateSelectionFrame(args[0], args[1]);
+		final PlateSelectionFrame frame = //new PlateSelectionFrame(args[0], args[1]);
+//				 new PlateSelectionFrame(Repository.getPlateFolderFile("051").getAbsolutePath(), "/Users/pps/dev/dest");
+		 new PlateSelectionFrame("/Users/pps/dev/detected1411", "/Users/pps/dev/dest", 
+				 "/Users/pps/dev/CalLine1.xml", "/Users/pps/dev/CalLine2.xml");
+
 //		File dir = new File("/Users/pps/dev/PlatesTestPictures");
 ////
 ////		

@@ -31,9 +31,10 @@ public class PlatePanel extends JPanel implements ActionListener {
 	
 	private ImageIcon ii;
 	
-	public PlatePanel(String filename) {
+	public PlatePanel(PlateSelectionFrame parent, String filename) {
 		super();
 		this.filename = filename;
+		setParent(parent);
 		loadData();
 		
 		setBorder(new LineBorder(Color.darkGray, 1, true));
@@ -75,7 +76,8 @@ public class PlatePanel extends JPanel implements ActionListener {
 		Mat orig = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
 		m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 
-		segResult = SegmentationFactory.getLegacySegmentation().segment(m);
+//		segResult = parent.doSegmentation(orig);
+		segResult = parent.doSegmentation(filename);
 
 		for (int p : segResult.getCutPoints())
 			Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), new Scalar(0,255,0));
@@ -143,14 +145,15 @@ public class PlatePanel extends JPanel implements ActionListener {
 		int s = -1;
 		for (int i = 0; i < segResult.getCutPoints().size(); i++) {
 			if (x < scaleFactor*segResult.getCutPoints().get(i)) {
-				s = i; break;
+				s = i-1; break;
 			}
 		}
 		
 		if (s!=-1) {
 			saveCheckbox.setSelected(true);
+			System.out.println("got fsi= "+s);
 			firstSegmentIndex = s;
-			int drawX = s==0? 0 : segResult.getCutPoints().get(s-1)*scaleFactor;
+			int drawX = segResult.getCutPoints().get(s)*scaleFactor;
 			Image img = ImageUtils.mat2Image(ImageUtils.scaleUp(m,scaleFactor));
 			Graphics g = img.getGraphics();
 			g.setColor(Color.RED);

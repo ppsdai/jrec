@@ -60,6 +60,26 @@ public class SegmentationResult {
 		return pieces;
 	}
 	
+	public List<Mat> getSegments() {
+		if (possibleCuts.isEmpty()) return Collections.emptyList();
+		
+		List<Mat> pieces = new ArrayList<Mat>();
+		
+		Mat  res = getOriginalMat().rowRange(data.getUpperBound(), data.getLowerBound()+1);
+
+		List<Integer> cutPoints = getPossibleCuts().get(0).getCutPoints();
+		int x0 = 0; int x1 = 0;
+		
+		for (int i = 0; i <= cutPoints.size(); i++) {
+			if (i == cutPoints.size()) x1 = res.cols()-1;
+			else x1 = cutPoints.get(i);
+			pieces.add(res.colRange(x0, x1+1));
+			
+			x0 = x1;
+		}
+		return pieces;
+	}
+	
 	
 	public List<Mat> getRevisedSegments(CutData cut) {
 		List<Mat> segments = new ArrayList<Mat>();
@@ -75,6 +95,27 @@ public class SegmentationResult {
 			segments.add(getOriginalMat().submat(r.y, r.y+r.height+1, r.x, r.x+r.width+1));
 		
 		return segments;
+	}
+	
+	public List<Rect> getRectangles() {
+		if (possibleCuts.isEmpty()) return Collections.emptyList();
+		return getRectangles(possibleCuts.get(0));
+
+	}
+	
+	public List<Rect> getRectangles(CutData cut) {
+		
+		List<Rect> rectangles = new ArrayList<Rect>();
+		List<Integer> cutPoints = cut.getCutPoints();
+		
+		for (int i = 0; i < cutPoints.size() - 1; i++) {
+			int x0 = cutPoints.get(i);
+			int x1 = cutPoints.get(i+1);
+			
+			rectangles.add(new Rect(new Point(x0, data.getUpperBound()), new Point(x1, data.getLowerBound())));
+		}
+		
+		return rectangles;
 	}
 	
 	public List<Rect> getRevisedRectangles(CutData cut) {

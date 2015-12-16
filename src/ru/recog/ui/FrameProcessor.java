@@ -48,15 +48,15 @@ public class FrameProcessor {
 				//return Integer.compare(i1, i2);
 				int i1 = Integer.valueOf(o1.substring(o1.lastIndexOf("N")+1, o1.lastIndexOf("t")) );
 				int i2 = Integer.valueOf(o2.substring(o2.lastIndexOf("N")+1, o2.lastIndexOf("t")) );
-		        if (Integer.compare(i1, i2) != 0)
+				return Integer.compare(i1, i2);
+	/*	        if (Integer.compare(i1, i2) != 0)
 		          return Integer.compare(i1, i2);
 		        else
 		        {
 					i1 = Integer.valueOf(o1.substring(o1.lastIndexOf("t")+1, o1.lastIndexOf(".")) );
 					i2 = Integer.valueOf(o2.substring(o2.lastIndexOf("t")+1, o2.lastIndexOf(".")) );
 					return Integer.compare(i1, i2);
-		        }
-		        
+		        }*/
 			}
 			
 		});
@@ -112,14 +112,20 @@ public class FrameProcessor {
 	void saveSegmentedPanel(PlatePanel panel, String number) {
 		//
 		//get segments 
-		List<Mat> segments = panel.getSegmentationResult().getRevisedSegments();
-		List<Rect> rectangles = panel.getSegmentationResult().getRevisedRectangles();
+//		List<Mat> segments = panel.getSegmentationResult().getRevisedSegments();
+//		List<Rect> rectangles = panel.getSegmentationResult().getRevisedRectangles();
+		
+		List<Mat> segments = panel.getSegmentationResult().getSegments();
+		List<Rect> rectangles = panel.getSegmentationResult().getRectangles();
+		
+//		System.out.println(rectangles);
 		//add to log file
 		StringBuilder sb = new StringBuilder(panel.getFilename());
 		sb.append(";").append(number).append(";");
 
 		int charNum = 0;
 
+		System.out.println("firstindex="+panel.getFirstSegmentIndex());
 		for (int i = panel.getFirstSegmentIndex(); i < panel.getFirstSegmentIndex()+6; 
 				i++, charNum++) {
 			Rect r = rectangles.get(i);
