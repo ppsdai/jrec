@@ -115,18 +115,20 @@ public class CalibrationLine {
 	
 	
 	public static void main(String[] args) throws Exception {
-		CalibrationPoint cp = new CalibrationPoint(54, 362, 21, 15, 0);
-		CalibrationPoint cp2 = new CalibrationPoint(171, 454, 22, 16, 0);
-		CalibrationPoint cp3 = new CalibrationPoint(443, 664, 24, 17, -1);
-		CalibrationPoint cp4 = new CalibrationPoint(603, 785, 25, 17, -2);
-		List<CalibrationPoint> cpl = Arrays.asList(new CalibrationPoint[]{cp, cp2, cp3, cp4});
+		CalibrationPoint cp =  new CalibrationPoint(93, 244, 14, 65.0/6, -4);
+		CalibrationPoint cp2 = new CalibrationPoint(262, 422, 16, 74.0/6, -5);
+		CalibrationPoint cp3 = new CalibrationPoint(499, 666, 18, 87.0/6, -6);
+		//CalibrationPoint cp4 = new CalibrationPoint( 4, 407, 18, 65/6, -2);
+		List<CalibrationPoint> cpl = Arrays.asList(new CalibrationPoint[]{cp, cp2, cp3});
 		CalibrationLine calLine1 = new CalibrationLine( cpl );
 		
-		CalibrationPoint ocp = new CalibrationPoint(365, 15, 16, 9, 4);
-		CalibrationPoint ocp2 = new CalibrationPoint(750, 223, 18, 10, 2);
-		CalibrationPoint ocp3 = new CalibrationPoint(1102, 411, 20, 11, 0);
-
-		List<CalibrationPoint> ocpl = Arrays.asList(new CalibrationPoint[]{ocp, ocp2, ocp3});
+		CalibrationPoint ocp = new CalibrationPoint(1155, 391, 18, 65.0/6,  0);
+		CalibrationPoint ocp2 = new CalibrationPoint(944, 261, 16, 59.0/6,  1);
+		CalibrationPoint ocp3 = new CalibrationPoint(775, 158, 15, 54.0/6,  2);
+		CalibrationPoint ocp4 = new CalibrationPoint(641,  75, 14, 50.0/6, 2.5);
+		CalibrationPoint ocp5 = new CalibrationPoint(524,   2, 13, 47.0/6,  3);
+		
+		List<CalibrationPoint> ocpl = Arrays.asList(new CalibrationPoint[]{ocp, ocp2, ocp3, ocp4, ocp5});
 		CalibrationLine calLine2 = new CalibrationLine( ocpl );
 		
 		
@@ -139,11 +141,11 @@ public class CalibrationLine {
 		System.out.println( foundPoint.toString() );
 		
 
-		XML.toXML(calLine1, new FileWriter(new File("c:\\dev\\CalLine1.xml")));
-		XML.toXML(calLine2, new FileWriter(new File("c:\\dev\\CalLine2.xml")));
+		XML.toXML(calLine1, new FileWriter(new File("C:\\dev\\frames\\VNew\\cal76635\\Cal76635\\CalLine1.xml")));
+		XML.toXML(calLine2, new FileWriter(new File("C:\\dev\\frames\\VNew\\cal76635\\Cal76635\\CalLine2.xml")));
 		
 		
-		CalibrationLine xmlCalLine1 = (CalibrationLine) XML.fromXML(new File("c:\\dev\\CalLine1.xml"));
+		CalibrationLine xmlCalLine1 = (CalibrationLine) XML.fromXML(new File("C:\\dev\\frames\\VNew\\cal76635\\Cal76635\\CalLine1.xml"));
 		
 		System.out.println(xmlCalLine1);
 		

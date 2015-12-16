@@ -159,11 +159,14 @@ public class CalibrationSegmenter implements Segmentation {
 			 double alfa = p1.getAlfa() + ( axisX_Proj / L ) * ( p2.getAlfa() - p1.getAlfa() ) ;
 			 double height = p1.getHeight() + ( axisX_Proj / L ) * ( p2.getHeight() - p1.getHeight() ) ;
 				
-			 pointOutput.setHeight(height);
-			 pointOutput.setAlfa(alfa);
-			 pointOutput.setLength(length);
+//			 pointOutput.setHeight(height);
+//			 pointOutput.setAlfa(alfa);
+//			 pointOutput.setLength(length);
+			 CalibrationPoint result = new 
+					 CalibrationPoint(testP.getX(), testP.getY(), height, length, alfa) ;
 			 
-			 return pointOutput;
+			 
+			 return result;
 		}
 		
 		  /**  
@@ -297,6 +300,47 @@ public class CalibrationSegmenter implements Segmentation {
 		public SegmentationResult segment(SegmentationData data) {
 		
 			return segment(data, 10);
+		}
+		
+		  /**  
+	    method calculates segmentation *
+	    on the basis of legacySegmentation with known*
+	    starting point */
+		public static CutData addLinesToNN(CutData cd, SegmentationData sd) {
+		
+			 List<Integer> newCP= cd.getCutPoints();
+			 int first = newCP.get(0);
+			 int last = 0;
+			 if (newCP.size()>=1)
+			   last = newCP.get(newCP.size()-1);
+
+			 int symbLength =  (int) sd.getWidth();
+			 
+			 if ( ( first - symbLength) > 0 ) {
+				 first = first - symbLength;
+				 newCP.add(0,first); 
+			 }
+				 
+			 if ( ( first - symbLength) > 0 ) {
+				 first = first - symbLength;
+				 newCP.add(0,first); 
+			 }
+			 
+			 if ( ( last + symbLength) <  sd.getOriginalMat().cols() ) {
+				 last = last + symbLength;
+				 newCP.add(last); 
+			 }
+				 
+			 if ( ( last + symbLength) < sd.getOriginalMat().cols() ) {
+				 last = last + symbLength;
+				 newCP.add(last); 
+			 }
+				
+			 
+			 CutData cd2 = new CutData(newCP);
+			
+			 return cd2;
+			
 		}
 		
 }
