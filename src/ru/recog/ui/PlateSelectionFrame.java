@@ -75,7 +75,7 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		
 		segmenter = SegmentationFactory.getMarkovSegmentation();
-		calib = new CalibrationSegmenter("/Users/pps/dev/CalLine1.xml", "/Users/pps/dev/CalLine2.xml");
+		calib = new CalibrationSegmenter(calib1, calib2);
 		
 		loader = new FrameProcessor(dir, dest);
 		addMorePlates(25);
