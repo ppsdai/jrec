@@ -82,7 +82,7 @@ public class PlatePanel extends JPanel implements ActionListener {
 		for (int p : segResult.getCutPoints())
 			Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), new Scalar(0,255,0));
 
-		for (Rect r : segResult.getRevisedRectangles()) {
+		for (Rect r : segResult.getRectangles()) {
 			Imgproc.line(m, new Point(r.x, r.y), new Point(r.x+r.width,r.y), new Scalar(255,0,0));
 			Imgproc.line(m, new Point(r.x, r.y+r.height), new Point(r.x+r.width, r.y+r.height), new Scalar(255,0,0));
 		}
@@ -151,7 +151,7 @@ public class PlatePanel extends JPanel implements ActionListener {
 		
 		if (s!=-1) {
 			saveCheckbox.setSelected(true);
-			System.out.println("got fsi= "+s);
+//			System.out.println("got fsi= "+s);
 			firstSegmentIndex = s;
 			int drawX = segResult.getCutPoints().get(s)*scaleFactor;
 			Image img = ImageUtils.mat2Image(ImageUtils.scaleUp(m,scaleFactor));

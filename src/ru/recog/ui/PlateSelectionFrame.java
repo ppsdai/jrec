@@ -78,7 +78,7 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 		calib = new CalibrationSegmenter("/Users/pps/dev/CalLine1.xml", "/Users/pps/dev/CalLine2.xml");
 		
 		loader = new FrameProcessor(dir, dest);
-		addMorePlates(100);
+		addMorePlates(25);
 		
 	}
 

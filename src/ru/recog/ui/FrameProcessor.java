@@ -125,10 +125,11 @@ public class FrameProcessor {
 
 		int charNum = 0;
 
-		System.out.println("firstindex="+panel.getFirstSegmentIndex());
+//		System.out.println("firstindex="+panel.getFirstSegmentIndex());
 		for (int i = panel.getFirstSegmentIndex(); i < panel.getFirstSegmentIndex()+6; 
 				i++, charNum++) {
 			Rect r = rectangles.get(i);
+//			System.out.println(r);
 			sb.append(r.x).append(";").append(r.y).append(";")
 			.append(r.width).append(";").append(r.height).append(";");
 			
