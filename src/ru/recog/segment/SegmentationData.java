@@ -322,5 +322,13 @@ public class SegmentationData {
 	public void setWidth(double width) {
 		this.width = width;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SD{Mat=").append(originalM.size()).append(", UP=").append(upperBound).append(", LB=")
+		.append(lowerBound).append(", mins: ").append(minimums);
+		return sb.toString();
+	}
 
 }

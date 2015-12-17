@@ -73,12 +73,13 @@ public class PlatePanel extends JPanel implements ActionListener {
 	
 	private void loadData() {
 		
-		Mat orig = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-		m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+//		Mat orig = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+//		m = Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_COLOR);
 
 //		segResult = parent.doSegmentation(orig);
 		segResult = parent.doSegmentation(filename);
-
+		m = ImageUtils.bin2color(segResult.getOriginalMat());
+		
 		for (int p : segResult.getCutPoints())
 			Imgproc.line(m, new Point(p, 0), new Point(p, m.rows()-1), new Scalar(0,255,0));
 

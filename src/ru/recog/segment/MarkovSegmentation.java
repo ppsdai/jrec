@@ -309,9 +309,11 @@ public class MarkovSegmentation implements Segmentation {
 			data.addEdgesToMinimums();
 			
 			Map<CutData, Double> cutMap = buildCuts(data, mld);
-			CutData bestCut = findBestCut(new SegmentationResult(data, new ArrayList<>(cutMap.keySet())), Network.getDefaultWrapper());
+			CutData bestCut = findBestCut(new SegmentationResult(
+					data, new ArrayList<>(cutMap.keySet())), Network.getDefaultWrapper());
 			CutData newCut = bestCut == null? new CutData(Collections.<Integer>emptyList()) 
 			: CalibrationSegmenter.addLinesToNN(bestCut, data);
+
 			return new SegmentationResult(data, newCut);
 		} else return null;
 	}

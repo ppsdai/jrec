@@ -40,9 +40,9 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 	
 	SegmentationResult doSegmentation(String filename) {
 		
+		System.out.println("Adding "+filename);
 		SegmentationData data = calib.calculateSegmentationData(new File(filename), 
 				Imgcodecs.imread(filename, Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE));
-		System.out.println("adding "+filename);
 		
 		return segmenter.segment(data, MarkovSegmentation.USE_NN);
 	}
@@ -197,8 +197,8 @@ public class PlateSelectionFrame extends JFrame implements ActionListener {
 		
 		final PlateSelectionFrame frame = //new PlateSelectionFrame(args[0], args[1]);
 //				 new PlateSelectionFrame(Repository.getPlateFolderFile("051").getAbsolutePath(), "/Users/pps/dev/dest");
-		 new PlateSelectionFrame("/Users/pps/dev/detected1411", "/Users/pps/dev/dest", 
-				 "/Users/pps/dev/CalLine1.xml", "/Users/pps/dev/CalLine2.xml");
+		 new PlateSelectionFrame("C:\\dev\\frames\\VNew\\detected1411", "C:\\dev\\frames\\VNew\\segmented1411", 
+				 "C:\\dev\\frames\\VNew\\cal1411\\CalLine1.xml", "C:\\dev\\frames\\VNew\\cal1411\\CalLine2.xml");
 
 //		File dir = new File("/Users/pps/dev/PlatesTestPictures");
 ////
